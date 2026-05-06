@@ -18,16 +18,11 @@ const genai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-const setCorsHeaders = (res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-};
-
 module.exports = async (req, res) => {
-  setCorsHeaders(res);
+  // CORS headers are now handled by vercel.json
 
   if (req.method === "OPTIONS") {
+    // Vercel handles OPTIONS automatically with the headers from vercel.json
     return res.status(204).send("");
   }
 
