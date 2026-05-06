@@ -65,6 +65,8 @@ export class NirvahaService {
       throw new Error("EXPO_PUBLIC_GEMINI_API_KEY is not defined");
     }
     this.apiKey = apiKey;
+    // Log the API key (first 8 chars + ... for security)
+    console.log("Using Gemini API Key:", apiKey.substring(0, 8) + "...");
   }
 
   private buildPrompt(
