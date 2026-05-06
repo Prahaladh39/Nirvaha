@@ -1,4 +1,3 @@
-import { GoogleGenAI } from "@google/genai";
 import { HUMAN_PATTERNS } from "../data/patterns";
 
 type ChatMessage = {
@@ -19,6 +18,7 @@ type ApiResponse = {
   status: (code: number) => {
     json: (body: unknown) => void;
   };
+  setHeader: (name: string, value: string) => void;
 };
 
 const SYSTEM_INSTRUCTION = `
@@ -125,26 +125,53 @@ Critical Principle: You are a mirror and a friend. Help them see the root of the
 
 `;
 
-export class NirvahaService {
-  private ai: GoogleGenAI;
+const MODEL_URL =
+  "https://generativelanguage.googleapis.com/v1beta2/models/gemini-3-flash-preview:generateContent";
 
-  private model: string = "gemini-3-flash-preview";
+export class NirvahaService {
+  private apiKey: string;
+  private modelUrl: string = MODEL_URL;
 
   constructor() {
     const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 
     if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is not defined");
+      throw new Error("EXPO_PUBLIC_GEMINI_API_KEY is not defined");
     }
 
-    this.ai = new GoogleGenAI({ apiKey });
+    this.apiKey = apiKey;
+  }
+
+  private buildPrompt(
+    message: string,
+    history: { role: "user" | "model"; parts: { text: string }[] }[],
+    lengthInstruction: string,
+  ) {
+    const historyText = history
+      .map((item) => {
+        const author = item.role === "user" ? "You" : "Nirvaha";
+        const text = item.parts.map((part) => part.text).join(" ");
+        return `${author}: ${text}`;
+      })
+      .join("\n");
+
+    return [
+      SYSTEM_INSTRUCTION.trim(),
+      "",
+      `CURRENT LENGTH PREFERENCE: ${lengthInstruction}`,
+      "",
+      "Conversation:",
+      historyText,
+      `You: ${message}`,
+      "Nirvaha:",
+    ]
+      .filter(Boolean)
+      .join("\n");
   }
 
   async generateReflection(
     message: string,
-
     history: { role: "user" | "model"; parts: { text: string }[] }[] = [],
-
     lengthPreference: "short" | "long" = "short",
   ) {
     try {
@@ -153,21 +180,42 @@ export class NirvahaService {
           ? "STRICTLY keep your response very brief (1 line if possible, max 2). Be like a quick, wise spark. Use minimal words."
           : "Be more descriptive and expansive (4 to 7 lines). Use the extra space for a relatable real-life example, deeper empathy, and a warm, ancient-modern perspective. Even for simple greetings, be a bit more welcoming and wordy.";
 
-      const response = await this.ai.models.generateContent({
-        model: this.model,
+      const promptText = this.buildPrompt(message, history, lengthInstruction);
 
-        contents: [...history, { role: "user", parts: [{ text: message }] }],
-
-        config: {
-          systemInstruction: `${SYSTEM_INSTRUCTION}\n\nCURRENT LENGTH PREFERENCE: ${lengthInstruction}`,
-
-          temperature: 0.7,
-
-          topP: 0.95,
+      const response = await fetch(
+        `${this.modelUrl}?key=${encodeURIComponent(this.apiKey)}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [{ text: promptText }],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.7,
+              topP: 0.95,
+            },
+          }),
         },
-      });
+      );
 
-      return response.text || "I am reflecting on that.";
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(JSON.stringify(data));
+      }
+
+      const candidate = data?.candidates?.[0];
+      const replyText = candidate?.content?.parts
+        ?.map((part: { text?: string }) => part.text || "")
+        .join("")
+        .trim();
+
+      return replyText || "I am reflecting on that.";
     } catch (error) {
       console.error("Error generating reflection:", error);
 
@@ -179,6 +227,16 @@ export class NirvahaService {
 const getNirvahaService = () => new NirvahaService();
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
+  // Set CORS headers
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    return res.status(200).json({});
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }

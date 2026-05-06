@@ -1,4 +1,3 @@
-import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { ArrowLeft, Send, Sparkles } from "lucide-react-native";
@@ -16,6 +15,7 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import { NirvahaService } from "../api/client";
 import { theme } from "../constants/theme";
 
 export type ChatMessage = {
@@ -30,35 +30,6 @@ const INTRO_MESSAGE: ChatMessage = {
       text: "Hey, I’m here. Tell me what’s been sitting on your mind.",
     },
   ],
-};
-
-const getChatEndpoint = () => {
-  const baseUrl =
-    Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL ||
-    process.env.EXPO_PUBLIC_API_BASE_URL;
-
-  if (baseUrl) {
-    if (Platform.OS === "android") {
-      const androidUrl = baseUrl
-        .replace(/localhost|127\.0\.0\.1/, "10.0.2.2")
-        .replace(/\/$/, "");
-      return `${androidUrl}/api/chat`;
-    }
-
-    return `${baseUrl.replace(/\/$/, "")}/api/chat`;
-  }
-
-  if (Platform.OS === "web") {
-    return "http://localhost:3000/api/chat";
-  }
-
-  const host = Constants.expoConfig?.hostUri?.split(":")[0];
-  if (host) {
-    const serverHost = Platform.OS === "android" ? "10.0.2.2" : host;
-    return `http://${serverHost}:3000/api/chat`;
-  }
-
-  return "http://localhost:3000/api/chat";
 };
 
 export default function ChatScreen() {
@@ -93,30 +64,14 @@ export default function ChatScreen() {
     scrollToEnd();
 
     try {
-      const response = await fetch(getChatEndpoint(), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: trimmed,
-          history,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.error || "Chat request failed");
-      }
+      const nirvahaService = new NirvahaService();
+      const reply = await nirvahaService.generateReflection(trimmed, history);
 
       const modelMessage: ChatMessage = {
         role: "model",
         parts: [
           {
-            text:
-              data?.reply ||
-              "There was a quiet pause there. Say that once more?",
+            text: reply,
           },
         ],
       };
@@ -124,6 +79,10 @@ export default function ChatScreen() {
       setMessages((current) => [...current, modelMessage]);
     } catch (error) {
       console.error("Chat send error:", error);
+      // Log more details for debugging
+      if (error instanceof Error) {
+        console.error("Error details:", error.message);
+      }
       setMessages((current) => [
         ...current,
         {
