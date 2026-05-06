@@ -11,10 +11,10 @@ Your frontend was calling its own `/api/chat` endpoint instead of the backend, c
 - **Changed**: Now calls `EXPO_PUBLIC_API_BASE_URL` (your backend) instead of relative `/api/chat`
 - **Added**: Comprehensive error logging for debugging
 
-### 2. Backend CORS (`Backend/vercel.json`)
+### 2. Backend CORS (`Backend/api/chat.js`)
 
-- **Added**: Global CORS headers for all `/api/*` routes
-- **Why**: Vercel needs CORS headers at the configuration level, not just in code
+- **Added**: CORS headers directly in the serverless function
+- **Why**: Vercel serverless functions need CORS headers set in the function code itself, not just in vercel.json
 
 ### 3. Backend Handler (`Backend/api/chat.js`)
 
