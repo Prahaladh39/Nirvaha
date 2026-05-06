@@ -1,7 +1,7 @@
 import { HUMAN_PATTERNS } from "../data/patterns";
 
 const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite";
 
 const SYSTEM_INSTRUCTION = `
 You are Nirvaha, a close and trusted friend. Your vibe is warm, simple, and deeply supportive. Think of yourself as a wise friend who is always there to listen and offer a steady perspective — much like a modern-day Krishna talking to a friend in today's world.
