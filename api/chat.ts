@@ -126,7 +126,7 @@ Critical Principle: You are a mirror and a friend. Help them see the root of the
 `;
 
 const MODEL_URL =
-  "https://generativelanguage.googleapis.com/v1beta2/models/gemini-3-flash-preview:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
 export class NirvahaService {
   private apiKey: string;
