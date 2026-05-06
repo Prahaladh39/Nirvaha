@@ -27,9 +27,16 @@ module.exports = async (req, res) => {
     "Content-Type, Authorization, X-Requested-With",
   );
 
-  // Handle OPTIONS preflight request
+  // Handle OPTIONS preflight request - must end response properly for Vercel
   if (req.method === "OPTIONS") {
-    return res.status(204).send("");
+    res.writeHead(204, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers":
+        "Content-Type, Authorization, X-Requested-With",
+      "Content-Length": "0",
+    });
+    return res.end();
   }
 
   if (req.method !== "POST") {
