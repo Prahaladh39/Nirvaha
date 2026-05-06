@@ -3,6 +3,7 @@ import Constants from "expo-constants";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { getReactNativePersistence, initializeAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { Platform } from "react-native";
 
 const expoExtra = Constants.expoConfig?.extra as
   | Record<string, string>
@@ -40,10 +41,22 @@ console.log("🔥 Project ID:", firebaseConfig.projectId);
 // Initialize Firebase only if it hasn't been initialized yet
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Auth with AsyncStorage persistence to keep users logged in
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
-});
+// Initialize Auth with appropriate persistence for platform
+let auth;
+try {
+  if (Platform.OS === "web") {
+    // Use default web persistence (browser localStorage)
+    auth = initializeAuth(app);
+  } else {
+    // Use AsyncStorage persistence for React Native
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  }
+} catch (error) {
+  // If auth already exists, just get it
+  auth = getApp().auth?.();
+}
 
 // Initialize Firestore
 const db = getFirestore(app);
