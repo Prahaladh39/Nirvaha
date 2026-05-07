@@ -37,8 +37,15 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>([INTRO_MESSAGE]);
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [lengthPreference, setLengthPreference] = useState<"short" | "long">(
+    "short",
+  );
 
   const canSend = inputText.trim().length > 0 && !loading;
+
+  const toggleLengthPreference = () => {
+    setLengthPreference((prev) => (prev === "short" ? "long" : "short"));
+  };
 
   const chatMessages = useMemo(() => messages, [messages]);
 
@@ -65,7 +72,11 @@ export default function ChatScreen() {
 
     try {
       const nirvahaService = new NirvahaService();
-      const reply = await nirvahaService.generateReflection(trimmed, history);
+      const reply = await nirvahaService.generateReflection(
+        trimmed,
+        history,
+        lengthPreference,
+      );
 
       const modelMessage: ChatMessage = {
         role: "model",
@@ -160,7 +171,14 @@ export default function ChatScreen() {
               A quiet space to say it honestly
             </Text>
           </View>
-          <View style={styles.headerSpacer} />
+          <Pressable
+            style={styles.toggleButton}
+            onPress={toggleLengthPreference}
+          >
+            <Text style={styles.toggleButtonText}>
+              {lengthPreference === "short" ? "Short" : "Long"}
+            </Text>
+          </Pressable>
         </View>
 
         <FlatList
@@ -279,6 +297,20 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: 40,
+  },
+  toggleButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: "rgba(212,175,55,0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(212,175,55,0.3)",
+  },
+  toggleButtonText: {
+    fontFamily: theme.typography.body,
+    fontSize: 12,
+    fontWeight: "600",
+    color: theme.colors.gold,
   },
   listContent: {
     paddingHorizontal: 18,
