@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
-import { Home, Sparkles, Play, Headphones, Globe } from 'lucide-react-native';
+import { Home, Sparkles, Play, User } from 'lucide-react-native';
 import { usePathname, router } from 'expo-router';
 import Animated, { useAnimatedStyle, withSpring, useSharedValue } from 'react-native-reanimated';
 import { theme } from '../../constants/theme';
@@ -8,11 +8,10 @@ import { theme } from '../../constants/theme';
 const { width } = Dimensions.get('window');
 
 const navItems = [
-  { label: 'Home', icon: Home, route: '/(tabs)' }, // index
-  { label: 'Inner Guide', icon: Sparkles, route: '/(tabs)/chat' },
-  { label: 'Collection', icon: Play, route: '/(tabs)/collection' },
-  { label: 'Sounds', icon: Headphones, route: '/(tabs)/sound-healing' },
-  { label: 'Space', icon: Globe, route: '/(tabs)/community' },
+  { label: 'Home', icon: Home, route: '/(tabs)' },
+  { label: 'Inner Guide', icon: Sparkles, route: '/chat' },
+  { label: 'Collection', icon: Play, route: '/collection' },
+  { label: 'Profile', icon: User, route: '/profile' },
 ];
 
 export default function BottomNav() {
@@ -23,8 +22,7 @@ export default function BottomNav() {
   const getActiveIndex = () => {
     if (pathname.includes('chat')) return 1;
     if (pathname.includes('collection')) return 2;
-    if (pathname.includes('sound-healing')) return 3;
-    if (pathname.includes('community')) return 4;
+    if (pathname.includes('profile')) return 3;
     return 0; // default to Home
   };
 
@@ -57,7 +55,6 @@ export default function BottomNav() {
               style={styles.navItem}
               onLayout={(e) => {
                 if (isActive && containerWidth > 0) {
-                  // Approximate calculation since flex: 1 distributes evenly
                   const itemWidth = containerWidth / navItems.length;
                   pillWidth.value = itemWidth;
                   pillOffset.value = itemWidth * index;
@@ -67,7 +64,7 @@ export default function BottomNav() {
                 if (item.route === '/(tabs)') {
                   router.replace('/(tabs)');
                 } else {
-                  router.replace(item.route as any);
+                  router.push(item.route as any);
                 }
               }}
             >
@@ -119,7 +116,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 4,
     height: 52,
-    backgroundColor: theme.colors.primary, // e.g. healing green or white
+    backgroundColor: theme.colors.primary,
     borderRadius: 26,
     zIndex: 0,
   },

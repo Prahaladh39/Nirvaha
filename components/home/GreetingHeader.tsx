@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { User } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
+import { router } from 'expo-router';
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -23,6 +24,7 @@ export default function GreetingHeader() {
       </View>
 
       <Pressable 
+        onPress={() => router.push('/profile')}
         style={({ pressed }) => [
           styles.profileButton,
           pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] }

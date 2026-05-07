@@ -1,4 +1,5 @@
 import { ChevronRight, Clock, Play } from "lucide-react-native";
+import { router } from "expo-router";
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";

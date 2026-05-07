@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, SafeAreaView, Dimensions, ActivityIndicator, GestureResponderEvent } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from 'expo-audio';
 import Animated, { 
@@ -23,13 +23,24 @@ const { width } = Dimensions.get('window');
 export default function AudioPlayer() {
   const { categoryId, itemId } = useLocalSearchParams<{ categoryId: string, itemId: string }>();
   const category = collectionCategories.find(c => c.id === categoryId);
-  const item = collectionItems[categoryId as string]?.find(i => i.id === itemId);
+  const items = collectionItems[categoryId as string] || [];
+  const itemIndex = items.findIndex(i => i.id === itemId);
+  const item = items[itemIndex];
 
   const player = useAudioPlayer(item?.audioFile ?? null, { updateInterval: 200 });
   const status = useAudioPlayerStatus(player);
+  const [progressBarWidth, setProgressBarWidth] = useState(0);
 
   const pulseValue = useSharedValue(1);
   const rotateValue = useSharedValue(0);
+
+  // Parse duration string "MM:SS" to seconds
+  const parseDuration = (dur: string) => {
+    if (!dur) return 0;
+    const parts = dur.split(':').map(Number);
+    if (parts.length === 2) return parts[0] * 60 + parts[1];
+    return parts[0]; // just seconds if no colon
+  };
 
   useEffect(() => {
     setAudioModeAsync({
@@ -55,16 +66,58 @@ export default function AudioPlayer() {
 
     player.play();
 
+    // Auto-loop if duration <= 1 minute
+    if (item && parseDuration(item.duration) <= 60) {
+      player.loop = true;
+    }
+
     return () => {
-      player.pause();
+      // expo-audio player might be released already
+      try {
+        player.pause();
+      } catch (e) {
+        // Ignore if already released
+      }
     };
-  }, []);
+  }, [item]); // Re-run if item changes (for next/prev)
 
   const handlePlayPause = () => {
     if (status.playing) {
       player.pause();
     } else {
+      if (status.didJustFinish) {
+        player.seekTo(0).catch(() => undefined);
+      }
       player.play();
+    }
+  };
+
+  const handleNext = () => {
+    if (itemIndex < items.length - 1) {
+      const nextItem = items[itemIndex + 1];
+      router.replace(`/collection/${categoryId}/${nextItem.id}`);
+    } else {
+      const firstItem = items[0];
+      router.replace(`/collection/${categoryId}/${firstItem.id}`);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (itemIndex > 0) {
+      const prevItem = items[itemIndex - 1];
+      router.replace(`/collection/${categoryId}/${prevItem.id}`);
+    } else {
+      const lastItem = items[items.length - 1];
+      router.replace(`/collection/${categoryId}/${lastItem.id}`);
+    }
+  };
+
+  const handleSeek = (event: GestureResponderEvent) => {
+    if (status.duration > 0 && progressBarWidth > 0) {
+      const touchX = event.nativeEvent.locationX;
+      const seekRatio = Math.max(0, Math.min(touchX / progressBarWidth, 1));
+      const seekTime = seekRatio * status.duration;
+      player.seekTo(seekTime).catch(() => undefined);
     }
   };
 
@@ -96,7 +149,12 @@ export default function AudioPlayer() {
       <View style={styles.ambientGlow} />
       
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
+        <Pressable 
+          onPress={() => {
+            router.back();
+          }} 
+          style={styles.backButton}
+        >
           <ArrowLeft size={20} color="#FFFFFF" />
         </Pressable>
         <View style={styles.headerTitleContainer}>
@@ -133,9 +191,15 @@ export default function AudioPlayer() {
 
         {/* Progress Area */}
         <View style={styles.progressArea}>
-          <View style={styles.progressBarBg}>
-            <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
-          </View>
+          <Pressable 
+            style={styles.progressBarContainer}
+            onLayout={(e) => setProgressBarWidth(e.nativeEvent.layout.width)}
+            onPress={handleSeek}
+          >
+            <View style={styles.progressBarBg}>
+              <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
+            </View>
+          </Pressable>
           <View style={styles.timeLabels}>
             <Text style={styles.timeText}>{formatTime(status.currentTime)}</Text>
             <Text style={styles.timeText}>{formatTime(status.duration)}</Text>
@@ -144,11 +208,16 @@ export default function AudioPlayer() {
 
         {/* Controls Area */}
         <View style={styles.controlsArea}>
-          <Pressable style={styles.secondaryBtn}>
+          <Pressable 
+            style={styles.secondaryBtn}
+            onPress={() => {
+              player.loop = !player.loop;
+            }}
+          >
             <Repeat size={20} color={player.loop ? theme.colors.gold : "rgba(255,255,255,0.5)"} />
           </Pressable>
           
-          <Pressable style={styles.skipBtn}>
+          <Pressable style={styles.skipBtn} onPress={handlePrevious}>
             <SkipBack size={28} color="#FFFFFF" fill="#FFFFFF" />
           </Pressable>
           
@@ -160,7 +229,7 @@ export default function AudioPlayer() {
             )}
           </Pressable>
           
-          <Pressable style={styles.skipBtn}>
+          <Pressable style={styles.skipBtn} onPress={handleNext}>
             <SkipForward size={28} color="#FFFFFF" fill="#FFFFFF" />
           </Pressable>
           
@@ -299,6 +368,10 @@ const styles = StyleSheet.create({
   progressArea: {
     width: width - 80,
     marginBottom: 40,
+  },
+  progressBarContainer: {
+    height: 20,
+    justifyContent: 'center',
   },
   progressBarBg: {
     height: 6,

@@ -166,7 +166,7 @@ export default function WelcomeScreen() {
           <View style={styles.finalActionsContainer}>
             <Animated.View entering={FadeIn.delay(100)}>
               <Pressable style={styles.btnPrimary} onPress={() => router.replace('/pages/Auth')}>
-                <Text style={styles.btnPrimaryText}>Create Account</Text>
+                <Text style={styles.btnPrimaryText}>SignIn/SignUp</Text>
               </Pressable>
             </Animated.View>
 

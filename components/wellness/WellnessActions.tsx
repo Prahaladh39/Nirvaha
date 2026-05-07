@@ -12,12 +12,12 @@ interface WellnessActionsProps {
 export default function WellnessActions({ avgMood }: WellnessActionsProps) {
   const actions = avgMood < 3
     ? [
-        { id: 1, icon: MessageCircle, label: "Talk to Nirvaha", sub: "Share how you're feeling", route: "/(tabs)/chat" },
-        { id: 2, icon: Wind, label: "Calming practice", sub: "2-minute breathing exercise", route: "/(tabs)/collection" },
+        { id: 1, icon: MessageCircle, label: "Talk to Nirvaha", sub: "Share how you're feeling", route: "/chat" },
+        { id: 2, icon: Wind, label: "Calming practice", sub: "2-minute breathing exercise", route: "/breathe" },
       ]
     : [
         { id: 3, icon: BookOpen, label: "Write a reflection", sub: "Capture this week's insights", route: "/(tabs)/journal" },
-        { id: 4, icon: Sparkles, label: "Wisdom Selfie", sub: "Express your inner journey", route: "/(tabs)/collection" },
+        { id: 4, icon: Sparkles, label: "Wisdom Selfie", sub: "Express your inner journey", route: "/coming-soon" },
       ];
 
   return (

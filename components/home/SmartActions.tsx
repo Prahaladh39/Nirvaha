@@ -10,6 +10,7 @@ const actions = [
     title: 'Ground your thoughts',
     subtitle: '2 min calm reset',
     icon: Wind,
+    route: '/breathe',
     colors: {
       bg: '#162828',
       iconBg: 'rgba(50, 140, 140, 0.2)',
@@ -31,6 +32,7 @@ const actions = [
     title: 'A new perspective',
     subtitle: 'See it differently',
     icon: Lightbulb,
+    route: '/chat',
     colors: {
       bg: '#241D33',
       iconBg: 'rgba(120, 80, 180, 0.2)',

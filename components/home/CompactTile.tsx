@@ -18,6 +18,7 @@ const tiles = [
     subtitle: "Anonymous sharing",
     icon: Globe,
     label: "CONNECT",
+    route: "/coming-soon",
     colors: {
       bg: "#122A22",
       iconBg: "rgba(42, 82, 77, 0.4)",
@@ -43,6 +44,7 @@ const tiles = [
     subtitle: "Meet your guides",
     icon: Camera,
     label: "DISCOVER",
+    route: "/coming-soon",
     colors: {
       bg: "#251633",
       iconBg: "rgba(120, 70, 160, 0.25)",
