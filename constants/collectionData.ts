@@ -5,7 +5,8 @@ export interface CollectionItem {
   moodTag: string;
   icon: string;
   duration: string;
-  videoPath?: string; // Path to video file (you'll update this)
+  imageUri?: string; // URL for mock image (uses picsum if not provided)
+  audioPath?: string; // Path to audio file (you'll update this)
   category: string;
 }
 

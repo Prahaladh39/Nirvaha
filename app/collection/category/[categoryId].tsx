@@ -1,8 +1,9 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import { ArrowLeft, Play, PlayCircle } from "lucide-react-native";
+import { ArrowLeft, Headphones, Play } from "lucide-react-native";
 import React, { useMemo, useState } from "react";
 import {
+  Image,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -64,7 +65,7 @@ export default function CollectionCategoryScreen() {
             >
               <ArrowLeft size={18} color="#FFFFFF" />
             </Pressable>
-            <PlayCircle size={16} color="rgba(255,255,255,0.5)" />
+            <Headphones size={16} color="rgba(255,255,255,0.5)" />
           </View>
 
           <View
@@ -89,7 +90,7 @@ export default function CollectionCategoryScreen() {
                   <View style={styles.moodPill}>
                     <Text style={styles.moodText}>{category.moodTag}</Text>
                   </View>
-                  <Text style={styles.trackMeta}>{items.length} videos</Text>
+                  <Text style={styles.trackMeta}>{items.length} audios</Text>
                 </View>
               </View>
             </View>
@@ -100,7 +101,7 @@ export default function CollectionCategoryScreen() {
           entering={FadeInDown.duration(450).delay(120)}
           style={styles.section}
         >
-          <Text style={styles.sectionTitle}>All Videos</Text>
+          <Text style={styles.sectionTitle}>All Audios</Text>
           <View style={styles.trackList}>
             {items.map((item, index) => (
               <Pressable
@@ -108,8 +109,18 @@ export default function CollectionCategoryScreen() {
                 style={styles.trackCard}
                 onPress={() => setActiveItem(item)}
               >
-                <View style={styles.trackIcon}>
-                  <Text style={styles.trackEmoji}>{item.icon}</Text>
+                <View style={styles.trackImageContainer}>
+                  <Image
+                    source={{
+                      uri:
+                        item.imageUri ||
+                        `https://picsum.photos/seed/${item.id}/100/100`,
+                    }}
+                    style={styles.trackImage}
+                  />
+                  <View style={styles.playOverlay}>
+                    <Play size={12} color="#FFFFFF" fill="#FFFFFF" />
+                  </View>
                 </View>
                 <View style={styles.trackCopy}>
                   <Text style={styles.trackTitle}>{item.title}</Text>
@@ -122,14 +133,6 @@ export default function CollectionCategoryScreen() {
                     </View>
                     <Text style={styles.trackDuration}>{item.duration}</Text>
                   </View>
-                </View>
-                <View style={styles.playButton}>
-                  <Play
-                    size={16}
-                    color="#FFFFFF"
-                    fill="#FFFFFF"
-                    style={styles.playOffset}
-                  />
                 </View>
               </Pressable>
             ))}
@@ -149,17 +152,24 @@ export default function CollectionCategoryScreen() {
       {activeItem && (
         <Animated.View
           entering={FadeInDown.duration(300)}
-          style={styles.videoPreview}
+          style={styles.audioPreview}
         >
-          <View style={styles.videoPreviewContent}>
-            <View style={styles.videoPlaceholder}>
-              <PlayCircle size={48} color={theme.colors.gold} />
-              <Text style={styles.videoPlaceholderText}>Video Player</Text>
+          <View style={styles.audioPreviewContent}>
+            <Image
+              source={{
+                uri:
+                  activeItem.imageUri ||
+                  `https://picsum.photos/seed/${activeItem.id}/120/120`,
+              }}
+              style={styles.audioPreviewImage}
+            />
+            <View style={styles.audioInfo}>
+              <Text style={styles.audioTitle}>{activeItem.title}</Text>
+              <Text style={styles.audioDuration}>{activeItem.duration}</Text>
             </View>
-            <View style={styles.videoInfo}>
-              <Text style={styles.videoTitle}>{activeItem.title}</Text>
-              <Text style={styles.videoDuration}>{activeItem.duration}</Text>
-            </View>
+            <Pressable style={styles.playPreviewButton}>
+              <Play size={20} color="#FFFFFF" fill="#FFFFFF" />
+            </Pressable>
             <Pressable
               style={styles.closeButton}
               onPress={() => setActiveItem(null)}
@@ -314,16 +324,28 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.08)",
   },
-  trackIcon: {
+  trackImageContainer: {
     width: 48,
     height: 48,
     borderRadius: 14,
+    overflow: "hidden",
     backgroundColor: "rgba(45,90,76,0.14)",
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
   },
-  trackEmoji: {
-    fontSize: 22,
+  trackImage: {
+    width: "100%",
+    height: "100%",
+  },
+  playOverlay: {
+    position: "absolute",
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   trackCopy: {
     flex: 1,
@@ -361,17 +383,6 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.body,
     fontSize: 10,
     color: "rgba(255,255,255,0.45)",
-  },
-  playButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  playOffset: {
-    marginLeft: 2,
   },
   tipCard: {
     borderRadius: 16,
@@ -412,7 +423,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: theme.colors.primaryForeground,
   },
-  videoPreview: {
+  audioPreview: {
     position: "absolute",
     bottom: 0,
     left: 0,
@@ -422,40 +433,39 @@ const styles = StyleSheet.create({
     borderTopColor: "rgba(255,255,255,0.1)",
     padding: 16,
   },
-  videoPreviewContent: {
+  audioPreviewContent: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
   },
-  videoPlaceholder: {
-    width: 80,
+  audioPreviewImage: {
+    width: 60,
     height: 60,
     borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.05)",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(255,255,255,0.1)",
   },
-  videoPlaceholderText: {
-    fontSize: 10,
-    color: "rgba(255,255,255,0.4)",
-    marginTop: 4,
-  },
-  videoInfo: {
+  audioInfo: {
     flex: 1,
   },
-  videoTitle: {
+  audioTitle: {
     fontFamily: theme.typography.body,
     fontSize: 14,
     fontWeight: "600",
     color: "#FFFFFF",
   },
-  videoDuration: {
+  audioDuration: {
     fontFamily: theme.typography.body,
     fontSize: 12,
     color: "rgba(255,255,255,0.5)",
     marginTop: 2,
+  },
+  playPreviewButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
   },
   closeButton: {
     width: 32,
