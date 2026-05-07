@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, SafeAreaView, Dimensions, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
-import { Audio } from 'expo-av';
+import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from 'expo-audio';
 import Animated, { 
   useAnimatedStyle, 
   useSharedValue, 
@@ -25,16 +25,20 @@ export default function AudioPlayer() {
   const category = collectionCategories.find(c => c.id === categoryId);
   const item = collectionItems[categoryId as string]?.find(i => i.id === itemId);
 
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [position, setPosition] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const player = useAudioPlayer(item?.audioFile ?? null, { updateInterval: 200 });
+  const status = useAudioPlayerStatus(player);
 
   const pulseValue = useSharedValue(1);
   const rotateValue = useSharedValue(0);
 
   useEffect(() => {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      interruptionMode: "doNotMix",
+      allowsRecording: false,
+      shouldPlayInBackground: true,
+    }).catch(err => console.warn("Audio mode error", err));
+
     pulseValue.value = withRepeat(
       withSequence(
         withTiming(1.1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
@@ -49,58 +53,25 @@ export default function AudioPlayer() {
       false
     );
 
-    loadAudio();
+    player.play();
 
     return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
+      player.pause();
     };
   }, []);
 
-  async function loadAudio() {
-    try {
-      if (!item) return;
-      
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        item.audioFile,
-        { shouldPlay: true },
-        onPlaybackStatusUpdate
-      );
-      setSound(newSound);
-      setIsPlaying(true);
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error loading audio:', error);
-      setIsLoading(false);
-    }
-  }
-
-  const onPlaybackStatusUpdate = (status: any) => {
-    if (status.isLoaded) {
-      setPosition(status.positionMillis);
-      setDuration(status.durationMillis || 0);
-      setIsPlaying(status.isPlaying);
-      if (status.didJustFinish) {
-        setIsPlaying(false);
-      }
-    }
-  };
-
-  const handlePlayPause = async () => {
-    if (!sound) return;
-    if (isPlaying) {
-      await sound.pauseAsync();
+  const handlePlayPause = () => {
+    if (status.playing) {
+      player.pause();
     } else {
-      await sound.playAsync();
+      player.play();
     }
   };
 
-  const formatTime = (millis: number) => {
-    const totalSeconds = millis / 1000;
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = Math.floor(totalSeconds % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
   const pulseStyle = useAnimatedStyle(() => ({
@@ -114,7 +85,7 @@ export default function AudioPlayer() {
 
   if (!item || !category) return null;
 
-  const progress = duration > 0 ? (position / duration) * 100 : 0;
+  const progress = status.duration > 0 ? (status.currentTime / status.duration) * 100 : 0;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -166,15 +137,15 @@ export default function AudioPlayer() {
             <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
           </View>
           <View style={styles.timeLabels}>
-            <Text style={styles.timeText}>{formatTime(position)}</Text>
-            <Text style={styles.timeText}>{formatTime(duration)}</Text>
+            <Text style={styles.timeText}>{formatTime(status.currentTime)}</Text>
+            <Text style={styles.timeText}>{formatTime(status.duration)}</Text>
           </View>
         </View>
 
         {/* Controls Area */}
         <View style={styles.controlsArea}>
           <Pressable style={styles.secondaryBtn}>
-            <Repeat size={20} color="rgba(255,255,255,0.5)" />
+            <Repeat size={20} color={player.loop ? theme.colors.gold : "rgba(255,255,255,0.5)"} />
           </Pressable>
           
           <Pressable style={styles.skipBtn}>
@@ -182,9 +153,7 @@ export default function AudioPlayer() {
           </Pressable>
           
           <Pressable style={styles.playPauseBtn} onPress={handlePlayPause}>
-            {isLoading ? (
-              <ActivityIndicator color="#000000" />
-            ) : isPlaying ? (
+            {status.playing ? (
               <Pause size={32} color="#000000" fill="#000000" />
             ) : (
               <Play size={32} color="#000000" fill="#000000" style={{ marginLeft: 4 }} />
@@ -217,7 +186,6 @@ const styles = StyleSheet.create({
     height: 300,
     borderRadius: 150,
     backgroundColor: 'rgba(255,255,255,0.05)',
-    filter: 'blur(80px)',
   },
   header: {
     flexDirection: 'row',
