@@ -26,7 +26,10 @@ export default function CollectionRail() {
           <Text style={styles.title}>From the Collection</Text>
           <Text style={styles.subtitle}>Curated for this moment</Text>
         </View>
-        <Pressable style={styles.viewAllBtn}>
+        <Pressable 
+          style={styles.viewAllBtn}
+          onPress={() => router.push('/collection')}
+        >
           <Text style={styles.viewAllText}>View All</Text>
           <ChevronRight size={12} color={theme.colors.gold} />
         </Pressable>
@@ -40,7 +43,11 @@ export default function CollectionRail() {
         {visible.map((item, i) => {
           const isRecommended = i === 0;
           return (
-            <Pressable key={item.id} style={styles.card}>
+            <Pressable 
+              key={item.id} 
+              style={styles.card}
+              onPress={() => router.push('/collection')}
+            >
               <View
                 style={[
                   styles.imageContainer,
@@ -54,13 +61,13 @@ export default function CollectionRail() {
                     {
                       backgroundColor: isRecommended
                         ? "#4A3B2C"
-                        : item.category === "yoga-sutras"
+                        : item.category === "yogasutras"
                           ? "#4A3F55"
-                          : item.category === "modern-gita"
+                          : item.category === "gita"
                             ? "#5A4422"
-                            : item.category === "modern-reset"
+                            : item.category === "reset"
                               ? "#273A57"
-                              : item.category === "lifestyle-os"
+                              : item.category === "lifestyle"
                                 ? "#2D5A4C"
                                 : "#684B25",
                     },
