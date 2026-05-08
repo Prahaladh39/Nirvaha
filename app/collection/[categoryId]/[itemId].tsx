@@ -168,7 +168,7 @@ export default function AudioPlayer() {
         {/* Visualizer Area */}
         <View style={styles.visualizerContainer}>
           <Animated.View style={[styles.pulseCircle, pulseStyle]} />
-          <Animated.View style={[styles.pulseCircle, pulseStyle, { width: 340, height: 340 }]} />
+          <Animated.View style={[styles.pulseCircle, pulseStyle, { width: 340, height: 340, borderRadius: 170, top: '50%', left: '50%', marginTop: -170, marginLeft: -170 }]} />
           
           <View style={styles.discContainer}>
             <Animated.View style={[styles.disc, discStyle]}>
@@ -225,7 +225,7 @@ export default function AudioPlayer() {
             {status.playing ? (
               <Pause size={32} color="#000000" fill="#000000" />
             ) : (
-              <Play size={32} color="#000000" fill="#000000" style={{ marginLeft: 4 }} />
+              <Play size={32} color="#000000" fill="#000000" style={{ marginLeft: 6 }} />
             )}
           </Pressable>
           
@@ -249,12 +249,12 @@ const styles = StyleSheet.create({
   },
   ambientGlow: {
     position: 'absolute',
-    top: '20%',
-    left: '10%',
+    top: '15%',
+    left: '20%',
     width: 300,
     height: 300,
     borderRadius: 150,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   header: {
     flexDirection: 'row',
@@ -277,11 +277,11 @@ const styles = StyleSheet.create({
   },
   headerCategory: {
     fontFamily: theme.typography.body,
-    fontSize: 10,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.5)',
+    fontSize: 11,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.6)',
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 2,
   },
   headerItem: {
     fontFamily: theme.typography.body,
@@ -312,9 +312,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 280,
     height: 280,
-    borderRadius: 180,
+    borderRadius: 140,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: 'rgba(255,255,255,0.15)',
+    top: '50%',
+    left: '50%',
+    marginTop: -140,
+    marginLeft: -140,
   },
   discContainer: {
     width: 240,
@@ -345,7 +349,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.2)',
   },
   discEmoji: {
-    fontSize: 80,
+    fontSize: 90,
   },
   infoArea: {
     alignItems: 'center',

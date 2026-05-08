@@ -2,13 +2,14 @@ import { ChevronRight, Clock, Play } from "lucide-react-native";
 import { router } from "expo-router";
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { collectionItems } from "../../constants/collectionData";
 import { theme } from "../../constants/theme";
 
 // Flatten all collection items and shuffle for variety
 const getAllCollectionItems = () => {
-  const allItems = Object.values(collectionItems).flat();
+  const allItems = Object.values(collectionItems).flat().filter(item => !!item.coverImage);
   // Shuffle array
   return allItems.sort(() => Math.random() - 0.5);
 };
@@ -55,25 +56,33 @@ export default function CollectionRail() {
                   isRecommended && styles.recommendedBorder,
                 ]}
               >
-                {/* Fallback color instead of actual image fetch for smoother preview */}
-                <View
-                  style={[
-                    styles.imagePlaceholder,
-                    {
-                      backgroundColor: isRecommended
-                        ? "#4A3B2C"
-                        : item.category === "yogasutras"
-                          ? "#4A3F55"
-                          : item.category === "gita"
-                            ? "#5A4422"
-                            : item.category === "reset"
-                              ? "#273A57"
-                              : item.category === "lifestyle"
-                                ? "#2D5A4C"
-                                : "#684B25",
-                    },
-                  ]}
-                />
+                {item.coverImage ? (
+                  <Image
+                    source={{ uri: item.coverImage }}
+                    style={styles.coverImage}
+                    contentFit="cover"
+                    transition={500}
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.imagePlaceholder,
+                      {
+                        backgroundColor: isRecommended
+                          ? "#4A3B2C"
+                          : item.category === "yogasutras"
+                            ? "#4A3F55"
+                            : item.category === "gita"
+                              ? "#5A4422"
+                              : item.category === "reset"
+                                ? "#273A57"
+                                : item.category === "lifestyle"
+                                  ? "#2D5A4C"
+                                  : "#684B25",
+                      },
+                    ]}
+                  />
+                )}
 
                 <View style={styles.gradientOverlay} />
 
@@ -85,7 +94,7 @@ export default function CollectionRail() {
 
                 {item.duration && (
                   <View style={styles.durationPill}>
-                    <Clock size={10} color="#FFFFFF" />
+                    <Clock size={10} color="#2A3B32" />
                     <Text style={styles.durationText}>{item.duration}</Text>
                   </View>
                 )}
@@ -172,6 +181,10 @@ const styles = StyleSheet.create({
   imagePlaceholder: {
     ...StyleSheet.absoluteFillObject,
   },
+  coverImage: {
+    ...StyleSheet.absoluteFillObject,
+    resizeMode: 'cover',
+  },
   recommendedBorder: {
     borderWidth: 1,
     borderColor: "rgba(235, 185, 80, 0.6)",
@@ -201,17 +214,17 @@ const styles = StyleSheet.create({
     left: 6,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.6)",
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 6,
+    backgroundColor: "rgba(255,255,255,0.85)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
     gap: 4,
   },
   durationText: {
     fontFamily: theme.typography.body,
     fontSize: 10,
-    fontWeight: "500",
-    color: "#FFFFFF",
+    fontWeight: "600",
+    color: "#2A3B32",
   },
   playButton: {
     position: "absolute",

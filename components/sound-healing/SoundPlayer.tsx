@@ -139,6 +139,24 @@ export default function SoundPlayer({
     ? playlist.findIndex((item) => item.id === track.id)
     : -1;
   const canSkip = playlist.length > 1 && activeIndex >= 0;
+  
+  const rotateValue = useSharedValue(0);
+
+  useEffect(() => {
+    if (isPlaying) {
+      rotateValue.value = withRepeat(
+        withTiming(360, { duration: 20000, easing: Easing.linear }),
+        -1,
+        false
+      );
+    } else {
+      rotateValue.value = withTiming(rotateValue.value);
+    }
+  }, [isPlaying, rotateValue]);
+
+  const discRotation = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotateValue.value}deg` }],
+  }));
 
   const elapsed = useMemo(() => {
     const seconds = Math.floor(currentTime);
@@ -208,7 +226,7 @@ export default function SoundPlayer({
             <View style={styles.content}>
               <Animated.View
                 entering={FadeIn.duration(350)}
-                style={[styles.trackIcon, isPlaying && styles.trackIconActive]}
+                style={[styles.trackIcon, isPlaying && styles.trackIconActive, discRotation]}
               >
                 <Text style={styles.trackEmoji}>{track.icon}</Text>
               </Animated.View>
@@ -477,7 +495,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   playIconOffset: {
-    marginLeft: 3,
+    marginLeft: 6,
   },
   intention: {
     fontFamily: theme.typography.body,

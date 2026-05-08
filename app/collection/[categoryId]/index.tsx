@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView } from 'react-native';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ArrowLeft, Play, Clock } from 'lucide-react-native';
@@ -19,7 +20,20 @@ export default function CategoryDetail() {
       <Stack.Screen options={{ headerShown: false }} />
       
       <View style={styles.hero}>
-        <LinearGradient colors={category.colors} style={styles.heroBg} />
+        {category.coverImage ? (
+          <Image 
+            source={{ uri: category.coverImage }} 
+            style={styles.heroImage} 
+            contentFit="cover"
+            transition={500}
+          />
+        ) : (
+          <LinearGradient colors={category.colors} style={styles.heroBg} />
+        )}
+        <LinearGradient 
+          colors={['rgba(10,10,10,0.2)', 'rgba(10,10,10,0.8)']} 
+          style={styles.heroOverlay} 
+        />
         <View style={styles.heroContent}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <ArrowLeft size={20} color="#FFFFFF" />
@@ -91,6 +105,13 @@ const styles = StyleSheet.create({
   heroBg: {
     ...StyleSheet.absoluteFillObject,
     opacity: 0.8,
+  },
+  heroImage: {
+    ...StyleSheet.absoluteFillObject,
+    resizeMode: 'cover',
+  },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
   },
   heroContent: {
     flex: 1,

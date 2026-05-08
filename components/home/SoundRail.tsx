@@ -1,13 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ChevronRight, Play } from 'lucide-react-native';
-import { localSoundTracks } from '../../constants/soundHealingData';
+import { localSoundTracks, soundHealingCategories } from '../../constants/soundHealingData';
 import { theme } from '../../constants/theme';
 import { router } from 'expo-router';
 
 export default function SoundRail() {
-  const visible = localSoundTracks.slice(0, 6);
+  const visible = soundHealingCategories.slice(0, 6);
 
   return (
     <Animated.View entering={FadeInDown.duration(500).delay(500)} style={styles.container}>
@@ -37,8 +38,17 @@ export default function SoundRail() {
               onPress={() => router.push('/(tabs)/sound-healing' as any)}
             >
               <View style={[styles.cardContainer, isRecommended && styles.recommendedBorder]}>
-                {/* Fallback solid background color based on index */}
-                <View style={[styles.cardBackground, { backgroundColor: ['#2F2942', '#2A1B38', '#1A233A', '#3A203F'][i % 4] }]} />
+                {cat.coverImage ? (
+                  <Image 
+                    source={{ uri: cat.coverImage }} 
+                    style={styles.coverImage} 
+                    contentFit="cover"
+                    transition={500}
+                  />
+                ) : (
+                  <View style={[styles.cardBackground, { backgroundColor: ['#2F2942', '#2A1B38', '#1A233A', '#3A203F'][i % 4] }]} />
+                )}
+                <View style={styles.gradientOverlay} />
                 
                 {isRecommended && (
                   <View style={styles.forYouPill}>
@@ -47,14 +57,14 @@ export default function SoundRail() {
                 )}
 
                 <View style={styles.playButton}>
-                  <Play size={10} color="#FFFFFF" fill="#FFFFFF" style={{ marginLeft: 2 }} />
+                  <Play size={14} color="#FFFFFF" fill="#FFFFFF" />
                 </View>
 
                 {/* Content */}
                 <View style={styles.cardContent}>
                   <Text style={styles.cardTitle} numberOfLines={1}>{cat.title}</Text>
                   <Text style={styles.cardSubtitle} numberOfLines={1}>
-                    {cat.duration} · {cat.moodTag}
+                    {cat.trackCount} tracks · {cat.moodTag}
                   </Text>
                 </View>
               </View>
@@ -128,6 +138,14 @@ const styles = StyleSheet.create({
   cardBackground: {
     ...StyleSheet.absoluteFillObject,
   },
+  coverImage: {
+    ...StyleSheet.absoluteFillObject,
+    resizeMode: 'cover',
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
   recommendedBorder: {
     borderWidth: 1,
     borderColor: 'rgba(235, 185, 80, 0.6)',
@@ -150,14 +168,14 @@ const styles = StyleSheet.create({
   },
   playButton: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+    top: 10,
+    right: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.6)',
     alignItems: 'center',
     justifyContent: 'center',
   },

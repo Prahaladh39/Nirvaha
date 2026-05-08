@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -47,7 +48,20 @@ export default function SoundCategoryScreen() {
           </View>
 
           <View style={styles.heroCard}>
-            <LinearGradient colors={category.colors} style={StyleSheet.absoluteFill} />
+            {category.coverImage ? (
+              <Image 
+                source={{ uri: category.coverImage }} 
+                style={styles.heroImage} 
+                contentFit="cover"
+                transition={500}
+              />
+            ) : (
+              <LinearGradient colors={category.colors} style={StyleSheet.absoluteFill} />
+            )}
+            <LinearGradient 
+              colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.7)']} 
+              style={styles.heroOverlay} 
+            />
             <View style={styles.heroOrb} />
             <View style={styles.heroContent}>
               <View style={styles.heroIcon}>
@@ -163,6 +177,13 @@ const styles = StyleSheet.create({
     padding: 18,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
+  },
+  heroImage: {
+    ...StyleSheet.absoluteFillObject,
+    resizeMode: 'cover',
+  },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
   },
   heroOrb: {
     position: 'absolute',

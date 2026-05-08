@@ -2,6 +2,7 @@
   "expo": {
     "name": "NirVahaApp",
     "slug": "NirVahaApp",
+    "projectId": "f7634c70-3f00-4876-9301-6af23240f928",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -45,6 +46,17 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "EXPO_PUBLIC_API_BASE_URL": "https://backend-six-lac-91.vercel.app",
+      "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyCrhis9EBbYDRncJXPThQStBaxJy-sTK3o",
+      "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "nirvaha-8a8e4.firebaseapp.com",
+      "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "nirvaha-8a8e4",
+      "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "nirvaha-8a8e4.firebasestorage.app",
+      "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "883506827772",
+      "EXPO_PUBLIC_FIREBASE_APP_ID": "1:883506827772:web:82ef0a0a5d73addbab6279",
+      "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID": "G-17HJ7246SH",
+      "router": {}
     }
   }
 }

@@ -8,6 +8,7 @@ export interface SoundTrack {
   category?: string;
   source?: number;
   loop?: boolean;
+  coverImage?: string;
 }
 
 export interface SoundCategory {
@@ -18,6 +19,7 @@ export interface SoundCategory {
   icon: string;
   trackCount: number;
   colors: [string, string];
+  coverImage?: string;
 }
 
 export interface SoundRecommendation {
@@ -36,6 +38,7 @@ export interface WellnessPackage {
   trackCount: number;
   icon: string;
   colors: [string, string];
+  coverImage?: string;
 }
 
 export interface JourneySession extends SoundTrack {
@@ -59,6 +62,7 @@ export const localSoundTracks: SoundTrack[] = [
     duration: '1:00',
     source: require('../assets/audio/desert-glass-loop.mp3'),
     loop: true,
+    coverImage: 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?q=80&w=600&auto=format&fit=crop',
   },
   {
     id: 'desert-glass',
@@ -68,6 +72,7 @@ export const localSoundTracks: SoundTrack[] = [
     icon: '✨',
     duration: '7:32',
     source: require('../assets/audio/desert-glass.mp3'),
+    coverImage: 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?q=80&w=600&auto=format&fit=crop',
   },
   {
     id: 'eternal-courtyard-of-dawn',
@@ -77,6 +82,7 @@ export const localSoundTracks: SoundTrack[] = [
     icon: '🌅',
     duration: '7:34',
     source: require('../assets/audio/eternal-courtyard-of-dawn.mp3'),
+    coverImage: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=600&auto=format&fit=crop',
   },
   {
     id: 'clouds-over-quiet-hills',
@@ -86,6 +92,7 @@ export const localSoundTracks: SoundTrack[] = [
     icon: '☁️',
     duration: '1:01',
     source: require('../assets/audio/clouds-over-quiet-hills.mp3'),
+    coverImage: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=600&auto=format&fit=crop',
   },
   {
     id: 'conch-tides',
@@ -95,6 +102,7 @@ export const localSoundTracks: SoundTrack[] = [
     icon: '🐚',
     duration: '0:54',
     source: require('../assets/audio/conch-tides.mp3'),
+    coverImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600&auto=format&fit=crop',
   },
   {
     id: 'spiral-tides',
@@ -104,6 +112,7 @@ export const localSoundTracks: SoundTrack[] = [
     icon: '🌊',
     duration: '4:20',
     source: require('../assets/audio/spiral-tides.mp3'),
+    coverImage: 'https://images.unsplash.com/photo-1518115391078-f67bd5f2d967?q=80&w=600&auto=format&fit=crop',
   },
   {
     id: 'whispering-pines',
@@ -113,6 +122,7 @@ export const localSoundTracks: SoundTrack[] = [
     icon: '🌲',
     duration: '5:46',
     source: require('../assets/audio/whispering-pines.mp3'),
+    coverImage: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=600&auto=format&fit=crop',
   },
   {
     id: 'lotus-breath-at-dawn',
@@ -122,6 +132,7 @@ export const localSoundTracks: SoundTrack[] = [
     icon: '🪷',
     duration: '7:11',
     source: require('../assets/audio/lotus-breath-at-dawn.mp3'),
+    coverImage: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=600&auto=format&fit=crop',
   },
 ];
 
@@ -134,6 +145,7 @@ export const soundHealingCategories: SoundCategory[] = [
     icon: '🎧',
     trackCount: 12,
     colors: ['#273A57', '#151A2D'],
+    coverImage: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=800&auto=format&fit=crop',
   },
   {
     id: 'mantras',
@@ -143,6 +155,7 @@ export const soundHealingCategories: SoundCategory[] = [
     icon: '🕉️',
     trackCount: 18,
     colors: ['#4A2E5D', '#201327'],
+    coverImage: 'https://images.unsplash.com/photo-1528319725582-ddc096101511?q=80&w=800&auto=format&fit=crop',
   },
   {
     id: 'nature',
@@ -152,6 +165,7 @@ export const soundHealingCategories: SoundCategory[] = [
     icon: '🌧️',
     trackCount: 24,
     colors: ['#1E4D43', '#102822'],
+    coverImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop',
   },
   {
     id: 'frequency',
@@ -161,6 +175,7 @@ export const soundHealingCategories: SoundCategory[] = [
     icon: '〰️',
     trackCount: 9,
     colors: ['#5A4422', '#241A0D'],
+    coverImage: 'https://images.unsplash.com/photo-1502134273026-acb7cad13c58?q=80&w=800&auto=format&fit=crop',
   },
   {
     id: 'breath',
@@ -170,6 +185,7 @@ export const soundHealingCategories: SoundCategory[] = [
     icon: '🌬️',
     trackCount: 8,
     colors: ['#285065', '#12212B'],
+    coverImage: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=800&auto=format&fit=crop',
   },
   {
     id: 'grounding',
@@ -179,6 +195,7 @@ export const soundHealingCategories: SoundCategory[] = [
     icon: '🪨',
     trackCount: 10,
     colors: ['#3B3A2A', '#191915'],
+    coverImage: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=800&auto=format&fit=crop',
   },
   {
     id: 'sleep',
@@ -188,6 +205,7 @@ export const soundHealingCategories: SoundCategory[] = [
     icon: '🌙',
     trackCount: 14,
     colors: ['#2B315F', '#111527'],
+    coverImage: 'https://images.unsplash.com/photo-1511295742364-911243512971?q=80&w=800&auto=format&fit=crop',
   },
   {
     id: 'focus',
@@ -197,6 +215,7 @@ export const soundHealingCategories: SoundCategory[] = [
     icon: '🎯',
     trackCount: 11,
     colors: ['#2C4D3D', '#111F19'],
+    coverImage: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=800&auto=format&fit=crop',
   },
 ];
 
@@ -259,12 +278,12 @@ export const categoryTracks: Record<string, SoundTrack[]> = {
 };
 
 export const wellnessPackages: WellnessPackage[] = [
-  { id: 'pregnancy', title: 'Gentle Motherhood', purpose: 'Soft grounding for pregnancy transitions', duration: '7 days', trackCount: 7, icon: '🤍', colors: ['#5D3F52', '#2A1A25'] },
-  { id: 'exam', title: 'Exam Calm', purpose: 'Focus and steadiness before study or tests', duration: '5 days', trackCount: 5, icon: '📚', colors: ['#2F4969', '#142133'] },
-  { id: 'employee', title: 'Workday Reset', purpose: 'Short sessions for busy professionals', duration: '6 days', trackCount: 6, icon: '💼', colors: ['#2D5A4C', '#172D27'] },
-  { id: 'emotional', title: 'Emotional Release', purpose: 'Sound rituals for heavy feelings', duration: '8 days', trackCount: 8, icon: '💛', colors: ['#684B25', '#2B1E0F'] },
-  { id: 'sleep-recovery', title: 'Sleep Recovery', purpose: 'Evening cues for consistent rest', duration: '10 days', trackCount: 10, icon: '🌙', colors: ['#2A3166', '#11162B'] },
-  { id: 'anxiety', title: 'Anxiety Ease', purpose: 'Breath-led sounds for nervous system care', duration: '7 days', trackCount: 7, icon: '🌬️', colors: ['#285C63', '#10262A'] },
+  { id: 'pregnancy', title: 'Gentle Motherhood', purpose: 'Soft grounding for pregnancy transitions', duration: '7 days', trackCount: 7, icon: '🤍', colors: ['#5D3F52', '#2A1A25'], coverImage: 'https://images.unsplash.com/photo-1516589174382-c68555f1480e?q=80&w=800&auto=format&fit=crop' },
+  { id: 'exam', title: 'Exam Calm', purpose: 'Focus and steadiness before study or tests', duration: '5 days', trackCount: 5, icon: '📚', colors: ['#2F4969', '#142133'], coverImage: 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?q=80&w=800&auto=format&fit=crop' },
+  { id: 'employee', title: 'Workday Reset', purpose: 'Short sessions for busy professionals', duration: '6 days', trackCount: 6, icon: '💼', colors: ['#2D5A4C', '#172D27'], coverImage: 'https://images.unsplash.com/photo-1499209974431-9eaa37a11944?q=80&w=800&auto=format&fit=crop' },
+  { id: 'emotional', title: 'Emotional Release', purpose: 'Sound rituals for heavy feelings', duration: '8 days', trackCount: 8, icon: '💛', colors: ['#684B25', '#2B1E0F'], coverImage: 'https://images.unsplash.com/photo-1506126279646-a6602b7d3466?q=80&w=800&auto=format&fit=crop' },
+  { id: 'sleep-recovery', title: 'Sleep Recovery', purpose: 'Evening cues for consistent rest', duration: '10 days', trackCount: 10, icon: '🌙', colors: ['#2A3166', '#11162B'], coverImage: 'https://images.unsplash.com/photo-1511295742364-911243512971?q=80&w=800&auto=format&fit=crop' },
+  { id: 'anxiety', title: 'Anxiety Ease', purpose: 'Breath-led sounds for nervous system care', duration: '7 days', trackCount: 7, icon: '🌬️', colors: ['#285C63', '#10262A'], coverImage: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=800&auto=format&fit=crop' },
 ];
 
 export const journeySessions: Record<string, JourneySession[]> = Object.fromEntries(
