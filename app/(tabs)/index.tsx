@@ -6,6 +6,7 @@ import HeroCarousel from '../../components/home/HeroCarousel';
 import CollectionRail from '../../components/home/CollectionRail';
 import SoundRail from '../../components/home/SoundRail';
 import CompactTilesGrid from '../../components/home/CompactTile';
+import JyotirlingaCard from '../../components/home/JyotirlingaCard';
 import SmartActions from '../../components/home/SmartActions';
 
 export default function Home() {
@@ -21,6 +22,7 @@ export default function Home() {
         <CollectionRail />
         <SoundRail />
         <CompactTilesGrid />
+        <JyotirlingaCard />
         <SmartActions />
       </ScrollView>
     </SafeAreaView>

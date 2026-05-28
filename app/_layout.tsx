@@ -35,6 +35,8 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="pages" options={{ headerShown: false }} />
         <Stack.Screen name="sound-healing" options={{ headerShown: false }} />
+        <Stack.Screen name="space" options={{ headerShown: false }} />
+        <Stack.Screen name="wisdom-selfie" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
       <Toast />

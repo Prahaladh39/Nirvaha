@@ -43,7 +43,8 @@ module.exports = {
         }
       ],
       "expo-font",
-      "expo-audio"
+      "expo-audio",
+      "expo-video"
     ],
     experiments: {
       typedRoutes: true,

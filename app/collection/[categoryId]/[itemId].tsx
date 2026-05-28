@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, SafeAreaView, Dimensions, ActivityIndicator, GestureResponderEvent } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from 'expo-audio';
+import { useVideoPlayer, VideoView } from 'expo-video';
+import { BlurView } from 'expo-blur';
 import Animated, { 
   useAnimatedStyle, 
   useSharedValue, 
@@ -21,6 +24,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 const { width } = Dimensions.get('window');
 
 export default function AudioPlayer() {
+  const insets = useSafeAreaInsets();
   const { categoryId, itemId } = useLocalSearchParams<{ categoryId: string, itemId: string }>();
   const category = collectionCategories.find(c => c.id === categoryId);
   const items = collectionItems[categoryId as string] || [];
@@ -29,6 +33,13 @@ export default function AudioPlayer() {
 
   const player = useAudioPlayer(item?.audioFile ?? null, { updateInterval: 200 });
   const status = useAudioPlayerStatus(player);
+  
+  const videoPlayer = useVideoPlayer(item?.videoFile ?? null, vp => {
+    vp.loop = true;
+    vp.muted = true;
+    vp.play();
+  });
+
   const [progressBarWidth, setProgressBarWidth] = useState(0);
 
   const pulseValue = useSharedValue(1);
@@ -84,11 +95,13 @@ export default function AudioPlayer() {
   const handlePlayPause = () => {
     if (status.playing) {
       player.pause();
+      if (item.videoFile) videoPlayer.pause();
     } else {
       if (status.didJustFinish) {
         player.seekTo(0).catch(() => undefined);
       }
       player.play();
+      if (item.videoFile) videoPlayer.play();
     }
   };
 
@@ -143,15 +156,32 @@ export default function AudioPlayer() {
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      <LinearGradient colors={category.colors} style={StyleSheet.absoluteFill} />
+      
+      {item.videoFile ? (
+        <View style={StyleSheet.absoluteFill}>
+          <VideoView 
+            player={videoPlayer} 
+            style={StyleSheet.absoluteFill} 
+            nativeControls={false}
+            contentFit="cover"
+          />
+          <BlurView intensity={70} tint="dark" style={StyleSheet.absoluteFill} />
+        </View>
+      ) : (
+        <LinearGradient colors={category.colors} style={StyleSheet.absoluteFill} />
+      )}
       
       {/* Background Decor */}
-      <View style={styles.ambientGlow} />
+      {!item.videoFile && <View style={styles.ambientGlow} />}
       
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 10) }]}>
         <Pressable 
           onPress={() => {
-            router.back();
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace(`/collection/${categoryId}`);
+            }
           }} 
           style={styles.backButton}
         >
@@ -166,7 +196,8 @@ export default function AudioPlayer() {
 
       <View style={styles.playerContent}>
         {/* Visualizer Area */}
-        <View style={styles.visualizerContainer}>
+        {!item.videoFile && (
+          <View style={styles.visualizerContainer}>
           <Animated.View style={[styles.pulseCircle, pulseStyle]} />
           <Animated.View style={[styles.pulseCircle, pulseStyle, { width: 340, height: 340, borderRadius: 170, top: '50%', left: '50%', marginTop: -170, marginLeft: -170 }]} />
           
@@ -181,7 +212,8 @@ export default function AudioPlayer() {
               </View>
             </Animated.View>
           </View>
-        </View>
+          </View>
+        )}
 
         {/* Info Area */}
         <View style={styles.infoArea}>

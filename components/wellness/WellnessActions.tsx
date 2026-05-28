@@ -17,7 +17,7 @@ export default function WellnessActions({ avgMood }: WellnessActionsProps) {
       ]
     : [
         { id: 3, icon: BookOpen, label: "Write a reflection", sub: "Capture this week's insights", route: "/(tabs)/journal" },
-        { id: 4, icon: Sparkles, label: "Wisdom Selfie", sub: "Express your inner journey", route: "/coming-soon" },
+        { id: 4, icon: Sparkles, label: "Wisdom Selfie", sub: "Express your inner journey", route: "/wisdom-selfie" },
       ];
 
   return (

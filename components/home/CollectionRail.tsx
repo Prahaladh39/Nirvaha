@@ -1,21 +1,14 @@
-import { ChevronRight, Clock, Play } from "lucide-react-native";
+import { ChevronRight, Play } from "lucide-react-native";
 import { router } from "expo-router";
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { collectionItems } from "../../constants/collectionData";
+import { collectionCategories } from "../../constants/collectionData";
 import { theme } from "../../constants/theme";
 
-// Flatten all collection items and shuffle for variety
-const getAllCollectionItems = () => {
-  const allItems = Object.values(collectionItems).flat().filter(item => !!item.coverImage);
-  // Shuffle array
-  return allItems.sort(() => Math.random() - 0.5);
-};
-
 export default function CollectionRail() {
-  const visible = getAllCollectionItems().slice(0, 6);
+  const visible = collectionCategories.slice(0, 6);
 
   return (
     <Animated.View
@@ -42,23 +35,23 @@ export default function CollectionRail() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {visible.map((item, i) => {
+        {visible.map((cat, i) => {
           const isRecommended = i === 0;
           return (
             <Pressable 
-              key={item.id} 
+              key={cat.id} 
               style={styles.card}
               onPress={() => router.push('/collection')}
             >
               <View
                 style={[
-                  styles.imageContainer,
+                  styles.cardContainer,
                   isRecommended && styles.recommendedBorder,
                 ]}
               >
-                {item.coverImage ? (
+                {cat.coverImage ? (
                   <Image
-                    source={{ uri: item.coverImage }}
+                    source={{ uri: cat.coverImage }}
                     style={styles.coverImage}
                     contentFit="cover"
                     transition={500}
@@ -66,20 +59,8 @@ export default function CollectionRail() {
                 ) : (
                   <View
                     style={[
-                      styles.imagePlaceholder,
-                      {
-                        backgroundColor: isRecommended
-                          ? "#4A3B2C"
-                          : item.category === "yogasutras"
-                            ? "#4A3F55"
-                            : item.category === "gita"
-                              ? "#5A4422"
-                              : item.category === "reset"
-                                ? "#273A57"
-                                : item.category === "lifestyle"
-                                  ? "#2D5A4C"
-                                  : "#684B25",
-                      },
+                      styles.cardBackground,
+                      { backgroundColor: cat.colors?.[0] || "#1E1E1E" },
                     ]}
                   />
                 )}
@@ -92,25 +73,24 @@ export default function CollectionRail() {
                   </View>
                 )}
 
-                {item.duration && (
-                  <View style={styles.durationPill}>
-                    <Clock size={10} color="#2A3B32" />
-                    <Text style={styles.durationText}>{item.duration}</Text>
-                  </View>
-                )}
-
                 <View style={styles.playButton}>
                   <Play
-                    size={12}
-                    color={theme.colors.background}
-                    fill={theme.colors.background}
-                    style={{ marginLeft: 2 }}
+                    size={14}
+                    color="#FFFFFF"
+                    fill="#FFFFFF"
                   />
                 </View>
+
+                {/* Content */}
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle} numberOfLines={1}>
+                    {cat.title}
+                  </Text>
+                  <Text style={styles.cardSubtitle} numberOfLines={1}>
+                    {cat.itemCount} sessions · {cat.moodTag}
+                  </Text>
+                </View>
               </View>
-              <Text style={styles.cardTitle} numberOfLines={2}>
-                {item.title}
-              </Text>
             </Pressable>
           );
         })}
@@ -167,36 +147,36 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   card: {
-    width: 140,
+    width: 156,
   },
-  imageContainer: {
-    width: 140,
-    height: 90,
-    borderRadius: 12,
+  cardContainer: {
+    width: 156,
+    height: 112,
+    borderRadius: 16,
     overflow: "hidden",
-    marginBottom: 8,
     position: "relative",
-    backgroundColor: "#1E1E1E",
+    justifyContent: "flex-end",
+    padding: 10,
   },
-  imagePlaceholder: {
+  cardBackground: {
     ...StyleSheet.absoluteFillObject,
   },
   coverImage: {
     ...StyleSheet.absoluteFillObject,
     resizeMode: 'cover',
   },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
   recommendedBorder: {
     borderWidth: 1,
     borderColor: "rgba(235, 185, 80, 0.6)",
   },
-  gradientOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
   forYouPill: {
     position: "absolute",
-    top: 6,
-    left: 6,
+    top: 8,
+    left: 8,
     backgroundColor: "rgba(235, 185, 80, 0.95)",
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -207,41 +187,34 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontWeight: "700",
     color: "#000000",
-  },
-  durationPill: {
-    position: "absolute",
-    bottom: 6,
-    left: 6,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.85)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-    gap: 4,
-  },
-  durationText: {
-    fontFamily: theme.typography.body,
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#2A3B32",
+    letterSpacing: 0.5,
   },
   playButton: {
     position: "absolute",
-    bottom: 6,
-    right: 6,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: theme.colors.primary,
+    top: 10,
+    right: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.6)",
     alignItems: "center",
     justifyContent: "center",
   },
+  cardContent: {
+    marginTop: "auto",
+  },
   cardTitle: {
-    fontFamily: theme.typography.body,
-    fontSize: 12,
-    fontWeight: "500",
+    fontFamily: theme.typography.display,
+    fontSize: 14,
+    fontWeight: "600",
     color: "#FFFFFF",
-    lineHeight: 16,
+    marginBottom: 2,
+  },
+  cardSubtitle: {
+    fontFamily: theme.typography.body,
+    fontSize: 10,
+    color: "rgba(255,255,255,0.8)",
   },
 });

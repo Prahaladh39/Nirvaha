@@ -112,7 +112,7 @@ export const localSoundTracks: SoundTrack[] = [
     icon: '🌊',
     duration: '4:20',
     source: require('../assets/audio/spiral-tides.mp3'),
-    coverImage: 'https://images.unsplash.com/photo-1518115391078-f67bd5f2d967?q=80&w=600&auto=format&fit=crop',
+    coverImage: 'https://tse2.mm.bing.net/th/id/OIP.2OrheTrjo6uUmw3B31mpEQHaHa?r=0&cb=thfvnextfalcon&w=700&h=700&rs=1&pid=ImgDetMain&o=7&rm=3',
   },
   {
     id: 'whispering-pines',
@@ -175,7 +175,7 @@ export const soundHealingCategories: SoundCategory[] = [
     icon: '〰️',
     trackCount: 9,
     colors: ['#5A4422', '#241A0D'],
-    coverImage: 'https://images.unsplash.com/photo-1502134273026-acb7cad13c58?q=80&w=800&auto=format&fit=crop',
+    coverImage: 'https://img.freepik.com/premium-photo/psychic-waves-resonating-with-frequencies-universe-into-energetic-resonance_942736-1256.jpg',
   },
   {
     id: 'breath',
@@ -205,7 +205,7 @@ export const soundHealingCategories: SoundCategory[] = [
     icon: '🌙',
     trackCount: 14,
     colors: ['#2B315F', '#111527'],
-    coverImage: 'https://images.unsplash.com/photo-1511295742364-911243512971?q=80&w=800&auto=format&fit=crop',
+    coverImage: 'https://img.freepik.com/premium-vector/cartoon-illustration-kid-sleeping_29937-9370.jpg?w=2000',
   },
   {
     id: 'focus',
