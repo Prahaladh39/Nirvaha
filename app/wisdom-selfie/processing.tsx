@@ -38,27 +38,27 @@ export default function WisdomSelfieProcessing() {
         const hasBeard = await detectBeard(base64Image);
         console.log('Beard detected:', hasBeard);
 
-        let templateUri = null;
+        let templateUri: any = null;
         if (hasBeard) {
           switch (templateId) {
-            case 'shiva': templateUri = require('../../assets/images/shiva.png'); break;
-            case 'krishna': templateUri = require('../../assets/images/krishna.png'); break;
-            case 'rama': templateUri = require('../../assets/images/rama.png'); break;
-            case 'ganesh': templateUri = require('../../assets/images/ganesh.png'); break;
+            case 'shiva': templateUri = null; break;
+            case 'krishna': templateUri = null; break;
+            case 'rama': templateUri = null; break;
+            case 'ganesh': templateUri = null; break;
             default: throw new Error("Unknown template");
           }
         } else {
           switch (templateId) {
-            case 'shiva': templateUri = require('../../assets/images/shiva shaven.png'); break;
-            case 'krishna': templateUri = require('../../assets/images/krishna shaven.png'); break;
-            case 'rama': templateUri = require('../../assets/images/rama shaven.png'); break;
-            case 'ganesh': templateUri = require('../../assets/images/ganesh shaven.png'); break;
+            case 'shiva': templateUri = null; break;
+            case 'krishna': templateUri = null; break;
+            case 'rama': templateUri = null; break;
+            case 'ganesh': templateUri = null; break;
             default: throw new Error("Unknown template");
           }
         }
 
         const resultUrl = await generateWisdomSelfie(templateUri, selfieUri);
-        
+
         // Navigate to result
         router.replace({
           pathname: '/wisdom-selfie/result',
@@ -89,7 +89,7 @@ export default function WisdomSelfieProcessing() {
   return (
     <SafeAreaView style={styles.container} pointerEvents="none">
       <LinearGradient colors={['#0F161A', '#0A0A0A']} style={StyleSheet.absoluteFillObject} />
-      
+
       <View style={styles.content}>
         {/* Animated Loader Orbs */}
         <View style={styles.loaderContainer}>

@@ -10,6 +10,7 @@ export const theme = {
     healingGreenLight: '#A3BDB1',
     gold: '#D4AF37', // Gold for particles/glow
     border: '#C0CEC6',
+    error: '#EF4444',
   },
   typography: {
     display: 'PlayfairDisplay_400Regular',
