@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable, Dimensions, ScrollView } from 'react-native';
 import Svg, { Path, Circle, G, Text as SvgText, Defs, LinearGradient, RadialGradient, Stop, Line } from 'react-native-svg';
 import { router, Stack } from 'expo-router';
-import { ArrowLeft, Compass, ShieldCheck } from 'lucide-react-native';
+import { ArrowLeft, Compass } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
 import { jyotirlingas } from '../../constants/jyotirlingaData';
+import { indiaMapPaths } from '../../constants/indiaMapPaths';
 import { LinearGradient as ExpoLinearGradient } from 'expo-linear-gradient';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -12,43 +13,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
-// SVG dimensions for rendering (viewBox is 0 0 500 620)
-const mapWidth = 500;
-const mapHeight = 620;
+// SVG dimensions for rendering (viewBox is 0 0 612 696)
+const mapWidth = 612;
+const mapHeight = 696;
 
-const getCoords = (xPercent: number, yPercent: number) => {
+const getCoords = (x: number, y: number) => {
   return {
-    cx: (xPercent / 100) * mapWidth,
-    cy: (yPercent / 100) * mapHeight,
+    cx: x,
+    cy: y,
   };
 };
-
-const indiaPathPoints = [
-  { x: 38.0, y: 4.5 }, { x: 39.5, y: 5.2 }, { x: 41.2, y: 7.0 }, { x: 42.5, y: 8.5 },
-  { x: 44.5, y: 10.2 }, { x: 45.2, y: 12.5 }, { x: 43.5, y: 14.8 }, { x: 44.8, y: 16.2 },
-  { x: 46.5, y: 18.0 }, { x: 48.8, y: 19.5 }, { x: 49.5, y: 21.5 }, { x: 48.8, y: 23.8 },
-  { x: 47.0, y: 25.0 }, { x: 50.0, y: 27.2 }, { x: 52.8, y: 29.5 }, { x: 56.5, y: 32.5 },
-  { x: 57.2, y: 31.2 }, { x: 58.2, y: 32.5 }, { x: 59.8, y: 32.2 }, { x: 62.0, y: 32.0 },
-  { x: 63.8, y: 31.5 }, { x: 66.5, y: 29.2 }, { x: 69.5, y: 27.8 }, { x: 72.8, y: 27.2 },
-  { x: 74.5, y: 29.8 }, { x: 74.0, y: 32.2 }, { x: 72.5, y: 34.0 }, { x: 73.2, y: 36.0 },
-  { x: 74.0, y: 38.8 }, { x: 73.5, y: 41.2 }, { x: 71.5, y: 44.2 }, { x: 70.0, y: 43.2 },
-  { x: 69.2, y: 44.8 }, { x: 68.4, y: 42.5 }, { x: 68.8, y: 40.8 }, { x: 67.2, y: 40.0 },
-  { x: 65.5, y: 38.5 }, { x: 62.5, y: 39.2 }, { x: 61.2, y: 40.5 }, { x: 61.8, y: 43.0 },
-  { x: 63.2, y: 44.8 }, { x: 64.0, y: 47.2 }, { x: 61.2, y: 48.0 }, { x: 59.8, y: 51.0 },
-  { x: 58.8, y: 53.2 }, { x: 57.5, y: 55.8 }, { x: 55.0, y: 58.8 }, { x: 51.5, y: 63.0 },
-  { x: 47.5, y: 69.2 }, { x: 44.8, y: 74.8 }, { x: 43.8, y: 79.0 }, { x: 43.2, y: 82.5 },
-  { x: 43.5, y: 86.0 }, { x: 41.2, y: 87.8 }, { x: 39.8, y: 91.0 }, { x: 37.8, y: 93.5 },
-  { x: 36.2, y: 92.0 }, { x: 35.5, y: 89.2 }, { x: 33.8, y: 84.8 }, { x: 32.2, y: 81.0 },
-  { x: 30.5, y: 76.8 }, { x: 28.5, y: 73.5 }, { x: 26.5, y: 71.5 }, { x: 23.5, y: 67.0 },
-  { x: 21.0, y: 62.2 }, { x: 19.5, y: 59.2 }, { x: 18.2, y: 56.8 }, { x: 17.5, y: 54.2 },
-  { x: 15.2, y: 53.5 }, { x: 13.8, y: 54.8 }, { x: 12.0, y: 54.0 }, { x: 10.2, y: 52.2 },
-  { x: 8.5, y: 52.0 }, { x: 6.8, y: 50.8 }, { x: 4.8, y: 49.0 }, { x: 3.2, y: 46.8 },
-  { x: 5.5, y: 45.2 }, { x: 7.2, y: 44.5 }, { x: 5.0, y: 44.0 }, { x: 4.2, y: 42.2 },
-  { x: 6.5, y: 41.0 }, { x: 9.8, y: 40.5 }, { x: 11.2, y: 37.8 }, { x: 12.5, y: 35.2 },
-  { x: 14.8, y: 32.8 }, { x: 17.0, y: 30.0 }, { x: 18.5, y: 28.0 }, { x: 20.2, y: 25.2 },
-  { x: 22.0, y: 23.0 }, { x: 24.2, y: 21.5 }, { x: 26.5, y: 19.8 }, { x: 27.5, y: 16.8 },
-  { x: 29.5, y: 14.0 }, { x: 31.8, y: 10.8 }, { x: 34.5, y: 8.0 }
-];
 
 const labelLayouts: Record<string, { xOffset: number; yOffset: number; anchor: 'start' | 'end' | 'middle' }> = {
   somnath: { xOffset: 12, yOffset: 4, anchor: 'start' },
@@ -65,21 +39,19 @@ const labelLayouts: Record<string, { xOffset: number; yOffset: number; anchor: '
   vaidyanath: { xOffset: -12, yOffset: 10, anchor: 'end' },
 };
 
-const getPathString = (points: { x: number; y: number }[]) => {
-  return points.reduce((path, p, i) => {
-    const { cx, cy } = getCoords(p.x, p.y);
-    if (i === 0) return `M ${cx} ${cy}`;
-    return `${path} L ${cx} ${cy}`;
-  }, '') + ' Z';
-};
-
-const borderPath = getPathString(indiaPathPoints);
-
 const regions = ['North', 'Central', 'East', 'West', 'South'];
 
 export default function JyotirlingaMapScreen() {
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
+
+  const activeStates = useMemo(() => {
+    return new Set(
+      jyotirlingas
+        .filter(t => activeRegion === null || t.region === activeRegion)
+        .map(t => t.state)
+    );
+  }, [activeRegion]);
 
   const initialScale = Dimensions.get('window').width / mapWidth * 0.95;
   
@@ -192,22 +164,30 @@ export default function JyotirlingaMapScreen() {
             })}
           </G>
 
-          {/* Base India Map */}
-          <Path
-            d={borderPath}
-            fill="#12141a"
-            stroke="rgba(212, 175, 55, 0.15)"
-            strokeWidth="2"
-          />
+          {/* Base India Map - State-by-State paths */}
+          {indiaMapPaths.map((statePath) => {
+            const isHighlighted = activeRegion === null || activeStates.has(statePath.name);
+            
+            return (
+              <Path
+                key={statePath.id}
+                d={statePath.d}
+                fill={isHighlighted ? "#12141a" : "#0d0e12"}
+                stroke={isHighlighted ? "rgba(212, 175, 55, 0.2)" : "rgba(255, 255, 255, 0.04)"}
+                strokeWidth={isHighlighted ? 1.2 : 0.8}
+                opacity={isHighlighted ? 1.0 : 0.35}
+              />
+            );
+          })}
 
           {/* Sea Labels */}
-          <SvgText x="8%" y="76%" fill="rgba(212, 175, 55, 0.15)" fontSize="12" fontFamily="monospace" letterSpacing="2">
+          <SvgText x="60" y="530" fill="rgba(212, 175, 55, 0.12)" fontSize="12" fontFamily="monospace" letterSpacing="2">
             ARABIAN SEA
           </SvgText>
-          <SvgText x="70%" y="76%" fill="rgba(212, 175, 55, 0.15)" fontSize="12" fontFamily="monospace" letterSpacing="2">
+          <SvgText x="440" y="530" fill="rgba(212, 175, 55, 0.12)" fontSize="12" fontFamily="monospace" letterSpacing="2">
             BAY OF BENGAL
           </SvgText>
-          <SvgText x="40%" y="98%" fill="rgba(212, 175, 55, 0.15)" fontSize="12" fontFamily="monospace" letterSpacing="2">
+          <SvgText x="230" y="675" fill="rgba(212, 175, 55, 0.12)" fontSize="12" fontFamily="monospace" letterSpacing="2">
             INDIAN OCEAN
           </SvgText>
 
@@ -246,7 +226,7 @@ export default function JyotirlingaMapScreen() {
                     fill="#FFF"
                     fontSize="10"
                     fontWeight="bold"
-                    fontFamily={theme.typography.serif}
+                    fontFamily={theme.typography.display}
                   >
                     {temple.name}
                   </SvgText>
