@@ -7,17 +7,16 @@ import Toast from 'react-native-toast-message';
 import { auth, db } from '../../config/firebase';
 import { questions } from '../../constants/onboardingData';
 import { theme } from '../../constants/theme';
+import { OnboardingEngine } from '../../services/onboarding/OnboardingEngine';
 
 interface Props {
   answers: number[];
 }
 
 const recapLabels = [
-  "Your focus is",
-  "When stressed, you",
-  "You're seeking",
-  "You'll explore through",
-  "You'll start with"
+  "Your mental anchor",
+  "Your path of choice",
+  "Your time commitment"
 ];
 
 export default function OnboardingRecap({ answers }: Props) {
@@ -27,11 +26,26 @@ export default function OnboardingRecap({ answers }: Props) {
     setSaving(true);
     try {
       const user = auth.currentUser;
+      
+      // Calculate weighted recommendations based on answers vector
+      let recommendationData = {};
+      try {
+        const engine = new OnboardingEngine(answers);
+        const rec = engine.getRecommendation();
+        recommendationData = {
+          recommendedFocus: rec.focus,
+          recommendedTool: rec.tool
+        };
+      } catch (calcError) {
+        console.error("Error calculating recommendation in recap:", calcError);
+      }
+
       if (user) {
-        // Save answers to Firestore (using setDoc with merge handles missing documents)
+        // Save answers and calculated recommendations to Firestore
         await setDoc(doc(db, 'users', user.uid), {
           onboardingCompleted: true,
           onboardingAnswers: answers,
+          ...recommendationData
         }, { merge: true });
       }
       
