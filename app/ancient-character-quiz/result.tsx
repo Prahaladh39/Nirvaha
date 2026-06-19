@@ -1,16 +1,47 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, SafeAreaView, Platform } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView, SafeAreaView, Platform, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { theme } from '../../constants/theme';
 import { CHARACTERS } from '../../constants/ancientCharacterQuizData';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { Sparkles, ArrowRight, ChevronLeft } from 'lucide-react-native';
+import { Sparkles, ArrowRight, ChevronLeft, Share2, Copy } from 'lucide-react-native';
+import ViewShot from 'react-native-view-shot';
+import { ShareCardGenerator } from '../../components/sharing/ShareCardGenerator';
+import { ShareService } from '../../components/sharing/ShareService';
+import Toast from 'react-native-toast-message';
+
 
 export default function QuizResultScreen() {
   const { primary, secondary, percentage } = useLocalSearchParams<{ primary: string; secondary: string; percentage: string }>();
   
   const primaryChar = CHARACTERS[primary] || CHARACTERS['rama'];
   const secondaryChar = CHARACTERS[secondary] || CHARACTERS['sita'];
+
+  const [sharing, setSharing] = useState(false);
+  const viewShotRef = useRef<ViewShot>(null);
+
+  const handleShare = async () => {
+    try {
+      setSharing(true);
+      await ShareService.shareCard(viewShotRef, primaryChar.name);
+    } catch (err: any) {
+      console.error(err);
+      Toast.show({
+        type: 'error',
+        text1: 'Sharing Failed',
+        text2: err.message || 'Something went wrong while generating the card.',
+      });
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    await ShareService.copyShareText(
+      `Discover your Ancient Character with Nirvaha — a modern spiritual wellness app inspired by ancient Indian wisdom.`
+    );
+  };
+
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: primaryChar.accentDark }]}>
@@ -47,7 +78,36 @@ export default function QuizResultScreen() {
           </View>
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.duration(600).delay(500)} style={styles.section}>
+        {/* Share Section CTA - Positioned below the result card */}
+        <Animated.View entering={FadeInUp.duration(600).delay(450)} style={styles.shareSection}>
+          <Pressable 
+            style={[
+              styles.shareBtn, 
+              { 
+                backgroundColor: primaryChar.themeColor,
+                shadowColor: primaryChar.themeColor,
+              }
+            ]} 
+            onPress={handleShare}
+            disabled={sharing}
+          >
+            {sharing ? (
+              <ActivityIndicator color={primaryChar.accentDark} size="small" />
+            ) : (
+              <>
+                <Share2 size={20} color={primaryChar.accentDark} />
+                <Text style={[styles.shareBtnText, { color: primaryChar.accentDark }]}>Share Resonance Card</Text>
+              </>
+            )}
+          </Pressable>
+
+          <Pressable style={styles.copyBtn} onPress={handleCopy}>
+            <Copy size={16} color="rgba(255,255,255,0.6)" />
+            <Text style={styles.copyBtnText}>Copy Share Text</Text>
+          </Pressable>
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.duration(600).delay(600)} style={styles.section}>
           <Text style={styles.sectionTitle}>Growth Suggestions</Text>
           <View style={styles.growthContainer}>
             {primaryChar.growth.map((tip, idx) => (
@@ -59,7 +119,8 @@ export default function QuizResultScreen() {
           </View>
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.duration(600).delay(700)} style={styles.footerBlock}>
+        <Animated.View entering={FadeInUp.duration(600).delay(750)} style={styles.footerBlock}>
+
           <View style={styles.secondaryCard}>
             <Text style={styles.secondaryLabel}>Secondary Resonance</Text>
             <View style={styles.secondaryRow}>
@@ -70,6 +131,18 @@ export default function QuizResultScreen() {
         </Animated.View>
 
       </ScrollView>
+
+      {/* Offscreen Collectible Share Card */}
+      <ShareCardGenerator
+        ref={viewShotRef}
+        name={primaryChar.name}
+        label={primaryChar.label}
+        oneLiner={primaryChar.oneLiner}
+        artwork={primaryChar.artwork}
+        percentage={percentage || '0'}
+        themeColor={primaryChar.themeColor}
+        accentDark={primaryChar.accentDark}
+      />
 
       <View style={styles.bottomBar}>
         <Pressable 
@@ -87,6 +160,45 @@ export default function QuizResultScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+  },
+  shareSection: {
+    marginVertical: 10,
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 36,
+  },
+  shareBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: 56,
+    borderRadius: 16,
+    gap: 10,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  shareBtnText: {
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  copyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  copyBtnText: {
+    fontFamily: theme.typography.body,
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.6)',
+    fontWeight: '500',
   },
   navBar: {
     paddingHorizontal: 20,
