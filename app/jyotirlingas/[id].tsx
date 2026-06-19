@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerTitle: {
-    fontFamily: theme.typography.serif,
+    fontFamily: theme.typography.display,
     fontSize: 12,
     fontWeight: '600',
     color: theme.colors.gold,
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   sanskritName: {
-    fontFamily: theme.typography.serif,
+    fontFamily: theme.typography.display,
     fontSize: 16,
     color: theme.colors.gold,
     opacity: 0.9,
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontFamily: theme.typography.serif,
+    fontFamily: theme.typography.display,
     fontSize: 16,
     fontWeight: '600',
     color: '#FFF',
