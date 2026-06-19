@@ -12,7 +12,7 @@ const { width, height } = Dimensions.get('window');
 export default function WisdomSelfieComingSoon() {
   const [showText, setShowText] = useState(false);
 
-  const videoPlayer = useVideoPlayer(require('../../assets/videos/wisdom-demo.mp4'), vp => {
+  const videoPlayer = useVideoPlayer(require('../../assets/videos/wisdom-selfie.mp4'), vp => {
     vp.loop = true;
     vp.muted = false;
     vp.play();
