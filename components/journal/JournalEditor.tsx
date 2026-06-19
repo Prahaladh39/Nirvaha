@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, Modal, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, Modal, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { ArrowLeft, X } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
 import Toast from 'react-native-toast-message';
+
 
 const moodOptions = [
   { emoji: "😊", label: "Happy" },
@@ -17,10 +18,12 @@ const moodOptions = [
 
 export interface JournalEntry {
   id: string;
+  title: string;
   text: string;
   mood: string;
   moodEmoji: string;
   timestamp: string;
+  lastEditedTimestamp: string;
   saved?: boolean;
 }
 
@@ -31,7 +34,9 @@ interface JournalEditorProps {
   editEntry?: JournalEntry | null;
 }
 
+
 export default function JournalEditor({ visible, onSave, onClose, editEntry }: JournalEditorProps) {
+  const [title, setTitle] = useState('');
   const [text, setText] = useState('');
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -39,6 +44,7 @@ export default function JournalEditor({ visible, onSave, onClose, editEntry }: J
 
   useEffect(() => {
     if (visible) {
+      setTitle(editEntry?.title || '');
       setText(editEntry?.text || '');
       setSelectedMood(editEntry?.mood || null);
       setSaving(false);
@@ -48,24 +54,29 @@ export default function JournalEditor({ visible, onSave, onClose, editEntry }: J
   const selectedMoodData = moodOptions.find((m) => m.label === selectedMood);
   const isEditing = !!editEntry;
 
-  const handleSave = async () => {
-    const trimmed = text.trim();
-    if (!trimmed || !selectedMood) return;
+  const handleSave = async (customEntry?: JournalEntry) => {
+    const trimmed = customEntry ? customEntry.text.trim() : text.trim();
+    const mood = customEntry ? customEntry.mood : selectedMood;
+    const moodEmoji = customEntry ? customEntry.moodEmoji : (selectedMoodData?.emoji || "📝");
+    const entryTitle = customEntry ? customEntry.title : title.trim();
+
+    if (!trimmed || !mood) return;
     if (trimmed.length > maxLength) return;
 
     setSaving(true);
     try {
       const entry: JournalEntry = {
-        id: editEntry?.id || Math.random().toString(36).substring(2, 15), // fallback random id
+        id: editEntry?.id || Math.random().toString(36).substring(2, 15),
+        title: entryTitle,
         text: trimmed,
-        mood: selectedMood,
-        moodEmoji: selectedMoodData?.emoji || "📝",
+        mood: mood,
+        moodEmoji: moodEmoji,
         timestamp: editEntry?.timestamp || new Date().toISOString(),
+        lastEditedTimestamp: new Date().toISOString(),
         saved: editEntry?.saved || false,
       };
       
       await onSave(entry);
-      // Close handled by parent usually, but we keep state clean
     } catch (error) {
       console.error("Save error", error);
       Toast.show({ type: 'error', text1: 'Error', text2: 'Could not save reflection.' });
@@ -74,12 +85,62 @@ export default function JournalEditor({ visible, onSave, onClose, editEntry }: J
     }
   };
 
+  const handleRequestClose = () => {
+    const isTitleChanged = title.trim() !== (editEntry?.title || '').trim();
+    const isBodyChanged = text.trim() !== (editEntry?.text || '').trim();
+    const isMoodChanged = selectedMood !== (editEntry?.mood || null);
+    
+    const hasUnsavedChanges = isTitleChanged || isBodyChanged || isMoodChanged;
+    const isContentEmpty = !title.trim() && !text.trim() && !selectedMood;
+
+    if (hasUnsavedChanges && !isContentEmpty) {
+      Alert.alert(
+        "Unsaved Changes",
+        "You have unsaved changes in your reflection. What would you like to do?",
+        [
+          { text: "Keep Editing", style: "cancel" },
+          { 
+            text: "Discard", 
+            style: "destructive", 
+            onPress: onClose 
+          },
+          { 
+            text: "Save Draft", 
+            onPress: async () => {
+              if (!text.trim() || !selectedMood) {
+                Toast.show({
+                  type: 'error',
+                  text1: 'Cannot Save Draft',
+                  text2: 'Please write a reflection and select a feeling first.',
+                });
+                return;
+              }
+              const draftEntry: JournalEntry = {
+                id: editEntry?.id || Math.random().toString(36).substring(2, 15),
+                title: title.trim(),
+                text: text.trim(),
+                mood: selectedMood,
+                moodEmoji: selectedMoodData?.emoji || "📝",
+                timestamp: editEntry?.timestamp || new Date().toISOString(),
+                lastEditedTimestamp: new Date().toISOString(),
+                saved: editEntry?.saved || false,
+              };
+              await handleSave(draftEntry);
+            } 
+          }
+        ]
+      );
+    } else {
+      onClose();
+    }
+  };
+
   return (
     <Modal
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet" // Works nicely on iOS, normal slide on Android
-      onRequestClose={onClose}
+      onRequestClose={handleRequestClose}
     >
       <KeyboardAvoidingView 
         style={styles.container} 
@@ -88,16 +149,17 @@ export default function JournalEditor({ visible, onSave, onClose, editEntry }: J
         <SafeAreaView style={styles.safeArea}>
           {/* Header */}
           <View style={styles.header}>
-            <Pressable onPress={onClose} style={styles.iconButton}>
+            <Pressable onPress={handleRequestClose} style={styles.iconButton}>
               <ArrowLeft size={20} color="#FFFFFF" />
             </Pressable>
             <Text style={styles.headerTitle}>
               {isEditing ? "Edit reflection" : "New reflection"}
             </Text>
-            <Pressable onPress={onClose} style={[styles.iconButton, styles.closeButtonBg]}>
+            <Pressable onPress={handleRequestClose} style={[styles.iconButton, styles.closeButtonBg]}>
               <X size={16} color="rgba(255,255,255,0.7)" />
             </Pressable>
           </View>
+
 
           {/* Mood Picker */}
           <View style={styles.moodSection}>
@@ -128,6 +190,16 @@ export default function JournalEditor({ visible, onSave, onClose, editEntry }: J
           <View style={styles.editorSection}>
             <View style={styles.editorCard}>
               <TextInput
+                style={styles.titleInput}
+                value={title}
+                onChangeText={setTitle}
+                placeholder="Title (optional)"
+                placeholderTextColor="rgba(255,255,255,0.4)"
+                maxLength={80}
+              />
+              <View style={styles.titleSeparator} />
+
+              <TextInput
                 style={styles.textInput}
                 value={text}
                 onChangeText={(val) => {
@@ -136,9 +208,10 @@ export default function JournalEditor({ visible, onSave, onClose, editEntry }: J
                 placeholder="What's on your mind? Write freely — this is your safe space..."
                 placeholderTextColor="rgba(255,255,255,0.3)"
                 multiline
-                autoFocus
+                autoFocus={!editEntry?.title}
                 textAlignVertical="top"
               />
+
               <View style={styles.editorFooter}>
                 <Text style={styles.charCount}>
                   {text.length}/{maxLength}
@@ -160,7 +233,7 @@ export default function JournalEditor({ visible, onSave, onClose, editEntry }: J
                 (!text.trim() || !selectedMood) && styles.saveButtonDisabled,
                 pressed && styles.saveButtonPressed
               ]}
-              onPress={handleSave}
+              onPress={() => handleSave()}
               disabled={!text.trim() || !selectedMood || saving}
             >
               {saving ? (
@@ -314,5 +387,18 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: theme.colors.primaryForeground,
-  }
+  },
+  titleInput: {
+    fontFamily: theme.typography.display,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    paddingBottom: 8,
+    marginBottom: 2,
+  },
+  titleSeparator: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    marginBottom: 12,
+  },
 });

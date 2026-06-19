@@ -2,69 +2,75 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView, ActivityIndicator } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { Plus, Bookmark } from 'lucide-react-native';
-import { collection, query, orderBy, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { db, auth } from '../../config/firebase';
 import { theme } from '../../constants/theme';
 import Toast from 'react-native-toast-message';
 
 import JournalEditor, { JournalEntry } from '../../components/journal/JournalEditor';
 import JournalEntryCard from '../../components/journal/JournalEntryCard';
 import JournalEmptyState from '../../components/journal/JournalEmptyState';
+import JournalList from '../../components/journal/JournalList';
+import JournalDetail from '../../components/journal/JournalDetail';
+import { JournalRepository } from '../../services/journal/JournalRepository';
+
 
 export default function JournalScreen() {
   const [showEditor, setShowEditor] = useState(false);
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
+  const [selectedDetailEntry, setSelectedDetailEntry] = useState<JournalEntry | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
   const [filter, setFilter] = useState<'all' | 'saved'>('all');
   
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch from Firestore
+  // Load journals from local repository on mount
   useEffect(() => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const q = query(
-      collection(db, `users/${user.uid}/journals`),
-      orderBy('timestamp', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetched: JournalEntry[] = [];
-      snapshot.forEach((doc) => {
-        fetched.push({ id: doc.id, ...doc.data() } as JournalEntry);
-      });
-      setEntries(fetched);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error fetching journals:", error);
-      setLoading(false);
-    });
-
-    return unsubscribe;
+    const loadJournals = async () => {
+      try {
+        const localEntries = await JournalRepository.getAll();
+        setEntries(localEntries);
+      } catch (error) {
+        console.error("Error loading journals:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadJournals();
   }, []);
 
   const handleSave = async (entry: JournalEntry) => {
-    const user = auth.currentUser;
-    if (!user) return;
-    
     try {
-      await setDoc(doc(db, `users/${user.uid}/journals`, entry.id), entry);
+      const saved = await JournalRepository.save(entry);
+      
+      // Update local state reactively
+      setEntries((prev) => {
+        const existingIdx = prev.findIndex((e) => e.id === saved.id);
+        if (existingIdx > -1) {
+          const next = [...prev];
+          next[existingIdx] = saved;
+          return next;
+        } else {
+          return [saved, ...prev];
+        }
+      });
+
       setShowEditor(false);
       setEditingEntry(null);
+      Toast.show({ type: 'success', text1: 'Journal saved successfully' });
     } catch (error) {
       console.error("Error saving entry:", error);
-      Toast.show({ type: 'error', text1: 'Save Failed', text2: 'Could not sync entry to cloud.' });
+      Toast.show({ type: 'error', text1: 'Save Failed', text2: 'Could not save entry locally.' });
     }
   };
 
   const handleDelete = async (id: string) => {
-    const user = auth.currentUser;
-    if (!user) return;
     try {
-      await deleteDoc(doc(db, `users/${user.uid}/journals`, id));
+      await JournalRepository.delete(id);
+      setEntries((prev) => prev.filter((e) => e.id !== id));
+      Toast.show({ type: 'success', text1: 'Journal deleted' });
     } catch (error) {
       console.error("Error deleting entry:", error);
+      Toast.show({ type: 'error', text1: 'Delete Failed', text2: 'Could not delete entry.' });
     }
   };
 
@@ -73,20 +79,22 @@ export default function JournalScreen() {
     setShowEditor(true);
   };
 
+  const handlePressCard = (entry: JournalEntry) => {
+    setSelectedDetailEntry(entry);
+    setShowDetail(true);
+  };
+
   const handleToggleSave = async (id: string) => {
-    const user = auth.currentUser;
-    if (!user) return;
     try {
-      const entryToUpdate = entries.find(e => e.id === id);
-      if (entryToUpdate) {
-        await updateDoc(doc(db, `users/${user.uid}/journals`, id), {
-          saved: !entryToUpdate.saved
-        });
+      const updated = await JournalRepository.toggleSave(id);
+      if (updated) {
+        setEntries((prev) => prev.map((e) => (e.id === id ? updated : e)));
       }
     } catch (error) {
       console.error("Error toggling save:", error);
     }
   };
+
 
   const filteredEntries = filter === 'saved' ? entries.filter(e => e.saved) : entries;
   const savedCount = entries.filter(e => e.saved).length;
@@ -187,16 +195,13 @@ export default function JournalScreen() {
           </Animated.View>
         ) : (
           <View>
-            {filteredEntries.map((entry, index) => (
-              <JournalEntryCard 
-                key={entry.id}
-                entry={entry}
-                index={index}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
-                onToggleSave={handleToggleSave}
-              />
-            ))}
+            <JournalList
+              entries={filteredEntries}
+              onDelete={handleDelete}
+              onEdit={handleEdit}
+              onToggleSave={handleToggleSave}
+              onPressCard={handlePressCard}
+            />
             <Text style={styles.footerQuote}>"Writing is thinking on paper"</Text>
           </View>
         )}
@@ -220,6 +225,15 @@ export default function JournalScreen() {
         onSave={handleSave}
         onClose={() => { setShowEditor(false); setEditingEntry(null); }}
         editEntry={editingEntry}
+      />
+
+      {/* Detail View Modal */}
+      <JournalDetail
+        visible={showDetail}
+        entry={selectedDetailEntry}
+        onClose={() => { setShowDetail(false); setSelectedDetailEntry(null); }}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
     </SafeAreaView>
   );
