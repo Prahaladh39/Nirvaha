@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { ArrowLeft, Send, Sparkles } from "lucide-react-native";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -15,31 +15,25 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { NirvahaService } from "../api/client";
+import { CompanionManager } from "../services/companion/CompanionManager";
+import { ConversationMessage } from "../services/companion/types";
 import { theme } from "../constants/theme";
 
-export type ChatMessage = {
-  role: "user" | "model";
-  parts: { text: string }[];
-};
+const NIRVAHA_MENTOR_ID = 'nirvaha';
 
-const INTRO_MESSAGE: ChatMessage = {
-  role: "model",
-  parts: [
-    {
-      text: "Hey, I’m here. Tell me what’s been sitting on your mind.",
-    },
-  ],
+const INTRO_MESSAGE: ConversationMessage = {
+  id: 'intro',
+  role: 'assistant',
+  content: "Hey, I'm here. Tell me what's been sitting on your mind.",
+  timestamp: Date.now(),
 };
 
 export default function ChatScreen() {
-  const listRef = useRef<FlatList<ChatMessage>>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([INTRO_MESSAGE]);
+  const listRef = useRef<FlatList<ConversationMessage>>(null);
+  const [messages, setMessages] = useState<ConversationMessage[]>([INTRO_MESSAGE]);
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [lengthPreference, setLengthPreference] = useState<"short" | "long">(
-    "short",
-  );
+  const [lengthPreference, setLengthPreference] = useState<"short" | "long">("short");
 
   const canSend = inputText.trim().length > 0 && !loading;
 
@@ -49,58 +43,53 @@ export default function ChatScreen() {
 
   const chatMessages = useMemo(() => messages, [messages]);
 
-  const scrollToEnd = () => {
+  const scrollToEnd = useCallback(() => {
     requestAnimationFrame(() => {
       listRef.current?.scrollToEnd({ animated: true });
     });
-  };
+  }, []);
 
   const handleSend = async () => {
     const trimmed = inputText.trim();
     if (!trimmed || loading) return;
 
-    const userMessage: ChatMessage = {
+    // Optimistic UI update
+    const userMessage: ConversationMessage = {
+      id: `user_${Date.now()}`,
       role: "user",
-      parts: [{ text: trimmed }],
+      content: trimmed,
+      timestamp: Date.now(),
     };
 
-    const history = messages.slice(-3);
     setMessages((current) => [...current, userMessage]);
     setInputText("");
     setLoading(true);
     scrollToEnd();
 
     try {
-      const nirvahaService = new NirvahaService();
-      const reply = await nirvahaService.generateReflection(
+      const response = await CompanionManager.sendMessage(
+        NIRVAHA_MENTOR_ID,
         trimmed,
-        history,
-        lengthPreference,
+        { lengthPreference },
       );
 
-      const modelMessage: ChatMessage = {
-        role: "model",
-        parts: [
-          {
-            text: reply,
-          },
-        ],
+      const modelMessage: ConversationMessage = {
+        id: `assistant_${Date.now()}`,
+        role: "assistant",
+        content: response.message,
+        timestamp: Date.now(),
       };
 
       setMessages((current) => [...current, modelMessage]);
     } catch (error) {
       console.error("Chat send error:", error);
-      // Log more details for debugging
-      if (error instanceof Error) {
-        console.error("Error details:", error.message);
-      }
       setMessages((current) => [
         ...current,
         {
-          role: "model",
-          parts: [
-            { text: "There was a little static there. Send it again, slowly." },
-          ],
+          id: `error_${Date.now()}`,
+          role: "assistant",
+          content: "There was a little static there. Send it again, slowly.",
+          timestamp: Date.now(),
         },
       ]);
     } finally {
@@ -113,7 +102,7 @@ export default function ChatScreen() {
     item,
     index,
   }: {
-    item: ChatMessage;
+    item: ConversationMessage;
     index: number;
   }) => {
     const isUser = item.role === "user";
@@ -140,7 +129,7 @@ export default function ChatScreen() {
               isUser ? styles.userText : styles.modelText,
             ]}
           >
-            {item.parts[0]?.text}
+            {item.content}
           </Text>
         </View>
       </Animated.View>
@@ -185,7 +174,7 @@ export default function ChatScreen() {
           ref={listRef}
           data={chatMessages}
           renderItem={renderMessage}
-          keyExtractor={(_, index) => `${index}`}
+          keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -207,7 +196,7 @@ export default function ChatScreen() {
             style={styles.input}
             value={inputText}
             onChangeText={setInputText}
-            placeholder="Say what’s on your mind..."
+            placeholder="Say what's on your mind..."
             placeholderTextColor="rgba(255,255,255,0.35)"
             multiline
             maxLength={1200}
@@ -294,9 +283,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "rgba(255,255,255,0.48)",
     marginTop: 2,
-  },
-  headerSpacer: {
-    width: 40,
   },
   toggleButton: {
     paddingHorizontal: 12,

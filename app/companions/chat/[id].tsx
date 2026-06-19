@@ -1,21 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   View, Text, StyleSheet, TextInput, Pressable, FlatList, 
-  KeyboardAvoidingView, Platform, SafeAreaView, Alert 
+  KeyboardAvoidingView, Platform, SafeAreaView, Alert, ActivityIndicator
 } from 'react-native';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { ChevronLeft, Send } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ChevronLeft, Send, Sparkles } from 'lucide-react-native';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { theme } from '../../../constants/theme';
 import { companionsData } from '../../../constants/companionsData';
-import { chatBotData, defaultBotAnswer } from '../../../constants/chatBotData';
-
-interface Message {
-  id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-}
+import { CompanionManager } from '../../../services/companion/CompanionManager';
+import { ConversationMessage, ConversationSession } from '../../../services/companion/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CHAT_LIMIT_KEY = 'LAST_COMPANION_CHAT_DATE';
 const SESSION_DURATION_SEC = 300; // 5 minutes
@@ -24,26 +19,54 @@ export default function CompanionChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const companion = companionsData.find(c => c.id === id) || companionsData[0];
   
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '0',
-      text: `Hi, I'm ${companion.name}. We have 5 minutes together. What's on your mind?`,
-      isUser: false,
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [inputText, setInputText] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [timeLeft, setTimeLeft] = useState(SESSION_DURATION_SEC);
   const [isSessionActive, setIsSessionActive] = useState(true);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
 
-  useEffect(() => {
-    checkDailyLimit();
-  }, []);
+  const canSend = inputText.trim().length > 0 && !loading && isSessionActive;
+
+  // ── Initialize conversation ───────────────────────────────────
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isSessionActive && timeLeft > 0) {
+    initializeChat();
+  }, [id]);
+
+  const initializeChat = async () => {
+    try {
+      // Check daily limit
+      const canChat = await checkDailyLimit();
+      if (!canChat) return;
+
+      // Start or resume conversation with this mentor
+      const session = await CompanionManager.getOrCreateSession(companion.id);
+      setConversationId(session.id);
+      setMessages(session.messages);
+    } catch (error) {
+      console.error('[CompanionChat] Init error:', error);
+      // Fallback greeting
+      const greeting = CompanionManager.getGreeting(companion.id);
+      const fallbackMsg: ConversationMessage = {
+        id: 'greeting',
+        role: 'assistant',
+        content: greeting,
+        timestamp: Date.now(),
+      };
+      setMessages([fallbackMsg]);
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+
+  // ── Session timer ─────────────────────────────────────────────
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setInterval>;
+    if (isSessionActive && timeLeft > 0 && !isInitializing) {
       timer = setInterval(() => {
         setTimeLeft(prev => prev - 1);
       }, 1000);
@@ -51,22 +74,26 @@ export default function CompanionChatScreen() {
       endSession();
     }
     return () => clearInterval(timer);
-  }, [timeLeft, isSessionActive]);
+  }, [timeLeft, isSessionActive, isInitializing]);
 
-  const checkDailyLimit = async () => {
+  const checkDailyLimit = async (): Promise<boolean> => {
     try {
       const lastDate = await AsyncStorage.getItem(CHAT_LIMIT_KEY);
       const today = new Date().toISOString().split('T')[0];
       if (lastDate === today) {
         Alert.alert(
           "Daily Limit Reached", 
-          "Your free session is over for today. You cannot talk to any other companion. Please come back tomorrow.",
+          "Your free session is over for today. Please come back tomorrow.",
           [{ text: "OK", onPress: () => router.back() }]
         );
         setIsSessionActive(false);
+        setIsInitializing(false);
+        return false;
       }
+      return true;
     } catch (e) {
       console.error(e);
+      return true;
     }
   };
 
@@ -80,10 +107,71 @@ export default function CompanionChatScreen() {
     }
     Alert.alert(
       "Session Ended", 
-      "Your 5-minute free session is over. For the rest of the day, you cannot talk to any other companion.",
+      "Your 5-minute free session is over. Come back tomorrow for another conversation.",
       [{ text: "OK", onPress: () => router.back() }]
     );
   };
+
+  // ── Message handling ──────────────────────────────────────────
+
+  const scrollToEnd = useCallback(() => {
+    requestAnimationFrame(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    });
+  }, []);
+
+  const sendMessage = async () => {
+    const trimmed = inputText.trim();
+    if (!trimmed || loading || !isSessionActive) return;
+
+    // Optimistic UI update — show user message immediately
+    const optimisticUserMsg: ConversationMessage = {
+      id: `user_${Date.now()}`,
+      role: 'user',
+      content: trimmed,
+      timestamp: Date.now(),
+    };
+    setMessages(prev => [...prev, optimisticUserMsg]);
+    setInputText('');
+    setLoading(true);
+    scrollToEnd();
+
+    try {
+      const response = await CompanionManager.sendMessage(companion.id, trimmed, {
+        lengthPreference: 'long',
+        conversationId: conversationId || undefined,
+      });
+
+      // Update conversation ID if new
+      if (!conversationId) {
+        setConversationId(response.conversationId);
+      }
+
+      // Add the AI response to the UI
+      const assistantMsg: ConversationMessage = {
+        id: `assistant_${Date.now()}`,
+        role: 'assistant',
+        content: response.message,
+        timestamp: Date.now(),
+        emotionalState: response.emotionalState.primary,
+      };
+      setMessages(prev => [...prev, assistantMsg]);
+    } catch (error) {
+      console.error('[CompanionChat] Send error:', error);
+      const errorMsg: ConversationMessage = {
+        id: `error_${Date.now()}`,
+        role: 'assistant',
+        content: "Something flickered for a moment there. Could you say that again?",
+        timestamp: Date.now(),
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
+      setLoading(false);
+      scrollToEnd();
+    }
+  };
+
+  // ── Timer formatting ──────────────────────────────────────────
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -91,65 +179,60 @@ export default function CompanionChatScreen() {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  const generateBotResponse = (userText: string) => {
-    const lowerText = userText.toLowerCase();
-    
-    for (const qa of chatBotData) {
-      if (qa.keywords.some(keyword => lowerText.includes(keyword))) {
-        return qa.answer;
-      }
-    }
-    return defaultBotAnswer;
+  // ── Render ────────────────────────────────────────────────────
+
+  const renderMessage = ({ item, index }: { item: ConversationMessage; index: number }) => {
+    const isUser = item.role === 'user';
+
+    return (
+      <Animated.View
+        entering={FadeInDown.duration(260).delay(Math.min(index * 20, 120))}
+        style={[styles.messageRow, isUser ? styles.userRow : styles.botRow]}
+      >
+        {!isUser && (
+          <View style={styles.mentorAvatar}>
+            <Text style={styles.mentorAvatarText}>{companion.initials}</Text>
+          </View>
+        )}
+        <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.botBubble]}>
+          <Text style={[styles.messageText, isUser ? styles.userText : styles.botText]}>
+            {item.content}
+          </Text>
+        </View>
+      </Animated.View>
+    );
   };
 
-  const sendMessage = () => {
-    if (!inputText.trim() || !isSessionActive) return;
-
-    const userMsg: Message = {
-      id: Date.now().toString(),
-      text: inputText.trim(),
-      isUser: true,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMsg]);
-    setInputText('');
-
-    // Simulate typing delay
-    setTimeout(() => {
-      const botMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        text: generateBotResponse(userMsg.text),
-        isUser: false,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, botMsg]);
-    }, 1000);
-  };
-
-  const renderMessage = ({ item }: { item: Message }) => (
-    <View style={[styles.messageBubble, item.isUser ? styles.userBubble : styles.botBubble]}>
-      <Text style={[styles.messageText, item.isUser ? styles.userText : styles.botText]}>
-        {item.text}
-      </Text>
-    </View>
-  );
+  if (isInitializing) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.healingGreen} />
+          <Text style={styles.loadingText}>Connecting with {companion.name.split(' ')[0]}...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <Stack.Screen options={{ headerShown: false }} />
       
+      {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <ChevronLeft color={theme.colors.foreground} size={24} />
         </Pressable>
         <View style={styles.headerInfo}>
           <Text style={styles.companionName}>{companion.name}</Text>
+          <Text style={styles.companionTitle}>{companion.title}</Text>
+        </View>
+        <View style={styles.timerContainer}>
           <Text style={[styles.timer, timeLeft <= 60 && styles.timerUrgent]}>
             {formatTime(timeLeft)}
           </Text>
         </View>
-        <View style={{ width: 40 }} />
       </View>
 
       <KeyboardAvoidingView 
@@ -163,24 +246,47 @@ export default function CompanionChatScreen() {
           keyExtractor={item => item.id}
           renderItem={renderMessage}
           contentContainerStyle={styles.chatContainer}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          onContentSizeChange={scrollToEnd}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         />
 
+        {/* Typing indicator */}
+        {loading && (
+          <Animated.View entering={FadeInUp.duration(220)} style={styles.typingRow}>
+            <View style={styles.typingDots}>
+              <View style={[styles.dot, styles.dot1]} />
+              <View style={[styles.dot, styles.dot2]} />
+              <View style={[styles.dot, styles.dot3]} />
+            </View>
+            <Text style={styles.typingText}>
+              {companion.name.split(' ')[0]} is thinking...
+            </Text>
+          </Animated.View>
+        )}
+
+        {/* Input area */}
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Type your message..."
+            placeholder={isSessionActive ? "Say what's on your mind..." : "Session ended"}
             placeholderTextColor={theme.colors.mutedForeground}
             value={inputText}
             onChangeText={setInputText}
-            editable={isSessionActive}
+            editable={isSessionActive && !loading}
             multiline
+            maxLength={1200}
           />
           <Pressable 
-            style={[styles.sendBtn, (!inputText.trim() || !isSessionActive) && styles.sendBtnDisabled]} 
+            style={[styles.sendBtn, !canSend && styles.sendBtnDisabled]} 
             onPress={sendMessage}
+            disabled={!canSend}
           >
-            <Send size={20} color="#FFFFFF" />
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Send size={18} color="#FFFFFF" />
+            )}
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -192,6 +298,17 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F8F9FA',
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  loadingText: {
+    fontFamily: theme.typography.body,
+    fontSize: 15,
+    color: theme.colors.mutedForeground,
   },
   header: {
     flexDirection: 'row',
@@ -220,11 +337,20 @@ const styles = StyleSheet.create({
     color: theme.colors.foreground,
     fontWeight: '600',
   },
+  companionTitle: {
+    fontFamily: theme.typography.body,
+    fontSize: 12,
+    color: theme.colors.mutedForeground,
+    marginTop: 1,
+  },
+  timerContainer: {
+    width: 50,
+    alignItems: 'flex-end',
+  },
   timer: {
     fontFamily: theme.typography.bodyMedium,
     fontSize: 14,
     color: theme.colors.healingGreen,
-    marginTop: 2,
   },
   timerUrgent: {
     color: '#E53935',
@@ -234,13 +360,39 @@ const styles = StyleSheet.create({
   },
   chatContainer: {
     padding: 16,
-    paddingBottom: 24,
+    paddingBottom: 8,
+  },
+  messageRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginBottom: 12,
+    gap: 8,
+  },
+  userRow: {
+    justifyContent: 'flex-end',
+  },
+  botRow: {
+    justifyContent: 'flex-start',
+  },
+  mentorAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.healingGreen,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
+  },
+  mentorAvatarText: {
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 12,
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
   messageBubble: {
-    maxWidth: '80%',
+    maxWidth: '75%',
     padding: 12,
     borderRadius: 20,
-    marginBottom: 12,
   },
   userBubble: {
     alignSelf: 'flex-end',
@@ -265,6 +417,32 @@ const styles = StyleSheet.create({
   botText: {
     color: theme.colors.foreground,
   },
+  typingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+    paddingLeft: 56, // Align with message content (avatar width + gap)
+  },
+  typingDots: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: theme.colors.healingGreenLight,
+  },
+  dot1: { opacity: 0.4 },
+  dot2: { opacity: 0.6 },
+  dot3: { opacity: 0.8 },
+  typingText: {
+    fontFamily: theme.typography.body,
+    fontSize: 12,
+    color: theme.colors.mutedForeground,
+  },
   inputContainer: {
     flexDirection: 'row',
     padding: 12,
@@ -273,6 +451,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#EBEBEB',
     alignItems: 'flex-end',
+    gap: 10,
   },
   input: {
     flex: 1,
@@ -286,7 +465,6 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.body,
     fontSize: 15,
     color: theme.colors.foreground,
-    marginRight: 12,
   },
   sendBtn: {
     width: 44,
