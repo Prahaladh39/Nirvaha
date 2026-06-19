@@ -12,9 +12,10 @@ interface JournalEntryCardProps {
   onDelete: (id: string) => void;
   onEdit: (entry: JournalEntry) => void;
   onToggleSave: (id: string) => void;
+  onPressCard?: (entry: JournalEntry) => void;
 }
 
-export default function JournalEntryCard({ entry, index, onDelete, onEdit, onToggleSave }: JournalEntryCardProps) {
+export default function JournalEntryCard({ entry, index, onDelete, onEdit, onToggleSave, onPressCard }: JournalEntryCardProps) {
   const date = new Date(entry.timestamp);
   
   // Format Date simple: MMM d, h:mm a
@@ -53,24 +54,30 @@ export default function JournalEntryCard({ entry, index, onDelete, onEdit, onTog
   return (
     <Animated.View entering={FadeInDown.duration(400).delay(100 + index * 60)} style={styles.wrapper}>
       <Swipeable renderRightActions={renderRightActions} overshootRight={false}>
-        <View style={styles.card}>
-          <View style={styles.header}>
-            <View style={styles.moodRow}>
-              <Text style={styles.emoji}>{entry.moodEmoji}</Text>
-              <Text style={styles.moodText}>{entry.mood}</Text>
-              {entry.saved && (
-                <BookmarkCheck size={14} color={theme.colors.gold} />
-              )}
+        <Pressable onPress={() => onPressCard?.(entry)}>
+          <View style={styles.card}>
+            <View style={styles.header}>
+              <View style={styles.moodRow}>
+                <Text style={styles.emoji}>{entry.moodEmoji}</Text>
+                <Text style={styles.moodText}>{entry.mood}</Text>
+                {entry.saved && (
+                  <BookmarkCheck size={14} color={theme.colors.gold} />
+                )}
+              </View>
+              <Text style={styles.dateText}>{formattedDate}</Text>
             </View>
-            <Text style={styles.dateText}>{formattedDate}</Text>
+            
+            {entry.title ? (
+              <Text style={styles.titleText}>{entry.title}</Text>
+            ) : null}
+            
+            <Text style={styles.bodyText} numberOfLines={4}>
+              {entry.text}
+            </Text>
+            
+            <Text style={styles.swipeHint}>← Swipe left for actions | Tap to read</Text>
           </View>
-          
-          <Text style={styles.bodyText} numberOfLines={4}>
-            {entry.text}
-          </Text>
-          
-          <Text style={styles.swipeHint}>← Swipe left to edit</Text>
-        </View>
+        </Pressable>
       </Swipeable>
     </Animated.View>
   );
@@ -113,6 +120,13 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.body,
     fontSize: 11,
     color: 'rgba(255,255,255,0.4)',
+  },
+  titleText: {
+    fontFamily: theme.typography.display,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 6,
   },
   bodyText: {
     fontFamily: theme.typography.body,
