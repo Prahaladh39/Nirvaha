@@ -2,60 +2,34 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, SafeAreaView, ScrollView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { theme } from '../../constants/theme';
-import { QUESTIONS, QuizOption } from '../../constants/ancientCharacterQuizData';
 import { X } from 'lucide-react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { AssessmentEngine } from '../../services/assessment/AssessmentEngine';
+import { AssessmentOption } from '../../services/assessment/AssessmentQuestions';
 
 export default function QuizScreen() {
-  const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
-  const [scores, setScores] = useState<Record<string, number>>({});
-  
-  const question = QUESTIONS[currentQuestionIdx];
-  const progress = ((currentQuestionIdx + 1) / QUESTIONS.length) * 100;
+  const [engine] = useState(() => new AssessmentEngine());
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const handleOptionSelect = (option: QuizOption) => {
-    // Add weights to scores
-    const newScores = { ...scores };
-    Object.keys(option.weight).forEach(char => {
-      newScores[char] = (newScores[char] || 0) + option.weight[char];
-    });
-    setScores(newScores);
+  const question = engine.getCurrentQuestion();
+  const totalQuestions = engine.getQuestionsCount();
+  const progress = engine.getProgress();
 
-    if (currentQuestionIdx < QUESTIONS.length - 1) {
-      setCurrentQuestionIdx(prev => prev + 1);
+  const handleOptionSelect = (option: AssessmentOption) => {
+    const resultPayload = engine.selectOption(option);
+    
+    if (resultPayload) {
+      router.push({
+        pathname: '/ancient-character-quiz/result',
+        params: {
+          primary: resultPayload.primary,
+          secondary: resultPayload.secondary,
+          percentage: resultPayload.percentage
+        }
+      });
     } else {
-      calculateAndNavigate(newScores);
+      setCurrentIndex(engine.getCurrentIndex());
     }
-  };
-
-  const calculateAndNavigate = (finalScores: Record<string, number>) => {
-    const sortedChars = Object.keys(finalScores).sort((a, b) => finalScores[b] - finalScores[a]);
-    const primaryMatch = sortedChars[0];
-    const secondaryMatch = sortedChars[1];
-
-    const primaryScore = finalScores[primaryMatch] || 0;
-    const totalPointsGiven = Object.values(finalScores).reduce((a, b) => a + b, 0);
-    
-    let rawPercentage = (primaryScore / totalPointsGiven) * 100;
-    // Map it up slightly to make the clamp feel more natural (e.g. max theoretical is 30/40 = 75%)
-    // But we will follow instructions exactly: clamp between 76-94
-    let matchPercentage = Math.round(rawPercentage);
-    
-    // Personality quizzes often scale scores. To avoid everything just being '76', 
-    // let's apply a multiplier so it falls nicely into the 76-94 range.
-    // If max primary score is ~30 (75%), let's multiply raw percentage by 1.2 => ~90%.
-    matchPercentage = Math.round(rawPercentage * 1.2);
-    
-    matchPercentage = Math.max(76, Math.min(94, matchPercentage));
-
-    router.push({
-      pathname: '/ancient-character-quiz/result',
-      params: {
-        primary: primaryMatch,
-        secondary: secondaryMatch,
-        percentage: matchPercentage
-      }
-    });
   };
 
   const handleClose = () => {
@@ -68,7 +42,7 @@ export default function QuizScreen() {
         <Pressable onPress={handleClose} style={styles.closeBtn}>
           <X color="#FFFFFF" size={24} />
         </Pressable>
-        <Text style={styles.progressText}>Question {currentQuestionIdx + 1} of {QUESTIONS.length}</Text>
+        <Text style={styles.progressText}>Question {currentIndex + 1} of {totalQuestions}</Text>
         <View style={{ width: 44 }} /> {/* Spacer */}
       </View>
 
@@ -81,7 +55,7 @@ export default function QuizScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View 
-          key={currentQuestionIdx} 
+          key={currentIndex} 
           entering={FadeIn.duration(400)} 
           exiting={FadeOut.duration(200)}
         >

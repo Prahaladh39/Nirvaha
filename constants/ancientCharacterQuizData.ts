@@ -6,6 +6,8 @@ export interface CharacterDetails {
   growth: string[];
   themeColor: string;
   accentDark: string;
+  oneLiner: string;
+  artwork: any;
 }
 
 export const CHARACTERS: Record<string, CharacterDetails> = {
@@ -20,7 +22,9 @@ export const CHARACTERS: Record<string, CharacterDetails> = {
       "Allow your primary ethical values to guide decisions more than momentary convenience."
     ],
     themeColor: "#cfaf6c", // Gold
-    accentDark: "#0d1c12"  // Jade green tint
+    accentDark: "#0d1c12",  // Jade green tint
+    oneLiner: "A pillar of absolute integrity and moral steadiness in times of turbulence.",
+    artwork: require('../assets/images/characters/rama.png')
   },
   krishna: {
     name: "Krishna",
@@ -33,7 +37,9 @@ export const CHARACTERS: Record<string, CharacterDetails> = {
       "Use your brilliant strategic vision to empower and lift the agency of others."
     ],
     themeColor: "#578ae6", // Cobalt blue tint
-    accentDark: "#0d1424"  // Deep navy tint
+    accentDark: "#0d1424",  // Deep navy tint
+    oneLiner: "Navigating life's complex strategies with dynamic wisdom, grace, and playfulness.",
+    artwork: require('../assets/images/characters/krishna.png')
   },
   hanuman: {
     name: "Hanuman",
@@ -46,7 +52,9 @@ export const CHARACTERS: Record<string, CharacterDetails> = {
       "Cultivate quiet inner fortitude to weather temporary external doubts."
     ],
     themeColor: "#e07343", // Rust/Saffron tint
-    accentDark: "#241108"  // Burnished mud tint
+    accentDark: "#241108",  // Burnished mud tint
+    oneLiner: "Unshakeable loyalty, moral courage, and selfless strength that empowers others.",
+    artwork: require('../assets/images/characters/hanuman.png')
   },
   arjuna: {
     name: "Arjuna",
@@ -59,7 +67,9 @@ export const CHARACTERS: Record<string, CharacterDetails> = {
       "Align your high personal ambitions with a collective purpose that serves the common good."
     ],
     themeColor: "#a3b8cc", // Platinum gray tint
-    accentDark: "#0e131a"  // Charcoal tint
+    accentDark: "#0e131a",  // Charcoal tint
+    oneLiner: "Pursuing ultimate skill, growth, and clarity through focused self-exploration.",
+    artwork: require('../assets/images/characters/arjuna.png')
   },
   sita: {
     name: "Sita",
@@ -72,7 +82,9 @@ export const CHARACTERS: Record<string, CharacterDetails> = {
       "Allow your gentle nature to act as a therapeutic, soothing catalyst for your environment."
     ],
     themeColor: "#e69caf", // Rosy blush
-    accentDark: "#241117"  // Soft clay-onyx tint
+    accentDark: "#241117",  // Soft clay-onyx tint
+    oneLiner: "Conquering adversity with quiet grace, unyielding boundaries, and pure intent.",
+    artwork: require('../assets/images/characters/sita.png')
   },
   karna: {
     name: "Karna",
@@ -85,7 +97,9 @@ export const CHARACTERS: Record<string, CharacterDetails> = {
       "Channel your proud, intense energies into noble persevering actions."
     ],
     themeColor: "#e65050", // Crimson red
-    accentDark: "#290a0a"  // Wine black tint
+    accentDark: "#290a0a",  // Wine black tint
+    oneLiner: "Unyielding grit, relentless perseverance, and proud generosity through every trial.",
+    artwork: require('../assets/images/characters/karna.png')
   }
 };
 
