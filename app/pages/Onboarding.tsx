@@ -7,40 +7,41 @@ import { ParticleOverlay } from '../../components/ParticleOverlay';
 import OnboardingStepper from '../../components/onboarding/OnboardingStepper';
 import OnboardingQuestion from '../../components/onboarding/OnboardingQuestion';
 import OnboardingRecap from '../../components/onboarding/OnboardingRecap';
-import { questions } from '../../constants/onboardingData';
 import { theme } from '../../constants/theme';
+import { OnboardingEngine } from '../../services/onboarding/OnboardingEngine';
 
 type Phase = 'questions' | 'recap';
 
 export default function Onboarding() {
+  const [engine] = useState(() => new OnboardingEngine());
   const [phase, setPhase] = useState<Phase>('questions');
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<number[]>([]);
   
-  const current = questions[step];
+  const current = engine.getCurrentQuestion();
+  const totalSteps = engine.getQuestionsCount();
 
   const handleSelect = (optionIndex: number) => {
-    const newAnswers = [...answers, optionIndex];
-    setAnswers(newAnswers);
-    
-    if (step + 1 >= questions.length) {
+    const isFinished = engine.selectOption(optionIndex);
+    if (isFinished) {
       setPhase('recap');
     } else {
-      setStep((s) => s + 1);
+      setStep(engine.getCurrentIndex());
     }
   };
 
   const handleBack = () => {
     if (phase === 'recap') {
       setPhase('questions');
-      setStep(questions.length - 1);
-      setAnswers((prev) => prev.slice(0, -1));
-    } else if (phase === 'questions' && step > 0) {
-      setStep((s) => s - 1);
-      setAnswers((prev) => prev.slice(0, -1));
-    } else if (phase === 'questions' && step === 0) {
-      // Go back to intro screen
-      router.back();
+      engine.goBack();
+      setStep(engine.getCurrentIndex());
+    } else {
+      const wentBack = engine.goBack();
+      if (wentBack) {
+        setStep(engine.getCurrentIndex());
+      } else {
+        // Go back to intro screen
+        router.back();
+      }
     }
   };
 
@@ -64,7 +65,7 @@ export default function Onboarding() {
       <View style={styles.contentContainer}>
         {phase === 'questions' && current && (
           <View style={styles.phaseWrapper}>
-            <OnboardingStepper currentStep={step} totalSteps={questions.length} />
+            <OnboardingStepper currentStep={step} totalSteps={totalSteps} />
             <OnboardingQuestion
               key={step} // Force remount to trigger entrance animations
               question={current.question}
@@ -77,7 +78,7 @@ export default function Onboarding() {
 
         {phase === 'recap' && (
           <View style={styles.phaseWrapper}>
-            <OnboardingRecap answers={answers} />
+            <OnboardingRecap answers={engine.getAnswers()} />
           </View>
         )}
       </View>
