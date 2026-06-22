@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   View, Text, StyleSheet, TextInput, Pressable, FlatList, 
-  KeyboardAvoidingView, Platform, SafeAreaView, Alert, ActivityIndicator
+  KeyboardAvoidingView, Platform, SafeAreaView, Alert, ActivityIndicator,
+  ScrollView
 } from 'react-native';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, Send, Sparkles } from 'lucide-react-native';
@@ -27,6 +28,14 @@ export default function CompanionChatScreen() {
   const [isSessionActive, setIsSessionActive] = useState(true);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
+  const inputRef = useRef<TextInput>(null);
+
+  const handleSuggestionTap = (text: string) => {
+    setInputText(text);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 80);
+  };
 
   const canSend = inputText.trim().length > 0 && !loading && isSessionActive;
 
@@ -265,9 +274,32 @@ export default function CompanionChatScreen() {
           </Animated.View>
         )}
 
+        {/* Suggestion starters */}
+        {isSessionActive && companion.suggestions && companion.suggestions.length > 0 && (
+          <View style={styles.suggestionsContainer}>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.suggestionsContent}
+              keyboardShouldPersistTaps="handled"
+            >
+              {companion.suggestions.map((suggestion, index) => (
+                <Pressable
+                  key={index}
+                  style={styles.suggestionChip}
+                  onPress={() => handleSuggestionTap(suggestion)}
+                >
+                  <Text style={styles.suggestionText}>{suggestion}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         {/* Input area */}
         <View style={styles.inputContainer}>
           <TextInput
+            ref={inputRef}
             style={styles.input}
             placeholder={isSessionActive ? "Say what's on your mind..." : "Session ended"}
             placeholderTextColor={theme.colors.mutedForeground}
@@ -476,5 +508,29 @@ const styles = StyleSheet.create({
   },
   sendBtnDisabled: {
     backgroundColor: '#C0CEC6',
+  },
+  suggestionsContainer: {
+    paddingVertical: 10,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F1F1',
+  },
+  suggestionsContent: {
+    paddingHorizontal: 16,
+    gap: 8,
+    flexDirection: 'row',
+  },
+  suggestionChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#F1F3F5',
+    borderWidth: 1,
+    borderColor: '#EBEBEB',
+  },
+  suggestionText: {
+    fontFamily: theme.typography.body,
+    fontSize: 13,
+    color: theme.colors.foreground,
   },
 });

@@ -50,16 +50,9 @@ export default function CompanionBioScreen() {
               {companion.isVerified && (
                 <View style={styles.badge}>
                   <ShieldCheck size={14} color={theme.colors.primary} />
-                  <Text style={styles.badgeText}>Verified</Text>
+                  <Text style={styles.badgeText}>Verified AI Companion</Text>
                 </View>
               )}
-              {companion.isCertified && (
-                <View style={styles.badge}>
-                  <Award size={14} color={theme.colors.gold} />
-                  <Text style={styles.badgeText}>Certified</Text>
-                </View>
-              )}
-              <Text style={styles.sessionsText}>{companion.sessionsCount}+ sessions</Text>
             </View>
           </View>
         </View>
