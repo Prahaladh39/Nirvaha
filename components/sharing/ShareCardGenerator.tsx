@@ -37,11 +37,9 @@ export const ShareCardGenerator = React.forwardRef<ViewShot, ShareCardProps>(
             >
               <View style={[styles.innerCard, { backgroundColor: `${accentDark}EE` || '#0A0A0A' }]}>
                 
-                {/* Sacred Geometry SVG Pattern Overlay */}
                 <View style={StyleSheet.absoluteFill}>
                   <Svg height="100%" width="100%" viewBox="0 0 1080 1350">
                     <G stroke={themeColor || '#DFB86C'} strokeWidth="1" fill="none" opacity="0.08">
-                      {/* Central Flower of Life Pattern */}
                       <Circle cx="540" cy="450" r="180" />
                       <Circle cx="540" cy="270" r="180" />
                       <Circle cx="540" cy="630" r="180" />
@@ -56,7 +54,6 @@ export const ShareCardGenerator = React.forwardRef<ViewShot, ShareCardProps>(
                       <Circle cx="540" cy="450" r="360" />
                       <Circle cx="540" cy="450" r="540" strokeWidth="2" strokeDasharray="10, 10" />
 
-                      {/* Sacred Rays / Diagonals */}
                       <Path d="M0 0 L1080 1350" />
                       <Path d="M1080 0 L0 1350" />
                       <Path d="M540 0 L540 1350" strokeWidth="0.5" />
