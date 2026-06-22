@@ -1,142 +1,225 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Pressable, Dimensions } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, SafeAreaView, Pressable, Dimensions, Platform, ScrollView } from 'react-native';
 import { router, Stack } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
+import { ChevronLeft, Sparkles } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
 
-export default function WisdomSelfieComingSoon() {
-  const [showText, setShowText] = useState(false);
+// Responsive dimensions for the Instagram Reel / YouTube Shorts style preview card
+const cardWidth = Math.min(width * 0.7, 280);
+const videoHeight = cardWidth * (16 / 9); // Perfect 9:16 aspect ratio for the video container
+const cardHeight = videoHeight + 64; // Video height plus the bottom status section height
 
+export default function WisdomSelfieComingSoon() {
   const videoPlayer = useVideoPlayer(require('../../assets/videos/wisdom-demo.mp4'), vp => {
     vp.loop = true;
-    vp.muted = false;
+    vp.muted = true;
     vp.play();
   });
 
-  useEffect(() => {
-    const subscription = videoPlayer.addListener('playToEnd', () => {
-      setShowText(true);
-    });
-    return () => {
-      subscription.remove();
-    };
-  }, [videoPlayer]);
-
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={[theme.colors.background, theme.colors.backgroundGradientEnd]}
+      style={styles.container}
+    >
       <Stack.Screen options={{ headerShown: false }} />
-      
-      <View style={StyleSheet.absoluteFill}>
-        <VideoView 
-          player={videoPlayer} 
-          style={StyleSheet.absoluteFill} 
-          nativeControls={false}
-          contentFit="contain"
-        />
-        <LinearGradient 
-          colors={['rgba(0,0,0,0.8)', 'transparent', 'transparent', 'rgba(0,0,0,0.9)']}
-          locations={[0, 0.2, 0.7, 1]}
-          style={StyleSheet.absoluteFill}
-        />
-      </View>
+
+      {/* Background glow effect behind the card */}
+      <View style={styles.glowCircle} />
 
       <SafeAreaView style={styles.safeArea}>
+        {/* Header containing back button */}
         <View style={styles.header}>
           <Pressable style={styles.backButton} onPress={() => router.back()}>
-            <ArrowLeft size={20} color="#FFFFFF" />
+            <ChevronLeft size={24} color={theme.colors.foreground} />
           </Pressable>
-          <Text style={styles.headerTitle}>Wisdom Selfie</Text>
-          <View style={{ width: 40 }} />
         </View>
 
-        <View style={styles.content}>
-          {showText && (
-            <Animated.Text entering={FadeIn.duration(1000)} style={styles.comingSoonText}>
-              Coming Soon...
-            </Animated.Text>
-          )}
-        </View>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Centered Heading and Subtitle */}
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Coming Soon</Text>
+            <Text style={styles.subtitle}>
+              Experience a new way of reflecting through AI-powered Wisdom Selfies.
+            </Text>
+          </View>
+
+          {/* Phone-style preview card (Instagram Reel / YouTube Shorts style) */}
+          <View style={styles.card}>
+            {/* Video container resized to fit 9:16 video naturally */}
+            <View style={styles.videoWrapper}>
+              <VideoView
+                player={videoPlayer}
+                style={styles.video}
+                nativeControls={false}
+                contentFit="contain"
+              />
+            </View>
+
+            {/* Bottom info section of the phone card */}
+            <View style={styles.cardBottom}>
+              <View style={styles.cardBottomRow}>
+                <Text style={styles.cardBottomText}>Reflection AI Active</Text>
+              </View>
+              <View style={styles.progressBar}>
+                <View style={styles.progressActive} />
+              </View>
+            </View>
+          </View>
+
+          {/* Understated informational text */}
+          <View style={styles.bottomInfoContainer}>
+            <Text style={styles.bottomInfoText}>
+              An immersive AI reflection experience is currently under development. This preview offers a glimpse of what's coming.
+            </Text>
+          </View>
+        </ScrollView>
       </SafeAreaView>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
   },
   safeArea: {
     flex: 1,
   },
+  glowCircle: {
+    position: 'absolute',
+    width: width * 1.2,
+    height: width * 1.2,
+    borderRadius: (width * 1.2) / 2,
+    backgroundColor: 'rgba(163, 189, 177, 0.22)',
+    top: height * 0.22,
+    left: -width * 0.1,
+  },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingTop: Platform.OS === 'android' ? 40 : 16,
+    paddingBottom: 8,
+    flexDirection: 'row',
   },
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontFamily: theme.typography.display,
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    textShadowColor: 'rgba(0,0,0,0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-  },
-  content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: 20,
-    paddingBottom: 60,
-  },
-  comingSoonText: {
-    fontFamily: theme.typography.display,
-    fontSize: 32,
-    color: theme.colors.gold,
-    fontWeight: '600',
-    letterSpacing: 1,
-    marginBottom: 30,
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-  },
-  primaryBtn: {
-    flexDirection: 'row',
-    backgroundColor: '#FFF',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 30,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  primaryBtnText: {
-    color: '#000',
+  scrollContent: {
+    alignItems: 'center',
+    paddingBottom: 40,
+  },
+  titleContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    marginTop: 8,
+    marginBottom: 28,
+  },
+  title: {
+    fontFamily: theme.typography.display,
+    fontSize: 28,
+    color: theme.colors.foreground,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  subtitle: {
     fontFamily: theme.typography.body,
+    fontSize: 15,
+    color: theme.colors.mutedForeground,
+    textAlign: 'center',
+    lineHeight: 22,
+    maxWidth: 280,
+  },
+  card: {
+    width: cardWidth,
+    height: cardHeight,
+    backgroundColor: 'rgba(255, 255, 255, 0.55)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.75)',
+    shadowColor: '#2D5A4C',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 15,
+    elevation: 6,
+    overflow: 'hidden',
+    marginBottom: 32,
+  },
+  videoWrapper: {
+    width: '100%',
+    height: videoHeight,
+    backgroundColor: '#000000',
+    overflow: 'hidden',
+  },
+  video: {
+    width: '100%',
+    height: '100%',
+  },
+  cardBottom: {
+    height: 64,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+  },
+  cardBottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  cardBottomText: {
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 12,
+    color: theme.colors.foreground,
+    marginLeft: 6,
     fontWeight: '600',
-    fontSize: 16,
-  }
+    opacity: 0.9,
+  },
+  progressBar: {
+    width: '80%',
+    height: 3,
+    backgroundColor: 'rgba(45, 90, 76, 0.1)',
+    borderRadius: 1.5,
+    overflow: 'hidden',
+  },
+  progressActive: {
+    width: '35%',
+    height: '100%',
+    backgroundColor: theme.colors.gold,
+    borderRadius: 1.5,
+  },
+  bottomInfoContainer: {
+    paddingHorizontal: 36,
+    alignItems: 'center',
+  },
+  bottomInfoText: {
+    fontFamily: theme.typography.body,
+    fontSize: 12,
+    color: theme.colors.mutedForeground,
+    textAlign: 'center',
+    lineHeight: 18,
+    opacity: 0.85,
+  },
 });
+
+
+
 
 /* =========================================================================
    OLD IMPLEMENTATION COMMENTED OUT BELOW
