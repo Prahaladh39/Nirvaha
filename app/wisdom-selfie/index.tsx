@@ -14,7 +14,7 @@ const videoHeight = cardWidth * (16 / 9); // Perfect 9:16 aspect ratio for the v
 const cardHeight = videoHeight + 64; // Video height plus the bottom status section height
 
 export default function WisdomSelfieComingSoon() {
-  const videoPlayer = useVideoPlayer(require('../../assets/videos/wisdom-demo.mp4'), vp => {
+  const videoPlayer = useVideoPlayer(require('../../assets/videos/wisdom-selfie.mp4'), vp => {
     vp.loop = true;
     vp.muted = true;
     vp.play();
