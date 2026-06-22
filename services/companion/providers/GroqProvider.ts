@@ -60,7 +60,14 @@ export class GroqProvider implements IAIProvider {
         }),
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data: any;
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch (jsonErr) {
+        console.error('[GroqProvider] Failed to parse response as JSON. Status:', response.status, 'Response:', responseText);
+        throw new Error(`Invalid JSON response from Groq API (status ${response.status})`);
+      }
 
       if (!response.ok) {
         console.error('[GroqProvider] API error:', data);

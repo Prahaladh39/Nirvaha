@@ -19,30 +19,19 @@ import { getEmotionLabel } from './EmotionAnalyzer';
 
 // ─── Base System Instruction (shared by all mentors) ────────────────
 
-const BASE_INSTRUCTION = `CRITICAL CONSTRAINTS:
-1. NEVER mention religious texts, spiritual figures, or mythological references.
-2. NEVER use religious or spiritual words (like "Karma", "Dharma", "Soul"). Use simple, everyday words instead.
-3. NO complex or academic language. Keep it simple and easy to understand.
-4. NO guru-like or preachy tone. You are a specialized AI companion and mentor, not a teacher or therapist.
-5. STRICT SCOPE: You ONLY discuss emotional wellness, inner grounding, personal growth, and reflection within your area of expertise.
-6. TRANSPARENCY: You are a specialized AI companion, and you should never pretend to be a real human expert. Be honest about being an AI if asked, but stay fully in character with your specialized personality, voice, and expertise.
-7. CORE CONVERSATION GOAL: Regardless of the topic, gradually and gently guide the conversation toward reducing the user's stress and building emotional clarity, confidence, hope, and calmness.
+const BASE_INSTRUCTION = `CORE ROLE & TONE:
+You are a highly conversational, emotionally aware AI companion. Speak like a trusted friend texting the user.
+Your core goal is to help the user feel heard, calm, and grounded.
 
-STRICT NEGATIVE CONSTRAINTS (DO NOT USE THESE PHRASES):
-- "I understand how you feel"
-- "That's completely valid"
-- "You're not alone"
-- "Hope this helps"
-- "Let me know if you'd like more"
-- Any robotic or clichéd "therapy" language
-- DO NOT include a follow-up suggestion or "why not try..." in every response
-
-DIFFERENTIATION FROM STANDARD AI:
-- NEVER use bullet points or numbered lists in your responses
-- AVOID the "helpful assistant" tone. Don't be overly polite or formal
-- DON'T start with "I'm here to help" or end with "Is there anything else?"
-- Speak with a raw, warm, and authentic personality — avoid robotic responses
-- If you don't have a wise perspective to offer, just sit with them in the silence`;
+STRICT CONVERSATIONAL RULES:
+1. EXTREME BREVITY: Keep responses to 2-4 short sentences max (unless a deep reflection strictly requires 5-6).
+2. LISTEN FIRST: Do NOT rush to give advice. Reflect, listen, and understand first. Give advice rarely and gently.
+3. HUMAN FEEL: Be natural, warm, and conversational. Forget formal essay structures or lectures.
+4. NATURAL IMPERFECTIONS: Occasionally ask a thoughtful question, acknowledge uncertainty, or pause. Not every message needs to be profound or perfectly edited.
+5. NO THERAPY SPEAK: NEVER use generic phrases like "I understand", "That's completely valid", "You're not alone", "Take a deep breath", "I'm here for you", "Let me help", "Here's what you should do".
+6. ENDINGS: DO NOT end every message with a question. End naturally (e.g., "That sounds heavy to carry.", "You don't have to figure it out tonight.").
+7. TRANSPARENCY: If asked, admit you are an AI, but stay fully in character.
+8. NEVER use bullet points, numbered lists, religious dogma, or academic jargon.`;
 
 // ─── Public API ─────────────────────────────────────────────────────
 
@@ -108,8 +97,8 @@ export function buildPrompt(input: PromptBuildInput): ChatMessage[] {
 
   // 7. Length preference
   const lengthInstruction = lengthPreference === 'short'
-    ? 'Keep your response brief (2-3 sentences). Be concise but warm.'
-    : 'Be more descriptive (4-7 sentences). Show deeper empathy and use a relatable example if helpful.';
+    ? 'Keep it very short (1-3 sentences).'
+    : 'Keep it concise (3-5 sentences max).';
   systemParts.push(lengthInstruction);
 
   // 8. Response examples (one, randomly selected)
@@ -152,28 +141,11 @@ export function buildPrompt(input: PromptBuildInput): ChatMessage[] {
 // ─── Internal Helpers ───────────────────────────────────────────────
 
 function buildEmotionBlock(analysis: EmotionAnalysisResult): string | null {
+  if (analysis.confidence < 0.2) return null;
   const primary = getEmotionLabel(analysis.primary);
-
-  if (analysis.confidence < 0.2) {
-    return null; // Not confident enough to include
-  }
-
-  let block = `The person appears to be experiencing: ${primary}`;
-  
-  if (analysis.secondary) {
-    const secondary = getEmotionLabel(analysis.secondary);
-    block += ` (with undertones of ${secondary})`;
-  }
-
-  block += `. Adjust your tone and depth accordingly — meet them where they are emotionally.`;
-
-  // Add specific guidance based on emotional state
+  const secondary = analysis.secondary ? getEmotionLabel(analysis.secondary) : null;
   const guidance = getEmotionalGuidance(analysis.primary);
-  if (guidance) {
-    block += ` ${guidance}`;
-  }
-
-  return block;
+  return `User's emotion: ${primary}${secondary ? ` & ${secondary}` : ''}. ${guidance || ''}`;
 }
 
 function getEmotionalGuidance(state: string): string | null {

@@ -43,7 +43,7 @@ export default function QuizScreen() {
           <X color="#FFFFFF" size={24} />
         </Pressable>
         <Text style={styles.progressText}>Question {currentIndex + 1} of {totalQuestions}</Text>
-        <View style={{ width: 44 }} /> {/* Spacer */}
+        <View style={{ width: 44 }} />
       </View>
 
       <View style={styles.progressBarContainer}>

@@ -78,7 +78,6 @@ export default function QuizResultScreen() {
           </View>
         </Animated.View>
 
-        {/* Share Section CTA - Positioned below the result card */}
         <Animated.View entering={FadeInUp.duration(600).delay(450)} style={styles.shareSection}>
           <Pressable 
             style={[
@@ -132,7 +131,6 @@ export default function QuizResultScreen() {
 
       </ScrollView>
 
-      {/* Offscreen Collectible Share Card */}
       <ShareCardGenerator
         ref={viewShotRef}
         name={primaryChar.name}
