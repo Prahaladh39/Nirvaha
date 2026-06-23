@@ -1,23 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Redirect } from 'expo-router';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../config/firebase';
 import { View, ActivityIndicator } from 'react-native';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Index() {
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const { user, isLoading } = useAuth();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0A0A0A' }}>
         <ActivityIndicator size="large" color="#D4AF37" />

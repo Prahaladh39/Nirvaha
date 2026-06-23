@@ -3,10 +3,24 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LogOut } from 'lucide-react-native';
 import { router } from 'expo-router';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 import { theme } from '../../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function SettingsSection() {
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      // After signOut, the onAuthStateChanged listener in the root layout
+      // will detect user === null and redirect to /pages/Auth automatically.
+      // We also call router.replace as an immediate navigation fallback.
+      router.replace('/pages/Auth');
+    } catch (error) {
+      console.error('[SettingsSection] Logout error:', error);
+    }
+  };
+
   return (
     <Animated.View
       entering={FadeInDown.duration(500).delay(350)}
@@ -38,7 +52,7 @@ export default function SettingsSection() {
 
       <Pressable 
         style={styles.logoutBtn}
-        onPress={() => router.replace('/pages/Auth')}
+        onPress={handleLogout}
       >
         <LogOut size={14} color="rgba(255,255,255,0.4)" />
         <Text style={styles.logoutText}>Log out</Text>
