@@ -24,7 +24,7 @@ export const CHARACTERS: Record<string, CharacterDetails> = {
     themeColor: "#cfaf6c", // Gold
     accentDark: "#0d1c12",  // Jade green tint
     oneLiner: "A pillar of absolute integrity and moral steadiness in times of turbulence.",
-    artwork: require('../assets/images/characters/rama.png')
+    artwork: require('../assets/images/characters/rama.jpg')
   },
   krishna: {
     name: "Krishna",
@@ -39,7 +39,7 @@ export const CHARACTERS: Record<string, CharacterDetails> = {
     themeColor: "#578ae6", // Cobalt blue tint
     accentDark: "#0d1424",  // Deep navy tint
     oneLiner: "Navigating life's complex strategies with dynamic wisdom, grace, and playfulness.",
-    artwork: require('../assets/images/characters/krishna.png')
+    artwork: require('../assets/images/characters/krishna.jpg')
   },
   hanuman: {
     name: "Hanuman",
@@ -54,7 +54,7 @@ export const CHARACTERS: Record<string, CharacterDetails> = {
     themeColor: "#e07343", // Rust/Saffron tint
     accentDark: "#241108",  // Burnished mud tint
     oneLiner: "Unshakeable loyalty, moral courage, and selfless strength that empowers others.",
-    artwork: require('../assets/images/characters/hanuman.png')
+    artwork: require('../assets/images/characters/hanuman.jpg')
   },
   arjuna: {
     name: "Arjuna",
@@ -69,7 +69,7 @@ export const CHARACTERS: Record<string, CharacterDetails> = {
     themeColor: "#a3b8cc", // Platinum gray tint
     accentDark: "#0e131a",  // Charcoal tint
     oneLiner: "Pursuing ultimate skill, growth, and clarity through focused self-exploration.",
-    artwork: require('../assets/images/characters/arjuna.png')
+    artwork: require('../assets/images/characters/arjuna.jpg')
   },
   sita: {
     name: "Sita",
@@ -84,7 +84,7 @@ export const CHARACTERS: Record<string, CharacterDetails> = {
     themeColor: "#e69caf", // Rosy blush
     accentDark: "#241117",  // Soft clay-onyx tint
     oneLiner: "Conquering adversity with quiet grace, unyielding boundaries, and pure intent.",
-    artwork: require('../assets/images/characters/sita.png')
+    artwork: require('../assets/images/characters/sita.jpg')
   },
   karna: {
     name: "Karna",
@@ -99,7 +99,7 @@ export const CHARACTERS: Record<string, CharacterDetails> = {
     themeColor: "#e65050", // Crimson red
     accentDark: "#290a0a",  // Wine black tint
     oneLiner: "Unyielding grit, relentless perseverance, and proud generosity through every trial.",
-    artwork: require('../assets/images/characters/karna.png')
+    artwork: require('../assets/images/characters/karna.jpg')
   }
 };
 
