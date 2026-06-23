@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
-import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
+import { User, Mail, Lock, Eye, EyeOff, Square, CheckSquare } from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../config/firebase';
 import { theme } from '../../constants/theme';
+import { consentService } from '../../services/consent/consentService';
+import { TERMS_AND_CONDITIONS, PRIVACY_POLICY, DPDP_ACT_COMPLIANCE, GLOBAL_PRIVACY_PRINCIPLES } from '../../constants/consentData';
+import ConsentModal from './ConsentModal';
 
 export default function CreateAccountForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [consentAccepted, setConsentAccepted] = useState(false);
+  const [viewTerms, setViewTerms] = useState(false);
+  const [viewPrivacy, setViewPrivacy] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
@@ -20,6 +26,16 @@ export default function CreateAccountForm() {
       Toast.show({ type: 'error', text1: 'Missing fields', text2: 'Please fill in all fields.' });
       return;
     }
+
+    if (!consentAccepted) {
+      Toast.show({
+        type: 'error',
+        text1: 'Consent Required',
+        text2: 'You must accept the Terms & Conditions and Privacy Policy before continuing.',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -31,6 +47,9 @@ export default function CreateAccountForm() {
         email: email.trim(),
         createdAt: new Date().toISOString(),
       });
+
+      // Save consent status
+      await consentService.saveConsent();
 
       Toast.show({ type: 'success', text1: 'Account Created', text2: 'Welcome to Nirvaha!' });
       // Clear form or redirect
@@ -112,6 +131,22 @@ export default function CreateAccountForm() {
         </View>
       </View>
 
+      <View style={styles.consentRow}>
+        <Pressable style={styles.consentCheckbox} onPress={() => setConsentAccepted(!consentAccepted)}>
+          {consentAccepted ? (
+            <CheckSquare size={18} color={theme.colors.primary} />
+          ) : (
+            <Square size={18} color={theme.colors.mutedForeground} />
+          )}
+        </Pressable>
+        <Text style={styles.consentText}>
+          I have read and agree to the{' '}
+          <Text style={styles.linkText} onPress={() => setViewTerms(true)}>Terms & Conditions</Text>
+          {' '}and{' '}
+          <Text style={styles.linkText} onPress={() => setViewPrivacy(true)}>Privacy Policy</Text>.
+        </Text>
+      </View>
+
       <Pressable style={styles.submitButton} onPress={handleSignUp} disabled={loading}>
         {loading ? (
           <ActivityIndicator color={theme.colors.primaryForeground} />
@@ -119,6 +154,20 @@ export default function CreateAccountForm() {
           <Text style={styles.submitButtonText}>Create Account</Text>
         )}
       </Pressable>
+
+      <ConsentModal
+        visible={viewTerms}
+        onClose={() => setViewTerms(false)}
+        title="Terms & Conditions"
+        sections={[...TERMS_AND_CONDITIONS, DPDP_ACT_COMPLIANCE]}
+      />
+
+      <ConsentModal
+        visible={viewPrivacy}
+        onClose={() => setViewPrivacy(false)}
+        title="Privacy Policy"
+        sections={[...PRIVACY_POLICY, DPDP_ACT_COMPLIANCE, GLOBAL_PRIVACY_PRINCIPLES]}
+      />
     </View>
   );
 }
@@ -157,6 +206,28 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.body,
     fontSize: 15,
     color: theme.colors.foreground,
+  },
+  consentRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+    paddingHorizontal: 4,
+  },
+  consentCheckbox: {
+    marginRight: 10,
+    marginTop: 2,
+  },
+  consentText: {
+    flex: 1,
+    fontFamily: theme.typography.body,
+    fontSize: 13,
+    color: theme.colors.mutedForeground,
+    lineHeight: 18,
+  },
+  linkText: {
+    fontFamily: theme.typography.bodyMedium,
+    color: theme.colors.primary,
+    textDecorationLine: 'underline',
   },
   submitButton: {
     backgroundColor: theme.colors.primary,

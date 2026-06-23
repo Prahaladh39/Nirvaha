@@ -498,10 +498,11 @@ export default function SoundPlayer({
   playlist = [],
   onTrackChange,
 }: SoundPlayerProps) {
-  const player = useAudioPlayer(track?.source ?? null, { updateInterval: 200 });
+  const player = useAudioPlayer(track?.source ?? require("../../assets/audio/desert-glass-loop.mp3"), { updateInterval: 200 });
   const status = useAudioPlayerStatus(player);
-  const [loopEnabled, setLoopEnabled] = useState(false);
+  const [loopEnabled, setLoopEnabled] = useState(true);
   const [progressWidth, setProgressWidth] = useState(0);
+  const [isPlayState, setIsPlayState] = useState(false);
 
   useEffect(() => {
     setAudioModeAsync({
@@ -517,21 +518,46 @@ export default function SoundPlayer({
 
   useEffect(() => {
     if (track) {
-      const shouldLoop = !!track.loop;
-      setLoopEnabled(shouldLoop);
-      player.loop = shouldLoop;
+      const source = track.source || require("../../assets/audio/desert-glass-loop.mp3");
+      try {
+        player.replace(source);
+      } catch (error) {
+        console.warn("Unable to replace audio source", error);
+      }
+      setLoopEnabled(true);
+      player.loop = false; // Disable native loop so didJustFinish will fire
       player.pause();
       player.seekTo(0).catch(() => undefined);
+      setIsPlayState(false);
     } else {
       player.pause();
+      setIsPlayState(false);
     }
   }, [player, track]);
 
   useEffect(() => {
-    player.loop = loopEnabled;
-  }, [loopEnabled, player]);
+    player.loop = false; // Disable native loop
+  }, [player]);
 
-  const isPlaying = status.playing;
+  useEffect(() => {
+    if (status.playing) {
+      setIsPlayState(true);
+    } else if (!status.playing && !status.didJustFinish) {
+      setIsPlayState(false);
+    }
+  }, [status.playing, status.didJustFinish]);
+
+  useEffect(() => {
+    if (status.didJustFinish) {
+      player.seekTo(0)
+        .then(() => {
+          player.play();
+        })
+        .catch((err) => console.warn("Loop seek error", err));
+    }
+  }, [status.didJustFinish, player]);
+
+  const isPlaying = isPlayState;
   const duration = status.duration || 0;
   const currentTime = status.currentTime || 0;
   const progress =
@@ -594,14 +620,16 @@ export default function SoundPlayer({
   }, [currentTime]);
 
   const handlePlayPause = () => {
-    if (!track?.source) return;
+    if (!track) return;
     if (isPlaying) {
       player.pause();
+      setIsPlayState(false);
     } else {
       if (status.didJustFinish) {
         player.seekTo(0).catch(() => undefined);
       }
       player.play();
+      setIsPlayState(true);
     }
   };
 
@@ -816,15 +844,13 @@ export default function SoundPlayer({
                 <Pressable
                   style={[
                     styles.controlButtonSecondary,
-                    loopEnabled && styles.controlButtonActive,
+                    styles.controlButtonActive,
                   ]}
-                  onPress={() => setLoopEnabled((value) => !value)}
+                  onPress={() => undefined}
                 >
                   <Repeat
                     size={20}
-                    color={
-                      loopEnabled ? themeColors.accent : "rgba(255,255,255,0.4)"
-                    }
+                    color={themeColors.accent}
                   />
                 </Pressable>
 

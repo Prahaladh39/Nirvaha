@@ -38,7 +38,7 @@ export const WISDOM_PATTERNS: WisdomPattern[] = [
     description: 'Breaking a complex problem down into its most basic, undeniable truths to find a path forward.',
     reflectionPrompt: 'If we strip away the stories and the noise, what are the three basic facts of this situation?',
     relevantEmotions: ['career_confusion', 'purpose_crisis', 'anxiety', 'stress'],
-    alignedMentors: ['4', '10'], // Rohan, David
+    alignedMentors: ['10'], // David
   },
   {
     id: 'discipline-over-impulse',
@@ -53,7 +53,7 @@ export const WISDOM_PATTERNS: WisdomPattern[] = [
     description: 'The willingness to see things as they are, rather than how you wish they were, even if it is uncomfortable.',
     reflectionPrompt: 'What is the one truth about this situation you are currently trying to avoid?',
     relevantEmotions: ['self_doubt', 'relationship_struggles', 'career_confusion', 'purpose_crisis'],
-    alignedMentors: ['4', '3'], // Rohan, Maya
+    alignedMentors: ['3'], // Maya
   },
   {
     id: 'action-over-rumination',
@@ -61,7 +61,7 @@ export const WISDOM_PATTERNS: WisdomPattern[] = [
     description: 'The understanding that thinking without acting leads to paralysis. Clarity is found in the doing.',
     reflectionPrompt: 'What is the single most effective action you can take in the next ten minutes?',
     relevantEmotions: ['anxiety', 'career_confusion', 'self_doubt', 'purpose_crisis'],
-    alignedMentors: ['4', '6', '10'], // Rohan, Liam, David
+    alignedMentors: ['6', '10'], // Liam, David
   },
   {
     id: 'process-over-outcome',
@@ -133,7 +133,7 @@ export const WISDOM_PATTERNS: WisdomPattern[] = [
     description: 'The things that scare you the most are often the things that matter the most. Fear is a compass, not a stop sign.',
     reflectionPrompt: 'What would you attempt today if you knew fear was a sign you were on the right track?',
     relevantEmotions: ['anxiety', 'self_doubt', 'career_confusion', 'purpose_crisis'],
-    alignedMentors: ['4', '1', '6'], // Rohan, Priya, Liam
+    alignedMentors: ['1', '6'], // Priya, Liam
   },
   {
     id: 'overthinking-spiral',
@@ -156,7 +156,7 @@ export const WISDOM_PATTERNS: WisdomPattern[] = [
     description: 'Perfectionism is not high standards — it is fear wearing a mask of excellence. Done is better than perfect.',
     reflectionPrompt: 'What would "good enough" look like here, and why does that feel scary?',
     relevantEmotions: ['self_doubt', 'anxiety', 'stress', 'burnout'],
-    alignedMentors: ['6', '4', '10'], // Liam, Rohan, David
+    alignedMentors: ['6', '10'], // Liam, David
   },
   {
     id: 'guilt-as-teacher',

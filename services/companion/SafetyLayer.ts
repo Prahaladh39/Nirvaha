@@ -69,10 +69,7 @@ const REDIRECT_TEMPLATES: RedirectTemplates = {
     'That\'s not where I live. I\'m here for the questions that keep you up at night — the meaning ones. Is there something like that beneath the surface?',
     'I think there are better places for that answer. But if there\'s something deeper you\'re sitting with, I\'m here.',
   ],
-  '4': [ // Rohan
-    'Not my area, friend. I\'m the "what are you building with your life" guy, not Google. What\'s actually on your mind?',
-    'I\'d love to help but that\'s way outside my zone. Talk to me about what\'s keeping you up at night — the real stuff.',
-  ],
+
   '5': [ // Aisha
     'I\'m not the right person for that, but I\'m definitely the right person if you need to talk about family, belonging, or finding your voice. What\'s going on?',
     'That\'s outside what I do, but I\'m here and listening. Is there something about your family or relationships that needs attention?',

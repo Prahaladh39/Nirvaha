@@ -27,11 +27,11 @@ const { width } = Dimensions.get('window');
 const slides = [
   {
     headline: 'Your mind deserves\na place to rest',
-    sub: 'Nirvaha helps you understand what you feel —\nnot just reduce stress.',
+    sub: 'Nirvaha helps you understand what you feel - \nnot just reduce stress.',
     image: o1, // Mock image
   },
   {
-    headline: 'Nirvaha AI, therapy &\nancient wisdom — united',
+    headline: 'Nirvaha AI, therapy &\nancient wisdom - united',
     sub: 'Get personalized guidance through AI intelligence,\nreflection, meditation, and human support.',
     image: o2, // Mock image
   },
