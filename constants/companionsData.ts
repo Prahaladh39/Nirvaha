@@ -122,37 +122,6 @@ export const companionsData: Companion[] = [
     ]
   },
   {
-    id: "4",
-    name: "Rohan Desai",
-    initials: "RD",
-    title: "AI Startup Mentor",
-    category: "Career Guidance",
-    rating: 4.7,
-    reviewsCount: 65,
-    sessionsCount: 150,
-    availability: "Available 24/7",
-    isVerified: true,
-    isCertified: false,
-    about: "I'm an AI startup mentor designed to support founders with practical execution strategies, leadership habits, and navigation through imposter syndrome.",
-    tags: ["Startups", "Imposter Syndrome", "Leadership"],
-    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600",
-    reviews: [
-      {
-        id: "r4",
-        userName: "Vikram P.",
-        userInitial: "V",
-        rating: 4,
-        text: "\"Practical, direct prompts that cut through my overthinking. An excellent AI sounding board for founders.\""
-      }
-    ],
-    suggestions: [
-      "My startup is stressing me out",
-      "I'm afraid of failing",
-      "I'm losing motivation",
-      "How do I handle imposter syndrome?"
-    ]
-  },
-  {
     id: "5",
     name: "Aisha Khan",
     initials: "AK",

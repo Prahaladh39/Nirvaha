@@ -7,12 +7,20 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../config/firebase';
 import { theme } from '../../constants/theme';
+import { consentService } from '../../services/consent/consentService';
+import { TERMS_AND_CONDITIONS, PRIVACY_POLICY, DPDP_ACT_COMPLIANCE, GLOBAL_PRIVACY_PRINCIPLES } from '../../constants/consentData';
+import ConsentModal from './ConsentModal';
+import ForgotPasswordModal from './ForgotPasswordModal';
 
 export default function SignInForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [consentAccepted, setConsentAccepted] = useState(false);
+  const [viewTerms, setViewTerms] = useState(false);
+  const [viewPrivacy, setViewPrivacy] = useState(false);
+  const [forgotPasswordVisible, setForgotPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSignIn = async () => {
@@ -20,10 +28,24 @@ export default function SignInForm() {
       Toast.show({ type: 'error', text1: 'Missing fields', text2: 'Please fill in all fields.' });
       return;
     }
+    
+    if (!consentAccepted) {
+      Toast.show({
+        type: 'error',
+        text1: 'Consent Required',
+        text2: 'You must accept the Terms & Conditions and Privacy Policy before continuing.',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const trimmedEmail = email.trim();
       const userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, password);
+      
+      // Save consent locally upon successful sign-in
+      await consentService.saveConsent();
+      
       Toast.show({ type: 'success', text1: 'Signed In', text2: 'Welcome back to your inner balance.' });
       
       const userDocRef = doc(db, 'users', userCredential.user.uid);
@@ -98,9 +120,25 @@ export default function SignInForm() {
           <Text style={styles.checkboxLabel}>Remember me</Text>
         </Pressable>
 
-        <Pressable>
+        <Pressable onPress={() => setForgotPasswordVisible(true)}>
           <Text style={styles.forgotPasswordText}>Forgot password?</Text>
         </Pressable>
+      </View>
+
+      <View style={styles.consentRow}>
+        <Pressable style={styles.consentCheckbox} onPress={() => setConsentAccepted(!consentAccepted)}>
+          {consentAccepted ? (
+            <CheckSquare size={18} color={theme.colors.primary} />
+          ) : (
+            <Square size={18} color={theme.colors.mutedForeground} />
+          )}
+        </Pressable>
+        <Text style={styles.consentText}>
+          I have read and agree to the{' '}
+          <Text style={styles.linkText} onPress={() => setViewTerms(true)}>Terms & Conditions</Text>
+          {' '}and{' '}
+          <Text style={styles.linkText} onPress={() => setViewPrivacy(true)}>Privacy Policy</Text>.
+        </Text>
       </View>
 
       <Pressable style={styles.submitButton} onPress={handleSignIn} disabled={loading}>
@@ -110,6 +148,25 @@ export default function SignInForm() {
           <Text style={styles.submitButtonText}>Sign In</Text>
         )}
       </Pressable>
+
+      <ConsentModal
+        visible={viewTerms}
+        onClose={() => setViewTerms(false)}
+        title="Terms & Conditions"
+        sections={[...TERMS_AND_CONDITIONS, DPDP_ACT_COMPLIANCE]}
+      />
+
+      <ConsentModal
+        visible={viewPrivacy}
+        onClose={() => setViewPrivacy(false)}
+        title="Privacy Policy"
+        sections={[...PRIVACY_POLICY, DPDP_ACT_COMPLIANCE, GLOBAL_PRIVACY_PRINCIPLES]}
+      />
+
+      <ForgotPasswordModal
+        visible={forgotPasswordVisible}
+        onClose={() => setForgotPasswordVisible(false)}
+      />
     </View>
   );
 }
@@ -169,6 +226,28 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.body,
     fontSize: 14,
     color: theme.colors.primary,
+  },
+  consentRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+    paddingHorizontal: 4,
+  },
+  consentCheckbox: {
+    marginRight: 10,
+    marginTop: 2,
+  },
+  consentText: {
+    flex: 1,
+    fontFamily: theme.typography.body,
+    fontSize: 13,
+    color: theme.colors.mutedForeground,
+    lineHeight: 18,
+  },
+  linkText: {
+    fontFamily: theme.typography.bodyMedium,
+    color: theme.colors.primary,
+    textDecorationLine: 'underline',
   },
   submitButton: {
     backgroundColor: theme.colors.primary,

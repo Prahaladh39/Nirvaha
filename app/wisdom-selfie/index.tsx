@@ -5,6 +5,7 @@ import { ChevronLeft, Sparkles } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { LinearGradient } from 'expo-linear-gradient';
+import { setAudioModeAsync } from 'expo-audio';
 
 const { width, height } = Dimensions.get('window');
 
@@ -14,9 +15,21 @@ const videoHeight = cardWidth * (16 / 9); // Perfect 9:16 aspect ratio for the v
 const cardHeight = videoHeight + 64; // Video height plus the bottom status section height
 
 export default function WisdomSelfieComingSoon() {
+  React.useEffect(() => {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      interruptionMode: "doNotMix",
+      allowsRecording: false,
+      shouldPlayInBackground: false,
+      shouldRouteThroughEarpiece: false,
+    }).catch((error) => {
+      console.warn("Unable to configure audio mode", error);
+    });
+  }, []);
+
   const videoPlayer = useVideoPlayer(require('../../assets/videos/wisdom-selfie.mp4'), vp => {
     vp.loop = true;
-    vp.muted = true;
+    vp.muted = false;
     vp.play();
   });
 
