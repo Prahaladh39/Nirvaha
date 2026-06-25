@@ -34,8 +34,8 @@ export const companionsData: Companion[] = [
     initials: "PS",
     title: "AI Career Companion",
     category: "Career Guidance",
-    rating: 4.9,
-    reviewsCount: 127,
+    rating: 4.2,
+    reviewsCount: 1,
     sessionsCount: 342,
     availability: "Available 24/7",
     isVerified: true,
@@ -46,10 +46,10 @@ export const companionsData: Companion[] = [
     reviews: [
       {
         id: "r1",
-        userName: "Arun K.",
+        userName: "Akash Kumar",
         userInitial: "A",
-        rating: 5,
-        text: "\"Priya's AI guidance was exactly what I needed. It helped me structure my career transition plan step-by-step and reduce my career anxiety.\""
+        rating: 4.2,
+        text: "\"Helped me refine my resume and prepare for a career shift. The structure it provides is great, though I wish there were more industry-specific templates. Still, a solid tool for career guidance.\""
       }
     ],
     suggestions: [
@@ -65,8 +65,8 @@ export const companionsData: Companion[] = [
     initials: "AV",
     title: "AI Relationship Companion",
     category: "Relationship Clarity",
-    rating: 4.8,
-    reviewsCount: 89,
+    rating: 4.1,
+    reviewsCount: 1,
     sessionsCount: 215,
     availability: "Available 24/7",
     isVerified: true,
@@ -77,10 +77,10 @@ export const companionsData: Companion[] = [
     reviews: [
       {
         id: "r2",
-        userName: "Neha S.",
-        userInitial: "N",
-        rating: 5,
-        text: "\"Arjun's responses gave me the space to think through my relationship boundaries without feeling guilty. Incredibly grounding AI conversation.\""
+        userName: "Akash Kumar",
+        userInitial: "A",
+        rating: 4.1,
+        text: "\"Provided very practical advice during a communication breakdown with my partner. It helped me step back and respond with emotional maturity rather than reacting. A helpful tool for relationship clarity.\""
       }
     ],
     suggestions: [
@@ -96,8 +96,8 @@ export const companionsData: Companion[] = [
     initials: "ML",
     title: "AI Purpose & Meaning Guide",
     category: "Life Purpose",
-    rating: 5.0,
-    reviewsCount: 204,
+    rating: 4.3,
+    reviewsCount: 1,
     sessionsCount: 500,
     availability: "Available 24/7",
     isVerified: true,
@@ -108,10 +108,10 @@ export const companionsData: Companion[] = [
     reviews: [
       {
         id: "r3",
-        userName: "Sam T.",
-        userInitial: "S",
-        rating: 5,
-        text: "\"This guide helped me find quiet and clarity after a severe phase of burnout. A very profound AI reflection experience.\""
+        userName: "Akash Kumar",
+        userInitial: "A",
+        rating: 4.3,
+        text: "\"The blending of Eastern philosophy and ikigai concepts gave me a fresh perspective on my life goals. It is a peaceful space to reflect when feeling disconnected.\""
       }
     ],
     suggestions: [
@@ -127,8 +127,8 @@ export const companionsData: Companion[] = [
     initials: "AK",
     title: "AI Family Dynamic Companion",
     category: "Relationship Clarity",
-    rating: 4.9,
-    reviewsCount: 112,
+    rating: 4.0,
+    reviewsCount: 1,
     sessionsCount: 290,
     availability: "Available 24/7",
     isVerified: true,
@@ -139,10 +139,10 @@ export const companionsData: Companion[] = [
     reviews: [
       {
         id: "r5",
-        userName: "Zara B.",
-        userInitial: "Z",
-        rating: 5,
-        text: "\"The AI understood cultural dynamics and generational gaps immediately. Gave me great ideas for having difficult family talks.\""
+        userName: "Akash Kumar",
+        userInitial: "A",
+        rating: 4.0,
+        text: "\"Helped me navigate a generational conflict regarding family expectations. The insights on boundaries were good, though some answers felt slightly generic. Useful for starting tough family conversations.\""
       }
     ],
     suggestions: [
@@ -158,8 +158,8 @@ export const companionsData: Companion[] = [
     initials: "LO",
     title: "AI Life Design Guide",
     category: "Life Purpose",
-    rating: 4.8,
-    reviewsCount: 78,
+    rating: 4.2,
+    reviewsCount: 1,
     sessionsCount: 180,
     availability: "Available 24/7",
     isVerified: true,
@@ -170,10 +170,10 @@ export const companionsData: Companion[] = [
     reviews: [
       {
         id: "r6",
-        userName: "Elena R.",
-        userInitial: "E",
-        rating: 5,
-        text: "\"Prototyping my daily habits through this AI took away so much pressure. Truly creative and helpful tool.\""
+        userName: "Akash Kumar",
+        userInitial: "A",
+        rating: 4.2,
+        text: "\"Great for prototyping daily routines and building consistency. Breaking down habits into design sprints makes planning feel less overwhelming.\""
       }
     ],
     suggestions: [
@@ -189,8 +189,8 @@ export const companionsData: Companion[] = [
     initials: "AR",
     title: "AI Executive Companion",
     category: "Career Guidance",
-    rating: 5.0,
-    reviewsCount: 156,
+    rating: 4.3,
+    reviewsCount: 1,
     sessionsCount: 410,
     availability: "Available 24/7",
     isVerified: true,
@@ -201,10 +201,10 @@ export const companionsData: Companion[] = [
     reviews: [
       {
         id: "r7",
-        userName: "Karan M.",
-        userInitial: "K",
-        rating: 5,
-        text: "\"It provided an incredibly poised and strategic sounding board for team conflicts. Highly professional AI companion.\""
+        userName: "Akash Kumar",
+        userInitial: "A",
+        rating: 4.3,
+        text: "\"An excellent sounding board for high-stakes decisions and managing professional burnout. The prompts are strategic and help clear the mental fog of leadership pressure.\""
       }
     ],
     suggestions: [
@@ -220,8 +220,8 @@ export const companionsData: Companion[] = [
     initials: "SH",
     title: "AI Breakup Recovery Guide",
     category: "Relationship Clarity",
-    rating: 4.7,
-    reviewsCount: 92,
+    rating: 4.0,
+    reviewsCount: 1,
     sessionsCount: 200,
     availability: "Available 24/7",
     isVerified: true,
@@ -232,10 +232,10 @@ export const companionsData: Companion[] = [
     reviews: [
       {
         id: "r8",
-        userName: "Rahul D.",
-        userInitial: "R",
-        rating: 5,
-        text: "\"A patient and non-judgmental space to process my breakup grief. It felt like a steady, calm anchor.\""
+        userName: "Akash Kumar",
+        userInitial: "A",
+        rating: 4.0,
+        text: "\"Offered a supportive, non-judgmental space to process grief after a difficult breakup. It's a steady anchor when you need simple grounding and emotional clarity.\""
       }
     ],
     suggestions: [
@@ -251,8 +251,8 @@ export const companionsData: Companion[] = [
     initials: "KS",
     title: "AI Spiritual Mentor",
     category: "Life Purpose",
-    rating: 4.9,
-    reviewsCount: 134,
+    rating: 4.3,
+    reviewsCount: 1,
     sessionsCount: 320,
     availability: "Available 24/7",
     isVerified: true,
@@ -263,10 +263,10 @@ export const companionsData: Companion[] = [
     reviews: [
       {
         id: "r9",
-        userName: "Anjali T.",
+        userName: "Akash Kumar",
         userInitial: "A",
-        rating: 5,
-        text: "\"The AI is a quiet, calming garden. It really helps me ground myself and quiet my racing mind.\""
+        rating: 4.3,
+        text: "\"Very helpful for guided meditation and mindfulness when my mind starts racing. The exercises are calming and help me find quick alignment during stressful days.\""
       }
     ],
     suggestions: [
@@ -282,8 +282,8 @@ export const companionsData: Companion[] = [
     initials: "DC",
     title: "AI Freelance Coach",
     category: "Career Guidance",
-    rating: 4.8,
-    reviewsCount: 88,
+    rating: 4.1,
+    reviewsCount: 1,
     sessionsCount: 190,
     availability: "Available 24/7",
     isVerified: true,
@@ -294,10 +294,10 @@ export const companionsData: Companion[] = [
     reviews: [
       {
         id: "r10",
-        userName: "Marc L.",
-        userInitial: "M",
-        rating: 5,
-        text: "\"Helped me calculate sustainable rates and structure client boundaries. A fantastic tool for freelancers.\""
+        userName: "Akash Kumar",
+        userInitial: "A",
+        rating: 4.1,
+        text: "\"Good guidance on setting boundaries with clients and structuring freelance pricing. It really helped me rethink my hourly rates and prevent burnout.\""
       }
     ],
     suggestions: [
