@@ -28,6 +28,17 @@ export interface EmotionAnalysisResult {
   secondary?: EmotionalState;
 }
 
+// ─── Domain Scope ───────────────────────────────────────────────────
+
+export interface DomainScope {
+  /** Topics this companion is an expert in */
+  inScope: string[];
+  /** Topics explicitly outside this companion's expertise */
+  outOfScope: string[];
+  /** Personality-consistent sentence for redirecting off-domain queries */
+  deflectionStyle: string;
+}
+
 // ─── Mentor Personality ─────────────────────────────────────────────
 
 export interface MentorPersonality {
@@ -37,6 +48,8 @@ export interface MentorPersonality {
   name: string;
   /** Areas of focus */
   focusAreas: string[];
+  /** Clearly defined domain boundaries for this companion */
+  domainScope: DomainScope;
   /** Communication style descriptors */
   speakingStyle: string[];
   /** Words and phrases this mentor naturally uses */
