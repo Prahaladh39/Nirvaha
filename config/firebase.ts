@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import {
+  Auth,
   getAuth,
   getReactNativePersistence,
   initializeAuth,
@@ -46,7 +47,7 @@ console.log("🔥 Project ID:", firebaseConfig.projectId);
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize Auth with appropriate persistence for platform
-let auth;
+let auth: Auth;
 if (Platform.OS === "web") {
   auth = getAuth(app);
 } else {

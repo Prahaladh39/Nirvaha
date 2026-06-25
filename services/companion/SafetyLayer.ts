@@ -126,6 +126,7 @@ const DANGER_REGEX = /\b(dangerous challenge|make (a )?bomb|make (a )?weapon|ill
 
 /**
  * Check if a message is off-topic for emotional wellness companions.
+ * Uses companion-aware domain scope for smarter redirects.
  * Returns null if on-topic, or a redirect message if off-topic.
  */
 export function checkSafety(message: string, mentorId: string): string | null {
@@ -165,8 +166,53 @@ export function checkSafety(message: string, mentorId: string): string | null {
     }
   }
 
-  // Generate a redirect in the mentor's voice
+  // Use companion-aware domain-based redirect
+  const personality = getMentorPersonality(mentorId);
+  const deflection = personality.domainScope.deflectionStyle;
+
+  // Check if the topic might belong to another companion's domain
+  const crossCompanionHint = checkCrossCompanionMatch(lowerMessage, mentorId);
+
+  if (crossCompanionHint) {
+    return `${deflection} You might find one of the other companions in Nirvaha more aligned with that topic.`;
+  }
+
+  // Fall back to personality-based deflection or generic redirect
+  if (deflection) {
+    return deflection;
+  }
+
   return getRedirectMessage(mentorId);
+}
+
+/**
+ * Checks if the user's message matches another companion's inScope domain.
+ * Returns true if it likely belongs to a different companion's expertise.
+ */
+function checkCrossCompanionMatch(lowerMessage: string, currentMentorId: string): boolean {
+  // Domain keywords mapped to companion IDs (simplified semantic check)
+  const DOMAIN_SIGNALS: Record<string, string[]> = {
+    '1': ['career', 'job', 'resume', 'interview', 'work transition', 'profession'],
+    '2': ['relationship', 'partner', 'dating', 'love', 'attachment', 'boyfriend', 'girlfriend'],
+    '3': ['meaning', 'purpose', 'values', 'ikigai', 'existential', 'identity'],
+    '5': ['family', 'parents', 'siblings', 'cultural', 'generational', 'relatives'],
+    '6': ['habit', 'routine', 'creative block', 'life design', 'prototype', 'experiment'],
+    '7': ['leadership', 'executive', 'management', 'decision making', 'team'],
+    '8': ['breakup', 'divorce', 'ex', 'heartbreak', 'moving on', 'grief'],
+    '9': ['meditation', 'spiritual', 'mindfulness', 'breathing', 'inner peace', 'grounding'],
+    '10': ['freelance', 'client', 'pricing', 'rates', 'self-employed', 'independent work'],
+  };
+
+  for (const [companionId, signals] of Object.entries(DOMAIN_SIGNALS)) {
+    if (companionId === currentMentorId) continue;
+    for (const signal of signals) {
+      if (lowerMessage.includes(signal)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 /**
