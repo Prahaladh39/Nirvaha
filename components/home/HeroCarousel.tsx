@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { View, StyleSheet, ScrollView, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import WellnessCard from './WellnessCard';
 import AiHeroCard from './AiHeroCard';
-import JournalHeroCard from './JournalHeroCard';
 import { theme } from '../../constants/theme';
 
 const { width } = Dimensions.get('window');
@@ -12,7 +11,7 @@ export default function HeroCarousel() {
   const scrollRef = useRef<ScrollView>(null);
 
   // For this translation, we're just using the WellnessCard as the primary hero card,
-  const slides = [<AiHeroCard key="1" />, <WellnessCard key="2" />, <JournalHeroCard key="3" />];
+  const slides = [<AiHeroCard key="1" />, <WellnessCard key="2" />];
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
