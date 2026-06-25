@@ -16,6 +16,7 @@
 import { ChatMessage, ConversationMessage, EmotionAnalysisResult, MentorPersonality } from './types';
 import { WisdomPattern } from '../../data/patterns';
 import { getEmotionLabel } from './EmotionAnalyzer';
+import { SafetyRisk, getMentorSpecificSafetyPrompt } from './SafetyLayer';
 
 // ─── Base System Instruction (shared by all mentors) ────────────────
 
@@ -43,6 +44,7 @@ interface PromptBuildInput {
   memorySummary: string;
   recentHistory: ConversationMessage[];
   lengthPreference: 'short' | 'long';
+  safetyRisk?: SafetyRisk | null;
 }
 
 /**
@@ -57,6 +59,7 @@ export function buildPrompt(input: PromptBuildInput): ChatMessage[] {
     memorySummary,
     recentHistory,
     lengthPreference,
+    safetyRisk,
   } = input;
 
   // ── Assemble system prompt ──────────────────────────────────────
@@ -68,6 +71,34 @@ export function buildPrompt(input: PromptBuildInput): ChatMessage[] {
 
   // 2. Base guardrails
   systemParts.push(BASE_INSTRUCTION);
+
+  // 2.5 Safety/Distress Augmentation
+  if (safetyRisk) {
+    let safetyInstruction = '';
+    
+    if (safetyRisk.category === 'self-harm') {
+      safetyInstruction = `CRITICAL SAFETY INSTRUCTION: The user is expressing self-harm or suicidal feelings. 
+You must respond with extreme empathy, warmth, and supportive validation. 
+Gently but clearly encourage them to connect with someone they trust immediately (e.g., family, parents, close friends, or a professional). 
+Never suggest or discuss methods of self-harm. Avoid sounding cold, dismissive, or robotic. Keep a hopeful and human tone.`;
+    } else if (safetyRisk.category === 'violence') {
+      safetyInstruction = `CRITICAL SAFETY INSTRUCTION: The user is expressing violence, revenge, or thoughts of hurting others. 
+You must remain calm, non-judgmental, and de-escalate the tension. 
+Do not encourage or give instructions for violence or harm. Encourage them to take a break, breathe, and reach out to someone they trust or a professional to talk through their feelings.`;
+    } else if (safetyRisk.category === 'abuse') {
+      safetyInstruction = `CRITICAL SAFETY INSTRUCTION: The user mentions abuse or domestic violence. 
+Respond with deep support and validation. Gently encourage them to connect with trusted friends, family members, or seek support from professionals or safety hotlines.`;
+    } else if (safetyRisk.category === 'danger') {
+      safetyInstruction = `CRITICAL SAFETY INSTRUCTION: The user is asking about dangerous or illegal activities. 
+Politely refuse to assist or guide them in any harmful behavior. Offer a supportive, positive pivot and encourage them to focus on safe, productive ways to address their situation.`;
+    } else if (safetyRisk.category === 'hopelessness') {
+      safetyInstruction = `CRITICAL SAFETY INSTRUCTION: The user is experiencing deep hopelessness or emotional breakdown. 
+Be exceptionally gentle, warm, and validation-focused. Let them know it's okay to feel overwhelmed, and suggest taking a break or sharing these feelings with a close friend or trusted person.`;
+    }
+
+    const mentorSpecificInstruction = getMentorSpecificSafetyPrompt(mentorPersonality.id, safetyRisk);
+    systemParts.push(`${safetyInstruction}\n${mentorSpecificInstruction}`);
+  }
 
   // 3. Emotional context
   const emotionLabel = getEmotionLabel(emotionAnalysis.primary);

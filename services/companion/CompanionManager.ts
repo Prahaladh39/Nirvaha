@@ -38,7 +38,7 @@ import {
   addMessageToConversation,
   getRecentHistory,
 } from './ConversationHistoryManager';
-import { checkSafety } from './SafetyLayer';
+import { checkSafety, classifySafetyRisk, validateAndModerateResponse } from './SafetyLayer';
 import { buildPrompt } from './PromptBuilder';
 
 // ─── Fallback Response ──────────────────────────────────────────────
@@ -64,26 +64,31 @@ class CompanionManagerClass {
     // Get or create active session
     let session = await this.getOrCreateSession(mentorId, conversationId);
 
-    // 1. Safety check — redirect off-topic messages
-    const safetyRedirect = checkSafety(message, mentorId);
-    if (safetyRedirect) {
-      // Still save the user message and redirect as part of conversation
-      const userMsg = this.createMessage('user', message);
-      session = await addMessageToConversation(session, userMsg);
+    // 1. Safety classifier & Risk assessment
+    const safetyRisk = classifySafetyRisk(message);
 
-      const redirectMsg = this.createMessage('assistant', safetyRedirect);
-      session = await addMessageToConversation(session, redirectMsg);
-      this.activeSessions.set(mentorId, session);
+    // 2. Off-topic check — redirect off-topic messages (skip if safety risk is present)
+    if (!safetyRisk) {
+      const safetyRedirect = checkSafety(message, mentorId);
+      if (safetyRedirect) {
+        // Still save the user message and redirect as part of conversation
+        const userMsg = this.createMessage('user', message);
+        session = await addMessageToConversation(session, userMsg);
 
-      return {
-        message: safetyRedirect,
-        emotionalState: { primary: 'reflection', confidence: 0.3 },
-        conversationId: session.id,
-        mentorId,
-      };
+        const redirectMsg = this.createMessage('assistant', safetyRedirect);
+        session = await addMessageToConversation(session, redirectMsg);
+        this.activeSessions.set(mentorId, session);
+
+        return {
+          message: safetyRedirect,
+          emotionalState: { primary: 'reflection', confidence: 0.3 },
+          conversationId: session.id,
+          mentorId,
+        };
+      }
     }
 
-    // 2. Add user message to conversation
+    // 3. Add user message to conversation
     const userMsg = this.createMessage('user', message);
     session = await addMessageToConversation(session, userMsg);
 
@@ -113,6 +118,7 @@ class CompanionManagerClass {
       memorySummary,
       recentHistory: recentHistory.slice(0, -1), // Exclude current message (already in prompt)
       lengthPreference,
+      safetyRisk,
     });
 
     // 8. Generate AI response
@@ -127,6 +133,9 @@ class CompanionManagerClass {
       console.error('[CompanionManager] AI generation error:', error);
       responseText = FALLBACK_RESPONSE;
     }
+
+    // 8.5 Safety validation and response moderation
+    responseText = validateAndModerateResponse(responseText, message, mentorId, safetyRisk);
 
     // 9. Save assistant response to conversation
     const assistantMsg = this.createMessage('assistant', responseText, emotionAnalysis.primary);

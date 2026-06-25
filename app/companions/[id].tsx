@@ -39,8 +39,7 @@ export default function CompanionBioScreen() {
             <View style={styles.ratingRow}>
               <Star size={16} color={theme.colors.gold} fill={theme.colors.gold} />
               <Text style={styles.ratingText}>
-                <Text style={styles.ratingValue}>{companion.rating} </Text>
-                <Text style={styles.ratingCount}>({companion.reviewsCount})</Text>
+                <Text style={styles.ratingValue}>{companion.rating}</Text>
               </Text>
               <Text style={styles.dotSeparator}>•</Text>
               <Text style={styles.availabilityText}>{companion.availability}</Text>
@@ -87,8 +86,8 @@ export default function CompanionBioScreen() {
                     <Star 
                       key={i} 
                       size={14} 
-                      color={i < review.rating ? theme.colors.gold : '#E2E8F0'} 
-                      fill={i < review.rating ? theme.colors.gold : 'transparent'} 
+                      color={i < Math.round(review.rating) ? theme.colors.gold : '#E2E8F0'} 
+                      fill={i < Math.round(review.rating) ? theme.colors.gold : 'transparent'} 
                     />
                   ))}
                 </View>
@@ -96,10 +95,6 @@ export default function CompanionBioScreen() {
               <Text style={styles.reviewText}>{review.text}</Text>
             </View>
           ))}
-          
-          <Pressable style={styles.seeAllReviewsBtn}>
-            <Text style={styles.seeAllReviewsText}>See all {companion.reviewsCount} reviews</Text>
-          </Pressable>
         </View>
 
       </ScrollView>
