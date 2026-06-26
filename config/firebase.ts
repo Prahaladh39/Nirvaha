@@ -4,9 +4,9 @@ import { getApp, getApps, initializeApp } from "firebase/app";
 import {
   Auth,
   getAuth,
-  getReactNativePersistence,
   initializeAuth,
 } from "firebase/auth";
+import { getReactNativePersistence } from "@firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { Platform } from "react-native";
 

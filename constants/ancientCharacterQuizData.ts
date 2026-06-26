@@ -116,250 +116,250 @@ export interface QuizQuestion {
 
 export const QUESTIONS: QuizQuestion[] = [
   {
-    text: "When chaotic or sudden pressure rises, what is your most reliable anchor?",
+    text: "When sudden pressure or chaos rises, what keeps you grounded?",
     options: [
       {
-        text: "A steady, unshakeable adherence to my primary duties and duty codes.",
+        text: "Following my duties and code of conduct.",
         weight: { rama: 3, sita: 1 },
         trait: "Duty-Driven"
       },
       {
-        text: "Stepping back to analyze all moving pieces and formulate a clever path.",
+        text: "Stepping back to analyze the situation and find a clever solution.",
         weight: { krishna: 3, arjuna: 1 },
         trait: "Analytical"
       },
       {
-        text: "Absorbing the immediate impact to protect and support those around me.",
+        text: "Protecting and supporting the people around me.",
         weight: { hanuman: 3, karna: 1 },
         trait: "Protector"
       },
       {
-        text: "Focusing aggressively on a single target outcome and executing through force of will.",
+        text: "Focusing entirely on my goal and pushing through with willpower.",
         weight: { arjuna: 3, karna: 1 },
         trait: "Driven"
       }
     ]
   },
   {
-    text: "In what way do you most naturally lead or influence other people?",
+    text: "How do you naturally lead or influence the people around you?",
     options: [
       {
-        text: "By quiet personal example and remaining consistent to strict standards.",
+        text: "By setting a quiet example and holding high standards.",
         weight: { rama: 3, sita: 2 },
         trait: "Exemplary"
       },
       {
-        text: "By listening deeply, using diplomacy, and building shared alignment.",
+        text: "By listening, using diplomacy, and bringing people together.",
         weight: { krishna: 3, arjuna: 1 },
         trait: "Diplomatic"
       },
       {
-        text: "By serving first, taking on heavy lifts, and highlighting the team's power.",
+        text: "By serving others, doing the hard work, and supporting the team.",
         weight: { hanuman: 3, sita: 1 },
         trait: "Altruistic"
       },
       {
-        text: "By setting incredibly high performance benchmarks and championing skill development.",
+        text: "By setting high goals and helping others improve their skills.",
         weight: { arjuna: 3, karna: 2 },
         trait: "Benchmark-Setter"
       }
     ]
   },
   {
-    text: "If someone who has previously let you down asks you for help, what is your stance?",
+    text: "How do you react if someone who let you down asks for help?",
     options: [
       {
-        text: "I offer help that is highly reasonable, remaining polite but preserving firm boundaries.",
+        text: "I help politely while keeping clear, firm boundaries.",
         weight: { rama: 3, sita: 1 },
         trait: "Measured"
       },
       {
-        text: "I assess their pattern and provide help that strategically inspires overall growth.",
+        text: "I help them in a way that helps them grow and learn.",
         weight: { krishna: 3, arjuna: 1 },
         trait: "Clever Guide"
       },
       {
-        text: "I forgive immediately and offer help without counting past transactional tallies.",
+        text: "I forgive them immediately and help without holding a grudge.",
         weight: { hanuman: 3, sita: 2 },
         trait: "Deeply Caring"
       },
       {
-        text: "I give them the ultimate level of dedication, prioritizing helpful generosity over pride.",
+        text: "I give my full support, prioritizing generosity over pride.",
         weight: { karna: 3, hanuman: 1 },
         trait: "Magnanimous"
       }
     ]
   },
   {
-    text: "When serious internal doubt or confusion clouds your path, how do you seek clarity?",
+    text: "How do you find clarity when you feel deep doubt or confusion?",
     options: [
       {
-        text: "I lean back onto established disciplines, values, and standard protocols.",
+        text: "I rely on my daily routines, values, and rules.",
         weight: { rama: 3, sita: 1 },
         trait: "Disciplined"
       },
       {
-        text: "I look at the situation from multiple perspectives to find an untraditional solution.",
+        text: "I look at the situation from different angles to find a creative solution.",
         weight: { krishna: 3, arjuna: 2 },
         trait: "Holistic"
       },
       {
-        text: "I throw myself into constructive action, finding focus through practical service.",
+        text: "I stay busy and focus on helping others or doing practical work.",
         weight: { hanuman: 3, rama: 1 },
         trait: "Action-Oriented"
       },
       {
-        text: "I engage in intense self-exploration, analyzing my own skill deficits and fears.",
+        text: "I look inward, analyzing my fears and areas for growth.",
         weight: { arjuna: 3, karna: 2 },
         trait: "Introspective"
       }
     ]
   },
   {
-    text: "What does the concept of absolute loyalty mean to you?",
+    text: "When you think of absolute loyalty, what does it mean to you?",
     options: [
       {
-        text: "Fulfilling promises and obligations even if they demand extreme personal sacrifice.",
+        text: "Keeping my promises, even at a high personal cost.",
         weight: { rama: 3, sita: 1 },
         trait: "Fulfilling"
       },
       {
-        text: "Deeply supporting a partner or vision, using creative means to ensure their ultimate success.",
+        text: "Supporting a vision or person and finding creative ways to help them succeed.",
         weight: { krishna: 3, arjuna: 1 },
         trait: "Strategic Ally"
       },
       {
-        text: "Pure devotion and humble assistance, expecting nothing back in return.",
+        text: "Serving others with pure devotion, expecting nothing in return.",
         weight: { hanuman: 3, sita: 1 },
         trait: "Pure Devotion"
       },
       {
-        text: "Standing unflinchingly alongside allies or choices, despite knowing critical flaws.",
+        text: "Standing by my allies and choices, even when I see their flaws.",
         weight: { karna: 3, rama: 1 },
         trait: "Unbreakable"
       }
     ]
   },
   {
-    text: "When confronting unfair struggles or deep hardship, you naturally tend to:",
+    text: "How do you naturally respond when facing unfair struggles or deep hardships?",
     options: [
       {
-        text: "Maintain absolute outward composure, quietly executing what is required.",
+        text: "Stay calm on the outside and quietly do what needs to be done.",
         weight: { rama: 3, sita: 2 },
         trait: "Poised"
       },
       {
-        text: "Remain dynamically flexible, adapting elements to find strategic leverage.",
+        text: "Stay flexible and adapt quickly to find a strategic advantage.",
         weight: { krishna: 3, arjuna: 1 },
         trait: "Versatile"
       },
       {
-        text: "Refuse to let the trial break your integrity, harboring high quiet inner resilience.",
+        text: "Hold onto my integrity and quiet inner strength, refusing to break.",
         weight: { sita: 3, hanuman: 2 },
         trait: "Silent Force"
       },
       {
-        text: "Sustain solid pride, grinding diligently to prove your unyielding mettle.",
+        text: "Keep my pride high and work hard to prove my strength.",
         weight: { karna: 3, arjuna: 2 },
         trait: "Proud Fortitude"
       }
     ]
   },
   {
-    text: "What drives your core interest to improve and achieve skill mastery?",
+    text: "What drives your desire to improve yourself and master your skills?",
     options: [
       {
-        text: "The high responsibility to serve as a morally stable protector of those around me.",
+        text: "The responsibility to protect and support the people around me.",
         weight: { rama: 3, hanuman: 1 },
         trait: "Protective"
       },
       {
-        text: "The sheer, playful joy of understanding complex patterns and life dynamics.",
+        text: "The joy of understanding complex ideas and how things work.",
         weight: { krishna: 3, arjuna: 1 },
         trait: "Inquisitive"
       },
       {
-        text: "The burning dream of singular mastery, targeted focus, and unmatched excellence.",
+        text: "The desire for perfect focus, skill mastery, and unmatched excellence.",
         weight: { arjuna: 3, karna: 1 },
         trait: "Precision-focused"
       },
       {
-        text: "The relentless urge to overcome societal barriers and validate my inherent capacities.",
+        text: "The drive to overcome obstacles and prove my true potential.",
         weight: { karna: 3, arjuna: 1 },
         trait: "Tenacious Rise"
       }
     ]
   },
   {
-    text: "When a valued close relationship experiences tense friction, you normally:",
+    text: "How do you handle tension or conflict in a close relationship?",
     options: [
       {
-        text: "Address the issue directly through structured communication and high boundaries.",
+        text: "Talk about the issue directly while keeping clear boundaries.",
         weight: { rama: 3, sita: 2 },
         trait: "Constructive"
       },
       {
-        text: "De-escalate with humor, custom empathy, and wise indirect guidance.",
+        text: "Calm things down with humor, empathy, and gentle advice.",
         weight: { krishna: 3, hanuman: 1 },
         trait: "Harmonizing"
       },
       {
-        text: "Reflect internally first, preferring to absorb immediate emotional weight for peacemaking.",
+        text: "Reflect inward first, willing to carry the emotional weight to keep peace.",
         weight: { hanuman: 3, sita: 2 },
         trait: "Self-sacrificing"
       },
       {
-        text: "Stand firm in your position, demanding clear mutual respect and direct clarity.",
+        text: "Stand my ground, demanding clear mutual respect and direct honesty.",
         weight: { arjuna: 3, karna: 1 },
         trait: "Direct"
       }
     ]
   },
   {
-    text: "How do you view personal ambition and structural success?",
+    text: "How do you view the role of personal ambition and success in life?",
     options: [
       {
-        text: "Ambition must always serve ethical collective guardrails and moral goodness.",
+        text: "Ambition should always follow moral values and help the common good.",
         weight: { rama: 3, sita: 1 },
         trait: "Ethical-drive"
       },
       {
-        text: "A beautiful interactive journey of moves, lessons, and strategic outcomes.",
+        text: "A dynamic journey of strategy, learning, and interesting choices.",
         weight: { krishna: 3, arjuna: 1 },
         trait: "Playful Planner"
       },
       {
-        text: "I do not seek personal trophies; I find ultimate purpose in supporting great ideas.",
+        text: "I don't need personal trophies; I prefer supporting a cause or others.",
         weight: { hanuman: 3, sita: 1 },
         trait: "Selfless Carrier"
       },
       {
-        text: "It is an internal fire prompting me to challenge all human limits and achieve greatness.",
+        text: "An inner drive to challenge my limits and achieve greatness.",
         weight: { arjuna: 3, karna: 2 },
         trait: "Limit-challenger"
       }
     ]
   },
   {
-    text: "What is your deepest, most consistent asset during times of existential crisis?",
+    text: "What is your most reliable strength during a major crisis?",
     options: [
       {
-        text: "An unshakeable, clean conscience and fidelity to what is honorable.",
+        text: "A clear conscience and staying true to what is honorable.",
         weight: { rama: 3, sita: 2 },
         trait: "Honorable"
       },
       {
-        text: "A versatile mind capable of finding light and strategy in absolute darkness.",
+        text: "A flexible mind that finds opportunities and strategies in dark times.",
         weight: { krishna: 3, arjuna: 1 },
         trait: "Illuminated"
       },
       {
-        text: "An absolute focus on selfless loyalty and trust in a purpose larger than myself.",
+        text: "My loyalty and deep trust in a purpose larger than myself.",
         weight: { hanuman: 3, sita: 1 },
         trait: "Faith-centered"
       },
       {
-        text: "An unyielding, noble pride that keeps my head high despite setbacks.",
+        text: "An unyielding pride that keeps my head held high through setbacks.",
         weight: { karna: 3, arjuna: 1 },
         trait: "Noble Dignity"
       }

@@ -1,7 +1,7 @@
 module.exports = {
   expo: {
-    name: "NirVahaApp",
-    slug: "NirVahaApp",
+    name: "NirVaha",
+    slug: "NirVaha",
     owner: "prahaladh",
     version: "1.0.0",
     orientation: "portrait",
@@ -14,6 +14,7 @@ module.exports = {
       bundleIdentifier: "com.prahaladh.nirvahaapp"
     },
     android: {
+      package: "com.prahaladh.nirvahaapp",
       adaptiveIcon: {
         foregroundImage: "./assets/images/icon.png",
         backgroundColor: "#FFFFFF"
@@ -30,12 +31,12 @@ module.exports = {
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#082F03",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#082F03"
           }
         }
       ],

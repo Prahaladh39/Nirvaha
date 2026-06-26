@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, FlatList, Pressable, TextInput, ActivityIndicator, Platform } from 'react-native';
 import { router } from 'expo-router';
-import { ArrowLeft, Search, Users, Bell, Sparkles, Heart, Plus } from 'lucide-react-native';
+import { ArrowLeft, Search, Bell, Heart, Plus } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
@@ -198,14 +198,12 @@ export default function SpaceScreen() {
             </View>
           </View>
           <View style={styles.headerRight}>
-            <Users size={20} color="rgba(255,255,255,0.7)" />
             <Pressable onPress={() => router.push('/space/notifications')}>
               <Bell size={20} color="rgba(255,255,255,0.7)" />
               {unreadCount > 0 && (
                 <View style={styles.unreadBadge} />
               )}
             </Pressable>
-            <Sparkles size={20} color={theme.colors.gold} />
           </View>
         </View>
         
