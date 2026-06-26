@@ -500,7 +500,6 @@ export default function SoundPlayer({
 }: SoundPlayerProps) {
   const player = useAudioPlayer(track?.source ?? require("../../assets/audio/desert-glass-loop.mp3"), { updateInterval: 200 });
   const status = useAudioPlayerStatus(player);
-  const [loopEnabled, setLoopEnabled] = useState(true);
   const [progressWidth, setProgressWidth] = useState(0);
   const [isPlayState, setIsPlayState] = useState(false);
 
@@ -524,8 +523,7 @@ export default function SoundPlayer({
       } catch (error) {
         console.warn("Unable to replace audio source", error);
       }
-      setLoopEnabled(true);
-      player.loop = false; // Disable native loop so didJustFinish will fire
+      player.loop = true; // Enable native loop
       player.pause();
       player.seekTo(0).catch(() => undefined);
       setIsPlayState(false);
@@ -536,26 +534,42 @@ export default function SoundPlayer({
   }, [player, track]);
 
   useEffect(() => {
-    player.loop = false; // Disable native loop
-  }, [player]);
+    player.loop = true; // Enable native loop
+  }, [player, track]);
 
   useEffect(() => {
-    if (status.playing) {
-      setIsPlayState(true);
-    } else if (!status.playing && !status.didJustFinish) {
-      setIsPlayState(false);
+    if (status.isLoaded) {
+      player.loop = true;
     }
-  }, [status.playing, status.didJustFinish]);
+  }, [status.isLoaded, player]);
 
   useEffect(() => {
     if (status.didJustFinish) {
       player.seekTo(0)
         .then(() => {
           player.play();
+          setIsPlayState(true);
         })
-        .catch((err) => console.warn("Loop seek error", err));
+        .catch((error) => {
+          console.warn("Unable to loop audio on finish", error);
+        });
     }
   }, [status.didJustFinish, player]);
+
+  useEffect(() => {
+    setIsPlayState(status.playing);
+  }, [status.playing]);
+
+  // Clean up playback when component unmounts
+  useEffect(() => {
+    return () => {
+      try {
+        player.pause();
+      } catch {
+        // ignore
+      }
+    };
+  }, [player]);
 
   const isPlaying = isPlayState;
   const duration = status.duration || 0;
@@ -618,6 +632,14 @@ export default function SoundPlayer({
     const seconds = Math.floor(currentTime);
     return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
   }, [currentTime]);
+
+  const formattedDuration = useMemo(() => {
+    const totalSec = Math.floor(duration);
+    if (totalSec > 0) {
+      return `${Math.floor(totalSec / 60)}:${String(totalSec % 60).padStart(2, "0")}`;
+    }
+    return track?.duration || "0:00";
+  }, [duration, track?.duration]);
 
   const handlePlayPause = () => {
     if (!track) return;
@@ -835,7 +857,7 @@ export default function SoundPlayer({
                 </Pressable>
                 <View style={styles.timeRow}>
                   <Text style={styles.timeText}>{elapsed}</Text>
-                  <Text style={styles.timeText}>{track.duration}</Text>
+                  <Text style={styles.timeText}>{formattedDuration}</Text>
                 </View>
               </View>
 
@@ -919,7 +941,7 @@ export default function SoundPlayer({
 
                 <LeafIllustration color={themeColors.accent} />
                 <Text style={[styles.reflectionQuote, { color: themeColors.secondary }]}>
-                  "{themeColors.quote}"
+                  &quot;{themeColors.quote}&quot;
                 </Text>
               </View>
             </ScrollView>
