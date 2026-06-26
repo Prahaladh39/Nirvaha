@@ -1,7 +1,7 @@
 module.exports = {
   expo: {
     name: "NirVaha",
-    slug: "NirVaha",
+    slug: "NirVahaApp",
     owner: "prahaladh",
     version: "1.0.0",
     orientation: "portrait",
