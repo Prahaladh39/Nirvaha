@@ -19,7 +19,7 @@ export default function CompanionCard({ companion, width = 140, height = 180 }: 
       onPress={() => router.push(`/companions/${companion.id}`)}
     >
       <Image
-        source={{ uri: companion.imageUrl }}
+        source={typeof companion.imageUrl === 'string' ? { uri: companion.imageUrl } : companion.imageUrl}
         style={styles.image}
         contentFit="cover"
         transition={300}

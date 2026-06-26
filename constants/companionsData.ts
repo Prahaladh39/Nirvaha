@@ -22,7 +22,7 @@ export interface Companion {
   isCertified: boolean;
   about: string;
   tags: string[];
-  imageUrl: string;
+  imageUrl: any;
   reviews: CompanionReview[];
   suggestions: string[];
 }
@@ -42,7 +42,7 @@ export const companionsData: Companion[] = [
     isCertified: false,
     about: "I'm an AI companion focused on helping you navigate career transitions, discover your purpose, and build the confidence to explore new professional paths.",
     tags: ["Career transitions", "Purpose discovery", "Confidence building"],
-    imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600",
+    imageUrl: require("../assets/images/1.jpeg"),
     reviews: [
       {
         id: "r1",
@@ -73,7 +73,7 @@ export const companionsData: Companion[] = [
     isCertified: false,
     about: "I'm an AI companion focused on helping you navigate relationship challenges with thoughtful conversations, emotional clarity, and healthier communication.",
     tags: ["Communication", "Attachment Styles", "Boundaries"],
-    imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=600",
+    imageUrl: require("../assets/images/2.jpeg"),
     reviews: [
       {
         id: "r2",
@@ -104,7 +104,7 @@ export const companionsData: Companion[] = [
     isCertified: false,
     about: "I'm a specialized AI wellness guide blending Eastern philosophy with modern psychology to help you clarify your values and discover your unique ikigai.",
     tags: ["Ikigai", "Mindfulness", "Existential Clarity"],
-    imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600",
+    imageUrl: require("../assets/images/3.jpeg"),
     reviews: [
       {
         id: "r3",
@@ -135,7 +135,7 @@ export const companionsData: Companion[] = [
     isCertified: false,
     about: "I'm a specialized AI companion designed to help you think through complex family dynamics, cultural expectations, and conflict resolution.",
     tags: ["Family Dynamics", "Cultural Identity", "Conflict Resolution"],
-    imageUrl: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=600",
+    imageUrl: require("../assets/images/4.jpeg"),
     reviews: [
       {
         id: "r5",
@@ -166,7 +166,7 @@ export const companionsData: Companion[] = [
     isCertified: false,
     about: "I'm an AI life design coach here to help you prototype habits, test creative life experiments, and map out your personal growth journey.",
     tags: ["Design Thinking", "Life Planning", "Creative Block"],
-    imageUrl: "https://images.unsplash.com/photo-1552058544-f2b08422138a?auto=format&fit=crop&q=80&w=600",
+    imageUrl: require("../assets/images/5.jpeg"),
     reviews: [
       {
         id: "r6",
