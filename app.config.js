@@ -1,8 +1,8 @@
 module.exports = {
   expo: {
     name: "NirVaha",
-    slug: "NirVahaApp",
-    owner: "prahaladh",
+    slug: "nirvaha",
+    owner: "akash1803s-team",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
@@ -11,10 +11,10 @@ module.exports = {
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.prahaladh.nirvahaapp"
+      bundleIdentifier: "org.nirvaha.app"
     },
     android: {
-      package: "com.prahaladh.nirvahaapp",
+      package: "org.nirvaha.app",
       adaptiveIcon: {
         foregroundImage: "./assets/images/icon.png",
         backgroundColor: "#FFFFFF"
@@ -50,7 +50,7 @@ module.exports = {
     },
     extra: {
       eas: {
-        projectId: "f7634c70-3f00-4876-9301-6af23240f928"
+        projectId: "fee74e4b-51d9-4c95-a160-c11d63160417"
       },
       "EXPO_PUBLIC_API_BASE_URL": "https://backend-six-lac-91.vercel.app",
       "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyCrhis9EBbYDRncJXPThQStBaxJy-sTK3o",
