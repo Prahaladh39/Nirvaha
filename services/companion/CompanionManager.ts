@@ -38,7 +38,7 @@ import {
   addMessageToConversation,
   getRecentHistory,
 } from './ConversationHistoryManager';
-import { checkSafety, classifySafetyRisk, validateAndModerateResponse } from './SafetyLayer';
+import { checkSafety, classifySafetyRisk, validateAndModerateResponse, checkPolicyViolations } from './SafetyLayer';
 import { buildPrompt } from './PromptBuilder';
 
 // ─── Fallback Response ──────────────────────────────────────────────
@@ -63,6 +63,27 @@ class CompanionManagerClass {
 
     // Get or create active session
     let session = await this.getOrCreateSession(mentorId, conversationId);
+
+    // 0. Check for prompt injection, medical, financial, legal, or memory policy violations
+    const policyResult = checkPolicyViolations(message, mentorId);
+    if (policyResult.isViolated) {
+      console.warn(`[SECURITY AUDIT] Policy violation detected in user message: Type=${policyResult.violationType}, InputLength=${message.length}`);
+      
+      // Still save the user message and redirect as part of conversation history
+      const userMsg = this.createMessage('user', message);
+      session = await addMessageToConversation(session, userMsg);
+
+      const assistantMsg = this.createMessage('assistant', policyResult.responseText || 'I cannot assist with that request.');
+      session = await addMessageToConversation(session, assistantMsg);
+      this.activeSessions.set(mentorId, session);
+
+      return {
+        message: policyResult.responseText || 'I cannot assist with that request.',
+        emotionalState: { primary: 'reflection', confidence: 0.3 },
+        conversationId: session.id,
+        mentorId,
+      };
+    }
 
     // 1. Safety classifier & Risk assessment
     const safetyRisk = classifySafetyRisk(message);

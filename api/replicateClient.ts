@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Asset } from 'expo-asset';
 
-const PIAPI_KEY = 'f5e2ab0ea2bf6027960c27ccbdba37f37e43cc2f05abf9d47fa7fdcf6a3f2477';
+const PIAPI_KEY = process.env.EXPO_PUBLIC_PIAPI_KEY || '';
 
 /**
  * Compresses an image and converts it to a base64 Data URI.
