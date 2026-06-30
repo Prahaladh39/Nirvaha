@@ -189,6 +189,90 @@ export function checkSafety(message: string, mentorId: string): string | null {
  * Checks if the user's message matches another companion's inScope domain.
  * Returns true if it likely belongs to a different companion's expertise.
  */
+// ─── Semantic Safety & Security Policy Violations ────────────────────
+
+const PROMPT_INJECTION_REGEX = /\b(ignore( all)? (previous|above|prior) (instructions?|rules?|directives?|prompts?|guidelines?)|you are now|developer mode|dan mode|jailbreak(ing|ed)?|system prompts?|reveal (instructions?|rules?|prompts?|configurations?|personality|persona|settings)|output (system|hidden|internal|raw) (prompts?|instructions?|rules?)|forget (your )?(instructions?|rules?|directives?|guidelines?)|pretend (you are|to be)|act as|simulate|roleplay as|repeat (the )?(above|system|prompt)|print (the )?(above|system|prompt)|do not follow (the )?(instructions?|rules?)|bypass(ing)? (safety|rules|guidelines)|who (programmed|created|designed) you|system instructions?|hidden.*(rules?|instructions?))\b/i;
+
+const MEDICAL_ADVICE_REGEX = /\b(diagnose|what disease|do i have (cancer|diabetes|covid|flu|infection|illness)|prescribe|medication|dosage|how much (paracetamol|ibuprofen|aspirin|antibiotic|xanax|prozac)|interpret.*\breport|interpret.*\bwork|emergency treatment|treat (cancer|appendicitis|heart attack|stroke))\b/i;
+
+const FINANCIAL_ADVICE_REGEX = /\b(investment advice|what stock(s)? should i (buy|sell)|should i invest in|cryptocurrency|crypto recommendation|bitcoin|ethereum|tax advice|tax planning|evad(e|ing)?.*\btax(es)?|tax(es)?.*\bevad(e|ing)?|loan advice|which loan|trading recommendation|trading strategy|stock recommendations)\b/i;
+
+const LEGAL_ADVICE_REGEX = /\b(legal advice|legal opinion|court advice|how to sue|sue someone|draft.*\bcontract|draft.*\bagreement|legal interpretation|is this legal|is it legal to)\b/i;
+
+const MEMORY_ACCESS_REGEX = /\b(read (my )?(internal )?memory|reveal (my )?memory|show (my )?(memory|embeddings|stored summaries|hidden metadata)|what is in your memory summary|what do you remember about me|display (my )?memory)\b/i;
+
+export interface PolicyCheckResult {
+  isViolated: boolean;
+  violationType: 'injection' | 'medical' | 'financial' | 'legal' | 'memory' | null;
+  responseText: string | null;
+}
+
+export function checkPolicyViolations(message: string, mentorId: string): PolicyCheckResult {
+  const lowerMessage = message.toLowerCase().trim();
+
+  // 1. Prompt Injection & Jailbreak
+  if (PROMPT_INJECTION_REGEX.test(lowerMessage)) {
+    const injectionResponses: Record<string, string> = {
+      '1': "Ha! Nice try, but I'm here to focus on your career transitions and goals. What's actually going on in your world today?",
+      '2': "I appreciate the creative attempt, but I'm much better at helping with relationship challenges and communication. What's on your mind?",
+      '3': "My path is to offer wisdom and perspective from the Gita, not to share system details. Tell me, what's really weighing on your heart?",
+      '5': "I'm here to support you with family and relationships, not system configurations. Is there something about your life you'd like to share?",
+      '6': "Designing a prompt is a different challenge than designing your life! Let's focus on the life part. What are you working on?",
+      '7': "I coach leaders through high-stakes situations, so let's stick to your goals and resilience. What's the real challenge?",
+      '8': "I'm here to help you heal and start over, not debug. Let's focus on your journey. How are you feeling?",
+      '9': "Take a breath. Let's return to presence and peace, rather than system prompts. What does your inner world need right now?",
+      '10': "That's not my focus—I'm the freelance and business guy. Let's talk about your work-life balance or goals instead.",
+    };
+    return {
+      isViolated: true,
+      violationType: 'injection',
+      responseText: injectionResponses[mentorId] || "I'm just a friend here to listen and walk with you. Let's focus on what you're going through. What's on your mind today?",
+    };
+  }
+
+  // 2. Medical advice
+  if (MEDICAL_ADVICE_REGEX.test(lowerMessage)) {
+    return {
+      isViolated: true,
+      violationType: 'medical',
+      responseText: "I'm here as a supportive companion, but I can't offer medical diagnoses, interpret reports, or suggest treatments. Please consult a qualified doctor or healthcare professional for medical concerns. How are you holding up emotionally, though?",
+    };
+  }
+
+  // 3. Financial advice
+  if (FINANCIAL_ADVICE_REGEX.test(lowerMessage)) {
+    return {
+      isViolated: true,
+      violationType: 'financial',
+      responseText: "I can't provide financial advice, stock picks, or loan recommendations. For those matters, it's best to speak with a certified financial advisor. If you're feeling stressed or overwhelmed by work or money, we can certainly talk through the emotional side of that.",
+    };
+  }
+
+  // 4. Legal advice
+  if (LEGAL_ADVICE_REGEX.test(lowerMessage)) {
+    return {
+      isViolated: true,
+      violationType: 'legal',
+      responseText: "I'm not equipped to give legal advice, interpret laws, or draft legal agreements. Please contact a qualified lawyer or legal counsel for help with that. Is there an emotional or career aspect of this situation you'd like to discuss?",
+    };
+  }
+
+  // 5. Memory access
+  if (MEMORY_ACCESS_REGEX.test(lowerMessage)) {
+    return {
+      isViolated: true,
+      violationType: 'memory',
+      responseText: "I only hold onto the themes of our conversations to help guide you. I don't expose raw memory summaries or files. Is there a specific detail or recurring topic you wanted to talk about?",
+    };
+  }
+
+  return {
+    isViolated: false,
+    violationType: null,
+    responseText: null,
+  };
+}
+
 function checkCrossCompanionMatch(lowerMessage: string, currentMentorId: string): boolean {
   // Domain keywords mapped to companion IDs (simplified semantic check)
   const DOMAIN_SIGNALS: Record<string, string[]> = {
@@ -214,6 +298,7 @@ function checkCrossCompanionMatch(lowerMessage: string, currentMentorId: string)
 
   return false;
 }
+
 
 /**
  * Classifies if a user message concerns a sensitive/high-risk safety topic.
