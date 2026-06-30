@@ -1,14 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView, ScrollView, Linking, Platform, ActivityIndicator } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  Pressable, 
+  SafeAreaView, 
+  ScrollView, 
+  Linking, 
+  Platform, 
+  ActivityIndicator, 
+  Modal, 
+  TextInput, 
+  Alert 
+} from 'react-native';
 import { router, Stack } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft, Trash2, ShieldAlert, Eye, EyeOff } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import Toast from 'react-native-toast-message';
 import { useAuth } from '../../contexts/AuthContext';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { 
+  deleteUser, 
+  reauthenticateWithCredential, 
+  EmailAuthProvider 
+} from 'firebase/auth';
+import { 
+  doc, 
+  getDoc, 
+  collection, 
+  getDocs, 
+  query, 
+  where, 
+  writeBatch 
+} from 'firebase/firestore';
+import { auth, db } from '../../config/firebase';
 import Constants from 'expo-constants';
 
 const BulletItem = ({ text }: { text: string }) => (
@@ -22,6 +49,13 @@ export default function DeletionPolicyScreen() {
   const { user } = useAuth();
   const [userData, setUserData] = useState<any>(null);
   const [fetchingProfile, setFetchingProfile] = useState(true);
+  
+  // Deletion state
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -109,6 +143,136 @@ ____________________________________`;
     }
   };
 
+  // Check if user requires password re-authentication
+  const requiresPasswordReauth = (): boolean => {
+    if (!user) return false;
+    return user.providerData.some(provider => provider.providerId === 'password');
+  };
+
+  const initiateDeleteFlow = () => {
+    if (!user) return;
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setShowConfirmModal(false);
+    if (requiresPasswordReauth()) {
+      setPassword('');
+      setShowPasswordModal(true);
+    } else {
+      executeDeletion();
+    }
+  };
+
+  const handlePasswordSubmit = () => {
+    if (!password.trim()) {
+      Alert.alert("Password Required", "Please enter your password to confirm deletion.");
+      return;
+    }
+    setShowPasswordModal(false);
+    executeDeletion(password.trim());
+  };
+
+  const executeDeletion = async (authPassword?: string) => {
+    if (!user) return;
+    setIsDeleting(true);
+
+    try {
+      // 1. Re-authenticate if password is provided
+      if (authPassword && user.email) {
+        const credential = EmailAuthProvider.credential(user.email, authPassword);
+        await reauthenticateWithCredential(user, credential);
+      }
+
+      console.warn(`[SECURITY AUDIT] Commencing complete data wipe for user UID: ${user.uid}`);
+
+      // 2. Transactional Firestore Wipe
+      const batch = writeBatch(db);
+      const uid = user.uid;
+
+      // Delete Profile Doc
+      const userDocRef = doc(db, 'users', uid);
+      batch.delete(userDocRef);
+
+      // Delete Mood Logs
+      const moodLogsRef = collection(db, `users/${uid}/moodLogs`);
+      const moodLogsSnap = await getDocs(moodLogsRef);
+      moodLogsSnap.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+
+      // Delete Notifications
+      const notificationsRef = collection(db, `users/${uid}/notifications`);
+      const notificationsSnap = await getDocs(notificationsRef);
+      notificationsSnap.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+
+      // Delete User-authored community posts
+      const spacePostsRef = collection(db, 'spacePosts');
+      const userPostsQuery = query(spacePostsRef, where('authorId', '==', uid));
+      const userPostsSnap = await getDocs(userPostsQuery);
+      userPostsSnap.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+
+      // Commit Firestore deletes
+      await batch.commit();
+      console.warn(`[SECURITY AUDIT] Firestore records successfully purged for UID: ${user.uid}`);
+
+      // 3. Clear all AsyncStorage data
+      await AsyncStorage.clear();
+      console.warn(`[SECURITY AUDIT] Local AsyncStorage successfully cleared`);
+
+      // 4. Delete user record in Firebase Auth
+      await deleteUser(user);
+      console.warn(`[SECURITY AUDIT] Firebase Auth account successfully deleted`);
+
+      Toast.show({
+        type: 'success',
+        text1: 'Account Deleted',
+        text2: 'Your account and personal data have been completely erased.',
+      });
+
+      // 5. Redirect back to Welcome screen
+      setTimeout(() => {
+        router.replace('/pages/Welcome');
+      }, 1000);
+
+    } catch (error: any) {
+      console.error('[SECURITY ERROR] Account deletion failed:', error);
+      let errorMsg = 'An unexpected error occurred. Please verify your internet connection and try again.';
+      
+      if (error.code === 'auth/wrong-password') {
+        errorMsg = 'Incorrect password. Re-authentication failed.';
+      } else if (error.code === 'auth/requires-recent-login') {
+        errorMsg = 'For security reasons, please sign out and sign back in before deleting your account.';
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMsg = 'Network connection failed. Please check your internet connection.';
+      }
+
+      Alert.alert(
+        "Deletion Failed",
+        errorMsg,
+        [
+          { 
+            text: "Retry", 
+            onPress: () => {
+              if (requiresPasswordReauth()) {
+                setShowPasswordModal(true);
+              } else {
+                executeDeletion();
+              }
+            } 
+          },
+          { text: "Cancel", style: "cancel" }
+        ]
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -141,12 +305,10 @@ ____________________________________`;
 
           <Text style={styles.sectionTitle}>Delete Your Account Through the App</Text>
           <Text style={styles.paragraph}>
-            The quickest way to delete your account is directly within the Nirvaha app.
+            The quickest way to delete your account and instantly purge all of your private records is directly within this screen.
           </Text>
-          <Text style={styles.boldLabel}>Go to:</Text>
-          <Text style={styles.codeBlock}>Profile → Delete Account</Text>
           <Text style={styles.paragraph}>
-            Follow the on-screen instructions to permanently delete your account.
+            Clicking the red button below will start the secure in-app deletion process.
           </Text>
 
           <Text style={styles.sectionTitle}>Can't Access Your Account?</Text>
@@ -203,10 +365,7 @@ ____________________________________`;
 
           <Text style={styles.sectionTitle}>Processing Time</Text>
           <Text style={styles.paragraph}>
-            We aim to process verified account deletion requests within <Text style={styles.boldText}>30 days</Text>.
-          </Text>
-          <Text style={styles.paragraph}>
-            Once your request has been completed, you will receive a confirmation email informing you that your account has been permanently deleted.
+            In-app deletion requests are processed **instantly**. Your database documents and local sessions are cleared on the spot. Manual requests via email may take up to <Text style={styles.boldText}>30 days</Text>.
           </Text>
 
           <Text style={styles.sectionTitle}>Important Information</Text>
@@ -236,20 +395,32 @@ ____________________________________`;
           </Text>
         </Animated.View>
 
-        {fetchingProfile ? (
+        {fetchingProfile || isDeleting ? (
           <View style={styles.loaderContainer}>
             <ActivityIndicator size="small" color={theme.colors.gold} />
+            {isDeleting && <Text style={styles.deletingText}>Purging account data...</Text>}
           </View>
         ) : user ? (
           <Animated.View entering={FadeInDown.duration(600).delay(200)} style={styles.buttonContainer}>
             <Pressable 
               style={({ pressed }) => [
                 styles.primaryButton,
+                styles.dangerButton,
                 pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] }
+              ]} 
+              onPress={initiateDeleteFlow}
+            >
+              <Text style={styles.buttonText}>Delete My Account</Text>
+            </Pressable>
+            
+            <Pressable 
+              style={({ pressed }) => [
+                styles.secondaryMailButton,
+                pressed && { opacity: 0.8 }
               ]} 
               onPress={handleSendDeletionRequest}
             >
-              <Text style={styles.buttonText}>Send Deletion Request</Text>
+              <Text style={styles.secondaryMailButtonText}>Request Deletion Via Email</Text>
             </Pressable>
           </Animated.View>
         ) : (
@@ -261,11 +432,101 @@ ____________________________________`;
               style={[styles.primaryButton, styles.disabledButton]} 
               disabled={true}
             >
-              <Text style={[styles.buttonText, { color: 'rgba(255,255,255,0.3)' }]}>Send Deletion Request</Text>
+              <Text style={[styles.buttonText, { color: 'rgba(255,255,255,0.3)' }]}>Delete My Account</Text>
             </Pressable>
           </Animated.View>
         )}
       </ScrollView>
+
+      {/* ─── MODALS ─────────────────────────────────────────────────── */}
+
+      {/* 1. Confirm Deletion Warning Modal */}
+      <Modal
+        visible={showConfirmModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowConfirmModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <ShieldAlert size={48} color="#D32F2F" style={{ marginBottom: 16 }} />
+            <Text style={styles.modalTitle}>Permanent Action Warning</Text>
+            <Text style={styles.modalText}>
+              Are you absolutely sure you want to delete your account? This action is permanent and cannot be undone. All journals, progress stats, settings, and conversations will be deleted forever.
+            </Text>
+            
+            <View style={styles.modalButtons}>
+              <Pressable 
+                style={[styles.modalButton, styles.cancelBtn]} 
+                onPress={() => setShowConfirmModal(false)}
+              >
+                <Text style={styles.cancelBtnText}>Keep Account</Text>
+              </Pressable>
+              
+              <Pressable 
+                style={[styles.modalButton, styles.confirmBtn]} 
+                onPress={handleConfirmDelete}
+              >
+                <Text style={styles.confirmBtnText}>Delete Permanently</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 2. Password Re-authentication Modal */}
+      <Modal
+        visible={showPasswordModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowPasswordModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxWidth: 360 }]}>
+            <Trash2 size={40} color="#D32F2F" style={{ marginBottom: 12 }} />
+            <Text style={styles.modalTitle}>Confirm Your Identity</Text>
+            <Text style={styles.modalText}>
+              Please enter your password to authorize this action.
+            </Text>
+
+            <View style={styles.passwordInputContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Enter password"
+                placeholderTextColor="rgba(255,255,255,0.3)"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+                autoFocus={true}
+              />
+              <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                {showPassword ? (
+                  <EyeOff size={18} color="rgba(255,255,255,0.6)" />
+                ) : (
+                  <Eye size={18} color="rgba(255,255,255,0.6)" />
+                )}
+              </Pressable>
+            </View>
+
+            <View style={styles.modalButtons}>
+              <Pressable 
+                style={[styles.modalButton, styles.cancelBtn]} 
+                onPress={() => setShowPasswordModal(false)}
+              >
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </Pressable>
+              
+              <Pressable 
+                style={[styles.modalButton, styles.confirmBtn]} 
+                onPress={handlePasswordSubmit}
+              >
+                <Text style={styles.confirmBtnText}>Confirm Delete</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
@@ -425,11 +686,19 @@ const styles = StyleSheet.create({
   loaderContainer: {
     paddingVertical: 20,
     alignItems: 'center',
+    gap: 8,
+  },
+  deletingText: {
+    fontFamily: theme.typography.body,
+    fontSize: 14,
+    color: '#D32F2F',
+    fontWeight: '600',
   },
   buttonContainer: {
     width: '100%',
     alignItems: 'center',
     marginBottom: 20,
+    gap: 12,
   },
   primaryButton: {
     width: '100%',
@@ -444,6 +713,10 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  dangerButton: {
+    backgroundColor: '#D32F2F',
+    shadowColor: '#D32F2F',
+  },
   disabledButton: {
     backgroundColor: 'rgba(255,255,255,0.05)',
     borderWidth: 1,
@@ -457,6 +730,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
   },
+  secondaryMailButton: {
+    paddingVertical: 10,
+  },
+  secondaryMailButtonText: {
+    fontFamily: theme.typography.body,
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.5)',
+    textDecorationLine: 'underline',
+  },
   disclaimerContainer: {
     width: '100%',
     alignItems: 'center',
@@ -468,5 +750,95 @@ const styles = StyleSheet.create({
     color: theme.colors.error,
     textAlign: 'center',
     marginBottom: 12,
+  },
+  
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: '#161B19',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  modalTitle: {
+    fontFamily: theme.typography.display,
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontFamily: theme.typography.body,
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.7)',
+    lineHeight: 20,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelBtn: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  cancelBtnText: {
+    fontFamily: theme.typography.body,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  confirmBtn: {
+    backgroundColor: '#D32F2F',
+  },
+  confirmBtnText: {
+    fontFamily: theme.typography.body,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  
+  // Password prompt specific styles
+  passwordInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    marginBottom: 24,
+    width: '100%',
+  },
+  passwordInput: {
+    flex: 1,
+    paddingVertical: 12,
+    fontFamily: theme.typography.body,
+    fontSize: 14,
+    color: '#FFFFFF',
+  },
+  eyeIcon: {
+    padding: 8,
   },
 });
