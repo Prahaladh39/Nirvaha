@@ -15,6 +15,7 @@ module.exports = {
     },
     android: {
       package: "org.nirvaha.app",
+      versionCode: 2,
       adaptiveIcon: {
         foregroundImage: "./assets/images/icon.png",
         backgroundColor: "#FFFFFF"
