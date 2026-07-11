@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Modal, ScrollView, Pressable, SafeAreaView, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, Modal, ScrollView, Pressable, Alert, Platform } from 'react-native';
+import ScreenContainer from '../ui/ScreenContainer';
 import { ArrowLeft, Trash2, Pencil, X } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
 import { JournalEntry } from './JournalEditor';
@@ -66,7 +67,7 @@ export default function JournalDetail({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView style={styles.container}>
+      <ScreenContainer statusBarStyle="light" style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
           <Pressable onPress={onClose} style={styles.iconButton}>
@@ -115,7 +116,7 @@ export default function JournalDetail({
             <Text style={styles.deleteButtonText}>Delete</Text>
           </Pressable>
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     </Modal>
   );
 }

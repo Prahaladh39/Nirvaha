@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { StyleSheet } from 'react-native';
+import ScreenContainer from '../../components/ui/ScreenContainer';
 import GreetingHeader from '../../components/home/GreetingHeader';
 import EmotionChips from '../../components/home/EmotionChips';
 import HeroCarousel from '../../components/home/HeroCarousel';
@@ -14,24 +14,25 @@ import SmartActions from '../../components/home/SmartActions';
 
 export default function Home() {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView 
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        <GreetingHeader />
-        <EmotionChips />
-        <HeroCarousel />
-        <CompanionRail />
-        <CollectionRail />
-        <SoundRail />
-        <CompactTilesGrid />
-        <JyotirlingaCard />
-        <AncientCharacterCard />
-        <TempleOfBalanceCard />
-        <SmartActions />
-      </ScrollView>
-    </SafeAreaView>
+    <ScreenContainer
+      scrollable
+      hasBottomTab
+      statusBarStyle="light"
+      style={styles.safeArea}
+      scrollContentStyle={styles.scrollContent}
+    >
+      <GreetingHeader />
+      <EmotionChips />
+      <HeroCarousel />
+      <CompanionRail />
+      <CollectionRail />
+      <SoundRail />
+      <CompactTilesGrid />
+      <JyotirlingaCard />
+      <AncientCharacterCard />
+      <TempleOfBalanceCard />
+      <SmartActions />
+    </ScreenContainer>
   );
 }
 
@@ -41,6 +42,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#0A0A0A', // Dark theme background
   },
   scrollContent: {
-    paddingBottom: 40,
+    // Spacing at the bottom is calculated dynamically by ScreenContainer
   }
 });

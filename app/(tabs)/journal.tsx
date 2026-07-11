@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ActivityIndicator, ScrollView } from 'react-native';
+import ScreenContainer from '../../components/ui/ScreenContainer';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { Plus, Bookmark } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
@@ -120,12 +121,20 @@ export default function JournalScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Ambient Background Glows */}
-      <View style={[styles.ambientOrb, { top: '8%', right: '-8%', backgroundColor: theme.colors.gold }]} />
-      <View style={[styles.ambientOrb, { bottom: '25%', left: '-8%', backgroundColor: theme.colors.healingGreen }]} />
-
-      <ScrollView 
+    <ScreenContainer
+      fullBleed
+      hasBottomTab
+      statusBarStyle="light"
+      style={styles.container}
+      background={
+        <>
+          {/* Ambient Background Glows */}
+          <View style={[styles.ambientOrb, { top: '8%', right: '-8%', backgroundColor: theme.colors.gold }]} />
+          <View style={[styles.ambientOrb, { bottom: '25%', left: '-8%', backgroundColor: theme.colors.healingGreen }]} />
+        </>
+      }
+    >
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -202,7 +211,7 @@ export default function JournalScreen() {
               onToggleSave={handleToggleSave}
               onPressCard={handlePressCard}
             />
-            <Text style={styles.footerQuote}>"Writing is thinking on paper"</Text>
+            <Text style={styles.footerQuote}>{"\"Writing is thinking on paper\""}</Text>
           </View>
         )}
       </ScrollView>
@@ -235,7 +244,7 @@ export default function JournalScreen() {
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -261,7 +270,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 32,
-    paddingBottom: 120, // Space for BottomNav
+    // Spacing at bottom calculated dynamically by ScreenContainer
   },
   header: {
     marginBottom: 24,

@@ -9,8 +9,7 @@ import Animated, {
   withRepeat,
   withSequence,
   withTiming,
-  Easing,
-  interpolateColor
+  Easing
 } from 'react-native-reanimated';
 import { theme } from '../../constants/theme';
 import type { OnboardingOption } from '../../constants/onboardingData';
@@ -41,13 +40,17 @@ export default function OnboardingQuestion({ question, subtitle, options, onSele
       style={styles.container}
     >
       <View style={styles.header}>
-        <Animated.Text entering={FadeInDown.duration(600).delay(100)} style={styles.questionText}>
-          {question}
-        </Animated.Text>
+        <Animated.View entering={FadeInDown.duration(600).delay(100)}>
+          <Text style={styles.questionText}>
+            {question}
+          </Text>
+        </Animated.View>
         {subtitle && (
-          <Animated.Text entering={FadeInDown.duration(500).delay(200)} style={styles.subtitleText}>
-            {subtitle}
-          </Animated.Text>
+          <Animated.View entering={FadeInDown.duration(500).delay(200)}>
+            <Text style={styles.subtitleText}>
+              {subtitle}
+            </Text>
+          </Animated.View>
         )}
       </View>
 
@@ -64,7 +67,7 @@ export default function OnboardingQuestion({ question, subtitle, options, onSele
       </ScrollView>
 
       <Animated.Text entering={FadeInUp.duration(500).delay(600)} style={styles.helperText}>
-        Your selections won't limit access to any features.
+        Your selections {"won't"} limit access to any features.
       </Animated.Text>
 
       <Animated.View

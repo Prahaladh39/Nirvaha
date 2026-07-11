@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import ScreenContainer from '../../components/ui/ScreenContainer';
 import { router, Stack } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ChevronRight, ArrowLeft } from 'lucide-react-native';
@@ -9,7 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 export default function CollectionOverview() {
   return (
-    <SafeAreaView style={styles.container}>
+    <ScreenContainer statusBarStyle="light" style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       
       <View style={styles.header}>
@@ -60,7 +61,7 @@ export default function CollectionOverview() {
           </Animated.View>
         ))}
       </ScrollView>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 

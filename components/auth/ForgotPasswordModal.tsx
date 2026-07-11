@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
   Modal,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   Pressable,
   View,
   ActivityIndicator,
-  KeyboardAvoidingView,
   Platform,
   Linking,
 } from 'react-native';
+import ScreenContainer from '../ui/ScreenContainer';
 import { Mail, X, CheckCircle } from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
 import { sendPasswordResetEmail } from 'firebase/auth';
@@ -150,11 +149,11 @@ export default function ForgotPasswordModal({ visible, onClose }: ForgotPassword
       presentationStyle="pageSheet"
       onRequestClose={handleModalClose}
     >
-      <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{ flex: 1 }}
-        >
+      <ScreenContainer
+        avoidKeyboard
+        statusBarStyle="dark"
+        style={styles.safeArea}
+      >
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Password Recovery</Text>
@@ -170,7 +169,7 @@ export default function ForgotPasswordModal({ visible, onClose }: ForgotPassword
                 <Text style={styles.title}>Forgot Password?</Text>
                 
                 <Text style={styles.subtitle}>
-                  Enter the email address associated with your Nirvaha account, and we'll send you a secure link to reset your password.
+                  Enter the email address associated with your Nirvaha account, and we{"'"}ll send you a secure link to reset your password.
                 </Text>
 
                 {/* Email Input */}
@@ -261,8 +260,7 @@ export default function ForgotPasswordModal({ visible, onClose }: ForgotPassword
               </View>
             )}
           </View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
+      </ScreenContainer>
     </Modal>
   );
 }

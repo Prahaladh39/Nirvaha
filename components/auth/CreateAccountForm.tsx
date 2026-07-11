@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { User, Mail, Lock, Eye, EyeOff, Square, CheckSquare, Check, AlertCircle } from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
-import { router } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../config/firebase';
 import { theme } from '../../constants/theme';
-import { consentService } from '../../services/consent/consentService';
+
 import { TERMS_AND_CONDITIONS, PRIVACY_POLICY, DPDP_ACT_COMPLIANCE, GLOBAL_PRIVACY_PRINCIPLES } from '../../constants/consentData';
 import ConsentModal from './ConsentModal';
 
@@ -83,8 +82,7 @@ export default function CreateAccountForm() {
         createdAt: new Date().toISOString(),
       });
 
-      // Save consent status
-      await consentService.saveConsent();
+
 
       Toast.show({ type: 'success', text1: 'Account Created', text2: 'Welcome to Nirvaha!' });
       
@@ -95,10 +93,6 @@ export default function CreateAccountForm() {
       setName('');
       setPasswordTouched(false);
       setConfirmPasswordTouched(false);
-      
-      setTimeout(() => {
-        router.replace('/pages/OnboardingIntro');
-      }, 500);
     } catch (error: any) {
       let errorMessage = 'An error occurred during account creation. Please try again.';
       if (error.code === 'auth/email-already-in-use') {

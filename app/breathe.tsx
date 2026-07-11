@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
+import ScreenContainer from '../components/ui/ScreenContainer';
 import { router, Stack } from 'expo-router';
 import Animated, { 
   useAnimatedStyle, 
@@ -98,12 +99,18 @@ export default function BreatheScreen() {
   const isComplete = elapsed >= TOTAL_SECONDS;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ScreenContainer
+      fullBleed
+      statusBarStyle="light"
+      background={
+        <>
+          {/* Background Decor */}
+          <View style={[styles.ambientOrb, styles.orbOne]} />
+          <View style={[styles.ambientOrb, styles.orbTwo]} />
+        </>
+      }
+    >
       <Stack.Screen options={{ headerShown: false }} />
-      
-      {/* Background Decor */}
-      <View style={[styles.ambientOrb, styles.orbOne]} />
-      <View style={[styles.ambientOrb, styles.orbTwo]} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -200,7 +207,7 @@ export default function BreatheScreen() {
           />
         </View>
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 

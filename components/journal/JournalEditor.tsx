@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, Modal, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, Modal, Platform, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import ScreenContainer from '../ui/ScreenContainer';
 import { ArrowLeft, X } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
 import Toast from 'react-native-toast-message';
@@ -142,11 +143,11 @@ export default function JournalEditor({ visible, onSave, onClose, editEntry }: J
       presentationStyle="pageSheet" // Works nicely on iOS, normal slide on Android
       onRequestClose={handleRequestClose}
     >
-      <KeyboardAvoidingView 
-        style={styles.container} 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      <ScreenContainer
+        avoidKeyboard
+        statusBarStyle="light"
+        style={styles.safeArea}
       >
-        <SafeAreaView style={styles.safeArea}>
           {/* Header */}
           <View style={styles.header}>
             <Pressable onPress={handleRequestClose} style={styles.iconButton}>
@@ -245,8 +246,7 @@ export default function JournalEditor({ visible, onSave, onClose, editEntry }: J
               )}
             </Pressable>
           </View>
-        </SafeAreaView>
-      </KeyboardAvoidingView>
+      </ScreenContainer>
     </Modal>
   );
 }

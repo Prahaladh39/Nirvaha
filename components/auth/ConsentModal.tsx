@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Modal,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,6 +8,7 @@ import {
   View,
   Dimensions,
 } from 'react-native';
+import ScreenContainer from '../ui/ScreenContainer';
 import { X } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
 import { ConsentSection } from '../../constants/consentData';
@@ -30,7 +30,7 @@ export default function ConsentModal({ visible, onClose, title, sections }: Cons
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView style={styles.safeArea}>
+      <ScreenContainer statusBarStyle="dark" style={styles.safeArea}>
         {/* Sticky Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>{title}</Text>
@@ -62,7 +62,7 @@ export default function ConsentModal({ visible, onClose, title, sections }: Cons
           
           <View style={styles.footerSpacer} />
         </ScrollView>
-      </SafeAreaView>
+      </ScreenContainer>
     </Modal>
   );
 }

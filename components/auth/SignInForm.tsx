@@ -7,7 +7,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../config/firebase';
 import { theme } from '../../constants/theme';
-import { consentService } from '../../services/consent/consentService';
+
 import { TERMS_AND_CONDITIONS, PRIVACY_POLICY, DPDP_ACT_COMPLIANCE, GLOBAL_PRIVACY_PRINCIPLES } from '../../constants/consentData';
 import ConsentModal from './ConsentModal';
 import ForgotPasswordModal from './ForgotPasswordModal';
@@ -43,8 +43,7 @@ export default function SignInForm() {
       const trimmedEmail = email.trim();
       const userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, password);
       
-      // Save consent locally upon successful sign-in
-      await consentService.saveConsent();
+
       
       Toast.show({ type: 'success', text1: 'Signed In', text2: 'Welcome back to your inner balance.' });
       
@@ -55,7 +54,7 @@ export default function SignInForm() {
         if (userDoc.exists() && userDoc.data().onboardingCompleted) {
           router.replace('/(tabs)');
         } else {
-          router.replace('/pages/OnboardingIntro');
+          router.replace('/pages/NewUserQuestions');
         }
       }, 500);
     } catch (error: any) {

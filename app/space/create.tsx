@@ -2,11 +2,12 @@ import { router } from 'expo-router';
 import { addDoc, collection, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import { ArrowLeft } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import Toast from 'react-native-toast-message';
 import { auth, db } from '../../config/firebase';
 import { theme } from '../../constants/theme';
+import ScreenContainer from '../../components/ui/ScreenContainer';
 
 const emotions = [
   { label: 'Emotional Health', icon: '💚' },
@@ -80,11 +81,7 @@ export default function CreateSpacePost() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1 }}
-      >
+    <ScreenContainer avoidKeyboard statusBarStyle="light" style={styles.container}>
         <View style={styles.header}>
           <Pressable style={styles.backButton} onPress={() => router.back()}>
             <ArrowLeft size={20} color="#FFFFFF" />
@@ -155,8 +152,7 @@ export default function CreateSpacePost() {
           </Animated.View>
 
         </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 

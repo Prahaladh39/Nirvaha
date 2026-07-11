@@ -5,15 +5,14 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import ScreenContainer from "../components/ui/ScreenContainer";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { CompanionManager } from "../services/companion/CompanionManager";
 import { ConversationMessage } from "../services/companion/types";
@@ -137,18 +136,22 @@ export default function ChatScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === "ios" ? "padding" : "padding"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 20}
-      >
-        <LinearGradient
-          colors={["#111A17", "#0A0A0A"]}
-          style={StyleSheet.absoluteFill}
-        />
-        <View style={[styles.ambientOrb, styles.ambientOne]} />
-        <View style={[styles.ambientOrb, styles.ambientTwo]} />
+    <ScreenContainer
+      fullBleed
+      avoidKeyboard
+      keyboardOffset={Platform.OS === "ios" ? 8 : 20}
+      statusBarStyle="light"
+      background={
+        <>
+          <LinearGradient
+            colors={["#111A17", "#0A0A0A"]}
+            style={StyleSheet.absoluteFill}
+          />
+          <View style={[styles.ambientOrb, styles.ambientOne]} />
+          <View style={[styles.ambientOrb, styles.ambientTwo]} />
+        </>
+      }
+    >
 
         <View style={styles.header}>
           <Pressable style={styles.backButton} onPress={() => router.back()}>
@@ -216,8 +219,7 @@ export default function ChatScreen() {
             )}
           </Pressable>
         </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 

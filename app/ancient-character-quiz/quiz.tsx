@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Platform } from 'react-native';
+import ScreenContainer from '../../components/ui/ScreenContainer';
 import { router } from 'expo-router';
 import { theme } from '../../constants/theme';
 import { X } from 'lucide-react-native';
@@ -52,7 +53,7 @@ export default function QuizScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+      <ScreenContainer statusBarStyle="light" style={styles.safeArea}>
       <View style={styles.header}>
         <Pressable onPress={handleClose} style={styles.closeBtn}>
           <X color="#FFFFFF" size={24} />
@@ -92,7 +93,7 @@ export default function QuizScreen() {
           </View>
         </Animated.View>
       </ScrollView>
-    </SafeAreaView>
+      </ScreenContainer>
   );
 }
 

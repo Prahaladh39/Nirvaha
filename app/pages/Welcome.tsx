@@ -2,6 +2,8 @@ import { router, Stack } from 'expo-router';
 import { ArrowRight } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LAYOUT_TOKENS } from '../../components/ui/ScreenContainer';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
@@ -46,6 +48,7 @@ const SWIPE_THRESHOLD = 50;
 
 export default function WelcomeScreen() {
   const [current, setCurrent] = useState(0);
+  const insets = useSafeAreaInsets();
   const [direction, setDirection] = useState(1); // 1 for next, -1 for prev
 
   const isLast = current === slides.length - 1;
@@ -142,8 +145,8 @@ export default function WelcomeScreen() {
         </View>
       </GestureDetector>
 
-      {/* Bottom Section */}
-      <View style={styles.bottomSection}>
+      {/* Indicator dots & Actions */}
+      <View style={[styles.bottomSection, { paddingBottom: LAYOUT_TOKENS.BOTTOM_NAV_MARGIN + insets.bottom }]}>
         {/* Dots */}
         <View style={styles.dotsContainer}>
           {slides.map((_, i) => (

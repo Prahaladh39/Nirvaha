@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { router } from 'expo-router';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 import {
   View,
   Text,
   StyleSheet,
   Pressable,
   ActivityIndicator,
-  ScrollView,
-  SafeAreaView,
-  Dimensions,
 } from 'react-native';
+import ScreenContainer from '../ui/ScreenContainer';
 import { Square, CheckSquare } from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
 import { useAuth } from '../../contexts/AuthContext';
@@ -23,7 +24,7 @@ import {
 import ConsentModal from './ConsentModal';
 import { ParticleOverlay } from '../ParticleOverlay';
 
-const { width } = Dimensions.get('window');
+
 
 export default function ConsentGate({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -64,7 +65,24 @@ export default function ConsentGate({ children }: { children: React.ReactNode })
     setSubmitting(true);
     try {
       await consentService.saveConsent();
+      
+      let onboardingCompleted = false;
+      if (user) {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists() && userDoc.data().onboardingCompleted) {
+          onboardingCompleted = true;
+        }
+      }
+      
       setHasAccepted(true);
+      
+      if (onboardingCompleted) {
+        router.replace('/(tabs)');
+      } else {
+        router.replace('/pages/NewUserQuestions');
+      }
+
       Toast.show({
         type: 'success',
         text1: 'Consent Recorded',
@@ -99,24 +117,26 @@ export default function ConsentGate({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <View style={styles.container}>
-      <ParticleOverlay />
-
-      {/* Ambient orbs */}
-      <View style={[styles.ambientOrb, { width: 340, height: 340, top: '5%', left: '-10%', backgroundColor: theme.colors.healingGreen }]} />
-      <View style={[styles.ambientOrb, { width: 280, height: 280, bottom: '5%', right: '-10%', backgroundColor: theme.colors.gold }]} />
-
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-        >
+    <>
+      <ScreenContainer
+      scrollable
+      fullBleed
+      scrollContentStyle={styles.scrollContainer}
+      statusBarStyle="light"
+      background={
+        <>
+          <ParticleOverlay />
+          {/* Ambient orbs */}
+          <View style={[styles.ambientOrb, { top: '-5%', right: '-10%', backgroundColor: theme.colors.healingGreen }]} />
+          <View style={[styles.ambientOrb, { bottom: '15%', left: '-8%', backgroundColor: theme.colors.gold, width: 220, height: 220, opacity: 0.08 }]} />
+        </>
+      }
+    >
           <View style={styles.card}>
             <Text style={styles.title}>Policy & Agreement Update</Text>
             
             <Text style={styles.description}>
-              We have updated Nirvaha's Terms & Conditions and Privacy Policy to align with India's new{' '}
+              We have updated Nirvaha{"'"}s Terms & Conditions and Privacy Policy to align with India{"'"}s new{' '}
               <Text style={styles.boldText}>Digital Personal Data Protection (DPDP) Act, 2023</Text>{' '}
               and standard global privacy practices inspired by GDPR.
             </Text>
@@ -168,8 +188,7 @@ export default function ConsentGate({ children }: { children: React.ReactNode })
               )}
             </Pressable>
           </View>
-        </ScrollView>
-      </SafeAreaView>
+    </ScreenContainer>
 
       <ConsentModal
         visible={viewTerms}
@@ -184,7 +203,7 @@ export default function ConsentGate({ children }: { children: React.ReactNode })
         title="Privacy Policy"
         sections={combinedPrivacy}
       />
-    </View>
+    </>
   );
 }
 

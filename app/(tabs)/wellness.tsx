@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import ScreenContainer from '../../components/ui/ScreenContainer';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { theme } from '../../constants/theme';
 import { useMoodLog } from '../../hooks/useMoodLog';
@@ -37,12 +38,21 @@ export default function WellnessScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Ambient Orbs */}
-      <View style={[styles.ambientOrb, { top: '5%', right: '-10%', backgroundColor: theme.colors.healingGreen, width: 240, height: 240 }]} />
-      <View style={[styles.ambientOrb, { bottom: '30%', left: '-10%', backgroundColor: theme.colors.gold, width: 180, height: 180 }]} />
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+    <ScreenContainer
+      scrollable
+      fullBleed
+      hasBottomTab
+      statusBarStyle="light"
+      style={styles.container}
+      scrollContentStyle={styles.scrollContent}
+      background={
+        <>
+          {/* Ambient Orbs */}
+          <View style={[styles.ambientOrb, { top: '5%', right: '-10%', backgroundColor: theme.colors.healingGreen, width: 240, height: 240 }]} />
+          <View style={[styles.ambientOrb, { bottom: '30%', left: '-10%', backgroundColor: theme.colors.gold, width: 180, height: 180 }]} />
+        </>
+      }
+    >
         
         {/* Header */}
         <Animated.View entering={FadeInDown.duration(500)} style={styles.header}>
@@ -64,12 +74,11 @@ export default function WellnessScreen() {
 
         {/* Journey Continuity */}
         <Animated.View entering={FadeIn.duration(600).delay(600)} style={styles.footer}>
-          <Text style={styles.footerQuote}>"Patterns are becoming clearer"</Text>
+          <Text style={styles.footerQuote}>{"\"Patterns are becoming clearer\""}</Text>
           <Text style={styles.footerSub}>Small check-ins create meaningful insight</Text>
         </Animated.View>
 
-      </ScrollView>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -93,7 +102,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 32,
-    paddingBottom: 120, // Space for bottom nav
+    // Spacing at bottom calculated dynamically by ScreenContainer
   },
   header: {
     marginBottom: 24,

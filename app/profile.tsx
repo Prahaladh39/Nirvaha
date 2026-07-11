@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { Text, StyleSheet, ScrollView } from 'react-native';
+import ScreenContainer, { LAYOUT_TOKENS } from '../components/ui/ScreenContainer';
 import { Stack } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import ProfileHeader from '../components/profile/ProfileHeader';
@@ -11,7 +12,7 @@ import { theme } from '../constants/theme';
 
 export default function ProfileScreen() {
   return (
-    <SafeAreaView style={styles.container}>
+    <ScreenContainer statusBarStyle="light" style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       
       <Animated.View 
@@ -28,13 +29,13 @@ export default function ProfileScreen() {
           <SettingsSection />
 
           <Text style={styles.footerQuote}>
-            "Your space, your pace"
+            {"\"Your space, your pace\""}
           </Text>
         </ScrollView>
       </Animated.View>
 
       <BottomNav />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -48,7 +49,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 100, // For BottomNav
+    // Clear the floating BottomNav: nav height + nav margin + breathing room
+    paddingBottom: LAYOUT_TOKENS.BOTTOM_NAV_HEIGHT + LAYOUT_TOKENS.BOTTOM_NAV_MARGIN + LAYOUT_TOKENS.GAP_PADDING,
   },
   footerQuote: {
     fontFamily: theme.typography.display,
@@ -59,3 +61,4 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   }
 });
+

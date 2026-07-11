@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import ScreenContainer from '../../components/ui/ScreenContainer';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -14,7 +15,7 @@ export default function SoundHealingScreen() {
   const trackList = localSoundTracks.slice(1);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ScreenContainer statusBarStyle="light" hasBottomTab style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.hero}>
           <LinearGradient colors={['#263C36', '#101615', '#0A0A0A']} style={StyleSheet.absoluteFill} />
@@ -103,7 +104,7 @@ export default function SoundHealingScreen() {
         onTrackChange={setActiveTrack}
         onClose={() => setActiveTrack(null)}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0A0A0A',
   },
   scrollContent: {
-    paddingBottom: 120,
+    // Spacing at bottom calculated dynamically by ScreenContainer
   },
   hero: {
     height: 280,

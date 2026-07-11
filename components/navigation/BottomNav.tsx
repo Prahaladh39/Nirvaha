@@ -4,6 +4,8 @@ import { Home, Sparkles, Play, User } from 'lucide-react-native';
 import { usePathname, router } from 'expo-router';
 import Animated, { useAnimatedStyle, withSpring, useSharedValue } from 'react-native-reanimated';
 import { theme } from '../../constants/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LAYOUT_TOKENS } from '../ui/ScreenContainer';
 
 const { width } = Dimensions.get('window');
 
@@ -17,6 +19,7 @@ const navItems = [
 export default function BottomNav() {
   const pathname = usePathname();
   const [containerWidth, setContainerWidth] = useState(0);
+  const insets = useSafeAreaInsets();
 
   // We determine the active index based on route
   const getActiveIndex = () => {
@@ -37,8 +40,13 @@ export default function BottomNav() {
     width: withSpring(pillWidth.value, { damping: 20, stiffness: 300 }),
   }));
 
+  /* 
+    Position the nav bar so it floats just above the system navigation area.
+    - On gesture-nav / iOS (insets.bottom ≈ 0–24): keeps the original 20px design spacing.
+    - On 3-button nav (insets.bottom ≈ 48): sits just above the system bar, not 20+48=68px up.
+  */
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, { bottom: Math.max(LAYOUT_TOKENS.BOTTOM_NAV_MARGIN, insets.bottom + 4) }]}>
       <View 
         style={styles.container}
         onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
