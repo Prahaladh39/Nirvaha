@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image, TextInput, ActivityIndicator } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Camera, User as UserIcon } from 'lucide-react-native';
+import { Camera, User as UserIcon, Pencil } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as FileSystem from 'expo-file-system/legacy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function ProfileHeader() {
-  const [name] = useState("Seeker");
+  const { profileName, updateProfileState } = useAuth();
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const loadAvatar = async () => {
@@ -75,6 +81,34 @@ export default function ProfileHeader() {
     }
   };
 
+  const handleSave = async () => {
+    const trimmed = editedName.trim();
+    if (!trimmed) {
+      setErrorMessage('Name cannot be empty.');
+      return;
+    }
+    if (trimmed.length < 2) {
+      setErrorMessage('Name must be at least 2 characters.');
+      return;
+    }
+    if (trimmed.length > 50) {
+      setErrorMessage('Name must be 50 characters or less.');
+      return;
+    }
+
+    setIsSaving(true);
+    setErrorMessage(null);
+    try {
+      await updateProfileState(trimmed);
+      setIsEditing(false);
+    } catch (err: any) {
+      console.error('Error saving profile name:', err);
+      setErrorMessage(err.message || 'Failed to save changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <Animated.View
       entering={FadeInDown.duration(600)}
@@ -115,7 +149,71 @@ export default function ProfileHeader() {
       </Pressable>
 
       {/* Name & Info */}
-      <Text style={styles.name}>{name}</Text>
+      {!isEditing ? (
+        <View style={styles.nameRow}>
+          <Text style={styles.name}>{profileName || "Seeker"}</Text>
+          <Pressable 
+            onPress={() => { 
+              setEditedName(profileName || ''); 
+              setIsEditing(true); 
+              setErrorMessage(null); 
+            }} 
+            style={({ pressed }) => [
+              styles.editIconBtn,
+              pressed && { opacity: 0.7 }
+            ]}
+          >
+            <Pencil size={14} color="rgba(255,255,255,0.6)" />
+          </Pressable>
+        </View>
+      ) : (
+        <View style={styles.editContainer}>
+          <TextInput
+            style={[styles.input, errorMessage ? styles.inputError : null]}
+            value={editedName}
+            onChangeText={(text) => {
+              setEditedName(text);
+              if (errorMessage) setErrorMessage(null);
+            }}
+            placeholder="Enter display name"
+            placeholderTextColor="rgba(255,255,255,0.4)"
+            autoFocus
+            maxLength={60}
+          />
+          {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
+          
+          <View style={styles.editActions}>
+            <Pressable 
+              onPress={handleSave} 
+              disabled={isSaving}
+              style={({ pressed }) => [
+                styles.actionBtn, 
+                styles.saveBtn,
+                (isSaving || pressed) && { opacity: 0.8 }
+              ]}
+            >
+              {isSaving ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text style={styles.saveBtnText}>Save</Text>
+              )}
+            </Pressable>
+            
+            <Pressable 
+              onPress={() => { setIsEditing(false); setErrorMessage(null); }} 
+              disabled={isSaving}
+              style={({ pressed }) => [
+                styles.actionBtn, 
+                styles.cancelBtn,
+                pressed && { opacity: 0.8 }
+              ]}
+            >
+              <Text style={styles.cancelBtnText}>Cancel</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
       <Text style={styles.subtitle}>On your journey to clarity</Text>
     </Animated.View>
   );
@@ -183,6 +281,77 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  editIconBtn: {
+    padding: 6,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  editContainer: {
+    width: '80%',
+    alignItems: 'center',
+  },
+  input: {
+    width: '100%',
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 18,
+    color: '#FFFFFF',
+    borderBottomWidth: 1.5,
+    borderBottomColor: theme.colors.healingGreen,
+    textAlign: 'center',
+    paddingVertical: 6,
+  },
+  inputError: {
+    borderBottomColor: theme.colors.error || '#EF4444',
+  },
+  errorText: {
+    fontFamily: theme.typography.body,
+    fontSize: 12,
+    color: theme.colors.error || '#EF4444',
+    marginTop: 6,
+    textAlign: 'center',
+  },
+  editActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 14,
+    justifyContent: 'center',
+    width: '100%',
+  },
+  actionBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    minWidth: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveBtn: {
+    backgroundColor: theme.colors.primary,
+  },
+  saveBtnText: {
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 13,
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  cancelBtn: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+  },
+  cancelBtnText: {
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.8)',
+  },
   name: {
     fontFamily: theme.typography.display,
     fontSize: 24,
@@ -196,3 +365,4 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 });
+
