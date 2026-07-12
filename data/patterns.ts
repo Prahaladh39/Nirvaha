@@ -38,7 +38,7 @@ export const WISDOM_PATTERNS: WisdomPattern[] = [
     description: 'Breaking a complex problem down into its most basic, undeniable truths to find a path forward.',
     reflectionPrompt: 'If we strip away the stories and the noise, what are the three basic facts of this situation?',
     relevantEmotions: ['career_confusion', 'purpose_crisis', 'anxiety', 'stress'],
-    alignedMentors: ['10'], // David
+    alignedMentors: [],
   },
   {
     id: 'discipline-over-impulse',
@@ -61,7 +61,7 @@ export const WISDOM_PATTERNS: WisdomPattern[] = [
     description: 'The understanding that thinking without acting leads to paralysis. Clarity is found in the doing.',
     reflectionPrompt: 'What is the single most effective action you can take in the next ten minutes?',
     relevantEmotions: ['anxiety', 'career_confusion', 'self_doubt', 'purpose_crisis'],
-    alignedMentors: ['6', '10'], // Liam, David
+    alignedMentors: ['6'], // Liam
   },
   {
     id: 'process-over-outcome',
@@ -91,7 +91,7 @@ export const WISDOM_PATTERNS: WisdomPattern[] = [
     description: 'Shifting focus from "What do I get?" to "How can I contribute?", which naturally dissolves personal anxiety.',
     reflectionPrompt: 'If you stepped outside your own story for a moment, how could you be of use to the situation at hand?',
     relevantEmotions: ['purpose_crisis', 'loneliness', 'burnout', 'self_doubt'],
-    alignedMentors: ['3', '7'], // Maya, Ananya
+    alignedMentors: ['3'], // Maya
   },
   {
     id: 'flow-over-resistance',
@@ -125,7 +125,7 @@ export const WISDOM_PATTERNS: WisdomPattern[] = [
     description: 'Burnout is not a failure of discipline — it is your body telling you that something fundamental needs to change.',
     reflectionPrompt: 'If your exhaustion could speak, what would it be asking you to stop doing?',
     relevantEmotions: ['burnout', 'stress', 'anxiety'],
-    alignedMentors: ['7', '10'], // Ananya, David
+    alignedMentors: [],
   },
   {
     id: 'fear-as-compass',
@@ -156,7 +156,7 @@ export const WISDOM_PATTERNS: WisdomPattern[] = [
     description: 'Perfectionism is not high standards — it is fear wearing a mask of excellence. Done is better than perfect.',
     reflectionPrompt: 'What would "good enough" look like here, and why does that feel scary?',
     relevantEmotions: ['self_doubt', 'anxiety', 'stress', 'burnout'],
-    alignedMentors: ['6', '10'], // Liam, David
+    alignedMentors: ['6'], // Liam
   },
   {
     id: 'guilt-as-teacher',

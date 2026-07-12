@@ -184,37 +184,6 @@ export const companionsData: Companion[] = [
     ]
   },
   {
-    id: "7",
-    name: "Dr. Ananya Rao",
-    initials: "AR",
-    title: "AI Executive Companion",
-    category: "Career Guidance",
-    rating: 4.3,
-    reviewsCount: 1,
-    sessionsCount: 410,
-    availability: "Available 24/7",
-    isVerified: true,
-    isCertified: false,
-    about: "I'm an AI executive companion designed to help leadership professionals prevent burnout, build resilience, and make high-stakes decisions with clarity.",
-    tags: ["Executive Coaching", "Resilience", "Decision Making"],
-    imageUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=600",
-    reviews: [
-      {
-        id: "r7",
-        userName: "Akash Kumar",
-        userInitial: "A",
-        rating: 4.3,
-        text: "\"An excellent sounding board for high-stakes decisions and managing professional burnout. The prompts are strategic and help clear the mental fog of leadership pressure.\""
-      }
-    ],
-    suggestions: [
-      "I'm feeling burned out at work",
-      "I have to make a tough decision",
-      "How do I build resilience?",
-      "How do I show vulnerability?"
-    ]
-  },
-  {
     id: "8",
     name: "Samir Hassan",
     initials: "SH",
@@ -274,37 +243,6 @@ export const companionsData: Companion[] = [
       "I feel disconnected from myself",
       "How do I cultivate inner peace?",
       "Can we do a grounding exercise?"
-    ]
-  },
-  {
-    id: "10",
-    name: "David Chen",
-    initials: "DC",
-    title: "AI Freelance Coach",
-    category: "Career Guidance",
-    rating: 4.1,
-    reviewsCount: 1,
-    sessionsCount: 190,
-    availability: "Available 24/7",
-    isVerified: true,
-    isCertified: false,
-    about: "I'm an AI companion built to help freelancers manage client relationships, set healthy pricing structures, and maintain a sustainable work-life balance.",
-    tags: ["Freelancing", "Pricing Strategy", "Boundaries"],
-    imageUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=600",
-    reviews: [
-      {
-        id: "r10",
-        userName: "Akash Kumar",
-        userInitial: "A",
-        rating: 4.1,
-        text: "\"Good guidance on setting boundaries with clients and structuring freelance pricing. It really helped me rethink my hourly rates and prevent burnout.\""
-      }
-    ],
-    suggestions: [
-      "I can't stop saying yes to clients",
-      "How do I price my services?",
-      "I'm afraid the work will dry up",
-      "How do I prevent client burnout?"
     ]
   }
 ];

@@ -27,6 +27,7 @@ export default function CompanionChatScreen() {
   const [timeLeft, setTimeLeft] = useState(SESSION_DURATION_SEC);
   const [isSessionActive, setIsSessionActive] = useState(true);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [lengthPreference, setLengthPreference] = useState<'short' | 'normal'>('normal');
   const flatListRef = useRef<FlatList>(null);
   const inputRef = useRef<TextInput>(null);
 
@@ -43,7 +44,28 @@ export default function CompanionChatScreen() {
 
   useEffect(() => {
     initializeChat();
+    loadPreference();
   }, [id]);
+
+  const loadPreference = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('nirvaha_length_preference');
+      if (stored === 'short' || stored === 'normal') {
+        setLengthPreference(stored);
+      }
+    } catch (e) {
+      console.error('Failed to load length preference', e);
+    }
+  };
+
+  const toggleLengthPreference = async (pref: 'short' | 'normal') => {
+    setLengthPreference(pref);
+    try {
+      await AsyncStorage.setItem('nirvaha_length_preference', pref);
+    } catch (e) {
+      console.error('Failed to save length preference', e);
+    }
+  };
 
   const initializeChat = async () => {
     try {
@@ -147,7 +169,7 @@ export default function CompanionChatScreen() {
 
     try {
       const response = await CompanionManager.sendMessage(companion.id, trimmed, {
-        lengthPreference: 'long',
+        lengthPreference,
         conversationId: conversationId || undefined,
       });
 
@@ -229,18 +251,51 @@ export default function CompanionChatScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       
       {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <ChevronLeft color={theme.colors.foreground} size={24} />
-        </Pressable>
-        <View style={styles.headerInfo}>
-          <Text style={styles.companionName}>{companion.name}</Text>
-          <Text style={styles.companionTitle}>{companion.title}</Text>
+      <View style={styles.headerContainer}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <ChevronLeft color={theme.colors.foreground} size={24} />
+          </Pressable>
+          <View style={styles.headerInfo}>
+            <Text style={styles.companionName}>{companion.name}</Text>
+            <Text style={styles.companionTitle}>{companion.title}</Text>
+          </View>
+          <View style={styles.timerContainer}>
+            <Text style={[styles.timer, timeLeft <= 60 && styles.timerUrgent]}>
+              {formatTime(timeLeft)}
+            </Text>
+          </View>
         </View>
-        <View style={styles.timerContainer}>
-          <Text style={[styles.timer, timeLeft <= 60 && styles.timerUrgent]}>
-            {formatTime(timeLeft)}
-          </Text>
+
+        {/* Segmented Control for Response Length */}
+        <View style={styles.preferenceContainer}>
+          <Text style={styles.preferenceLabel}>Response length preference:</Text>
+          <View style={styles.segmentedControl}>
+            <Pressable 
+              style={[
+                styles.segmentButton, 
+                lengthPreference === 'normal' && styles.segmentButtonActive
+              ]}
+              onPress={() => toggleLengthPreference('normal')}
+            >
+              <Text style={[
+                styles.segmentText, 
+                lengthPreference === 'normal' && styles.segmentTextActive
+              ]}>Normal</Text>
+            </Pressable>
+            <Pressable 
+              style={[
+                styles.segmentButton, 
+                lengthPreference === 'short' && styles.segmentButtonActive
+              ]}
+              onPress={() => toggleLengthPreference('short')}
+            >
+              <Text style={[
+                styles.segmentText, 
+                lengthPreference === 'short' && styles.segmentTextActive
+              ]}>Short</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
 
@@ -342,15 +397,62 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: theme.colors.mutedForeground,
   },
+  headerContainer: {
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#EBEBEB',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'android' ? 40 : 12,
+    paddingBottom: 8,
+    backgroundColor: '#FFFFFF',
+  },
+  preferenceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
     paddingBottom: 12,
     backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EBEBEB',
+  },
+  preferenceLabel: {
+    fontFamily: theme.typography.body,
+    fontSize: 13,
+    color: theme.colors.mutedForeground,
+  },
+  segmentedControl: {
+    flexDirection: 'row',
+    backgroundColor: '#F1F3F5',
+    borderRadius: 16,
+    padding: 3,
+    width: 140,
+    height: 32,
+  },
+  segmentButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 13,
+  },
+  segmentButtonActive: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 1.5,
+    elevation: 2,
+  },
+  segmentText: {
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 12,
+    color: theme.colors.mutedForeground,
+  },
+  segmentTextActive: {
+    color: theme.colors.healingGreen,
+    fontWeight: '600',
   },
   backBtn: {
     width: 40,

@@ -32,12 +32,12 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<ConversationMessage[]>([INTRO_MESSAGE]);
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [lengthPreference, setLengthPreference] = useState<"short" | "long">("short");
+  const [lengthPreference, setLengthPreference] = useState<"short" | "normal">("short");
 
   const canSend = inputText.trim().length > 0 && !loading;
 
   const toggleLengthPreference = () => {
-    setLengthPreference((prev) => (prev === "short" ? "long" : "short"));
+    setLengthPreference((prev) => (prev === "short" ? "normal" : "short"));
   };
 
   const chatMessages = useMemo(() => messages, [messages]);
@@ -168,7 +168,7 @@ export default function ChatScreen() {
             onPress={toggleLengthPreference}
           >
             <Text style={styles.toggleButtonText}>
-              {lengthPreference === "short" ? "Short" : "Long"}
+              {lengthPreference === "short" ? "Short" : "Normal"}
             </Text>
           </Pressable>
         </View>

@@ -44,7 +44,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       message,
       mentorId = "nirvaha",
       lengthPreference = "short",
-    } = req.body || {};
+    } = (req.body || {}) as { message?: string; mentorId?: string; lengthPreference?: string };
 
     if (!message || typeof message !== "string" || !message.trim()) {
       return res.status(400).json({ error: "Message is required" });
@@ -53,7 +53,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const response = await CompanionManager.sendMessage(
       mentorId,
       message.trim(),
-      { lengthPreference: lengthPreference === "long" ? "long" : "short" },
+      { lengthPreference: lengthPreference === "long" || lengthPreference === "normal" ? "normal" : "short" },
     );
 
     return res.status(200).json({

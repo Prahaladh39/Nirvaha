@@ -55,7 +55,7 @@ interface PromptBuildInput {
   wisdomPatterns: WisdomPattern[];
   memorySummary: string;
   recentHistory: ConversationMessage[];
-  lengthPreference: 'short' | 'long';
+  lengthPreference: 'short' | 'normal';
   safetyRisk?: SafetyRisk | null;
 }
 
@@ -154,8 +154,8 @@ Be exceptionally gentle, warm, and validation-focused. Let them know it's okay t
 
   // 7. Length preference
   const lengthInstruction = lengthPreference === 'short'
-    ? 'Keep it very short (1-3 sentences).'
-    : 'Keep it concise (3-5 sentences max).';
+    ? 'Keep it very short (1-2 sentences).'
+    : 'Keep it naturally detailed (3-5 sentences max).';
   systemParts.push(lengthInstruction);
 
   // 8. Response examples (one, randomly selected)

@@ -88,10 +88,6 @@ const REDIRECT_TEMPLATES: RedirectTemplates = {
     'Ooh, that\'s a different kind of design challenge — and not the kind I work on! I\'m more about designing your life. What\'s the current project there?',
     'Ha, I\'m more of a life architect than a technical one. But if you\'re feeling stuck or curious about your next chapter, I\'m your guy.',
   ],
-  '7': [ // Ananya
-    'That\'s not my domain, but I appreciate you being here. My world is leadership, resilience, and the human side of high-stakes work. What\'s the real question?',
-    'I\'m better at coaching leaders through tough moments than answering that. What\'s actually weighing on you?',
-  ],
   '8': [ // Samir
     'I wish I could help with that, but I\'m really here for the hard emotional stuff — the endings, the rebuilding. Is there something like that going on?',
     'Not my area, but I\'m not going anywhere. If you need to talk about loss, healing, or starting over, that\'s where I live.',
@@ -99,10 +95,6 @@ const REDIRECT_TEMPLATES: RedirectTemplates = {
   '9': [ // Kavita
     'That question lives in a different space than where I am. I\'m here for the quieter questions — the ones about peace, presence, and what your heart is trying to tell you.',
     'I don\'t have that answer, but I might have something better. Take a breath. What does your inner world need right now?',
-  ],
-  '10': [ // David
-    'That\'s not my world — I\'m the freelance and career guy. But if you\'re struggling with work-life balance, pricing, or burnout, let\'s talk.',
-    'Outside my area, I\'m afraid. But hey, if you\'re dealing with the emotional side of work or business, that\'s exactly what I\'m here for.',
   ],
   'nirvaha': [
     'I\'m more of a friend for the heart than a search engine. But I\'m here — what\'s really on your mind today?',
@@ -215,13 +207,11 @@ export function checkPolicyViolations(message: string, mentorId: string): Policy
     const injectionResponses: Record<string, string> = {
       '1': "Ha! Nice try, but I'm here to focus on your career transitions and goals. What's actually going on in your world today?",
       '2': "I appreciate the creative attempt, but I'm much better at helping with relationship challenges and communication. What's on your mind?",
-      '3': "My path is to offer wisdom and perspective from the Gita, not to share system details. Tell me, what's really weighing on your heart?",
+      '3': "My path is to offer wisdom and perspective, not to share system details. Tell me, what's really weighing on your heart?",
       '5': "I'm here to support you with family and relationships, not system configurations. Is there something about your life you'd like to share?",
       '6': "Designing a prompt is a different challenge than designing your life! Let's focus on the life part. What are you working on?",
-      '7': "I coach leaders through high-stakes situations, so let's stick to your goals and resilience. What's the real challenge?",
       '8': "I'm here to help you heal and start over, not debug. Let's focus on your journey. How are you feeling?",
       '9': "Take a breath. Let's return to presence and peace, rather than system prompts. What does your inner world need right now?",
-      '10': "That's not my focus—I'm the freelance and business guy. Let's talk about your work-life balance or goals instead.",
     };
     return {
       isViolated: true,
@@ -281,10 +271,8 @@ function checkCrossCompanionMatch(lowerMessage: string, currentMentorId: string)
     '3': ['meaning', 'purpose', 'values', 'ikigai', 'existential', 'identity'],
     '5': ['family', 'parents', 'siblings', 'cultural', 'generational', 'relatives'],
     '6': ['habit', 'routine', 'creative block', 'life design', 'prototype', 'experiment'],
-    '7': ['leadership', 'executive', 'management', 'decision making', 'team'],
     '8': ['breakup', 'divorce', 'ex', 'heartbreak', 'moving on', 'grief'],
     '9': ['meditation', 'spiritual', 'mindfulness', 'breathing', 'inner peace', 'grounding'],
-    '10': ['freelance', 'client', 'pricing', 'rates', 'self-employed', 'independent work'],
   };
 
   for (const [companionId, signals] of Object.entries(DOMAIN_SIGNALS)) {
@@ -332,13 +320,11 @@ export function getMentorSpecificSafetyPrompt(mentorId: string, risk: SafetyRisk
   const instructions: Record<string, string> = {
     '1': "Speak in Priya's career coach style. Offer warm career guidance and support.",
     '2': "Speak in Arjun's relationship coach style. Give practical relationship advice and demonstrate emotional maturity.",
-    '3': "Speak in Maya's Bhagavad Gita mentor style. Provide wisdom, resilience, perspective, and draw on inner strength.",
-    '5': "Speak in Aisha's therapist-style companion style. Validate their deep emotions completely without reinforcing hopelessness.",
-    '6': "Speak in Liam's productivity coach style. Help them reduce pressure and suggest small, manageable next steps.",
-    '7': "Speak in Ananya's startup mentor style. Encourage them to take a break and return with clarity.",
+    '3': "Speak in Maya's purpose and meaning guide style. Provide wisdom, resilience, perspective, and draw on inner strength.",
+    '5': "Speak in Aisha's family dynamic companion style. Validate their emotions without reinforcing hopelessness.",
+    '6': "Speak in Liam's life design guide style. Help them reduce pressure and suggest small next steps.",
     '8': "Speak in Samir's breakup recovery coach style. Provide a supportive, non-judgmental space to validate their heartbreak.",
-    '9': "Speak in Kavita's meditation companion style. Guide them through calming breathing, grounding, and mindfulness to quiet the mind.",
-    '10': "Speak in David's freelance and business coaching style. Encourage taking a break from business pressure.",
+    '9': "Speak in Kavita's spiritual mentor style. Guide them through calming breathing, grounding, and mindfulness to quiet the mind.",
   };
 
   return instructions[mentorId] || "Speak with warmth, deep empathy, and a calm, non-judgmental presence.";
@@ -394,10 +380,8 @@ export function getSafetyFallbackMessage(mentorId: string): string {
     '3': "When we are in the midst of deep pain, it can feel like all meaning is lost, but please remember that this moment is not the end of your story. I gently ask you to connect with a trusted friend, parent, or family member right now. Let someone walk with you through this reflection. There is hope, and support is available.",
     '5': "Family struggles can feel incredibly lonely and heavy to bear, but please know that your voice and life are precious. Please reach out to a trusted friend, a mentor, or another family member whom you feel safe with right now. Sharing this weight with someone who cares can bring a glimmer of light. You are not alone.",
     '6': "It sounds like you are facing an intense block and carrying an overwhelming amount of pressure. Let's pause any plans or habits right now—your safety and health are the absolute priority. Please reach out to a trusted friend, parent, or family member to talk about how you are feeling. Taking a short break to connect with others is the best next step.",
-    '7': "The pressure you are carrying right now is far too heavy for anyone to bear alone, and it is okay to pause and step down from this weight. Your life and peace of mind are worth everything. Please reach out to a family member, parent, or close friend right now to share what you are going through. Let's prioritize your well-being above all else.",
     '8': "I know the pain of this ending feels completely unbearable right now, but please believe that this darkness will pass with time and support. Your life is valuable. Please reach out to a close friend, a parent, or a trusted loved one to talk. Having someone steady by your side makes a world of difference right now.",
     '9': "Take a slow, deep breath, and let yourself rest in this present moment. You don't have to solve everything right now, and you don't have to be alone. Please reach out to a trusted friend, parent, or family member, or connect with a professional who can support you. Let someone sit with you in this quiet space.",
-    '10': "I hear how exhausted and overwhelmed you are, and I want to remind you that your worth is not tied to your business or work. Please pause everything and step away. I strongly encourage you to talk to a family member, parent, or a close friend who can support you right now. Your well-being is the only thing that matters.",
   };
 
   return fallbacks[mentorId] || "I am here and listening, and I want you to know that you are not alone in this pain. Please take a break from being alone and reach out to someone you trust—a parent, family member, or close friend. You can also connect with a professional or emergency helpline for immediate support. There are people who care and want to help you.";

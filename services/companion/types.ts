@@ -158,7 +158,7 @@ export interface AIProviderConfig {
 // ─── Companion Manager ──────────────────────────────────────────────
 
 export interface SendMessageOptions {
-  lengthPreference?: 'short' | 'long';
+  lengthPreference?: 'short' | 'normal';
   conversationId?: string;
 }
 

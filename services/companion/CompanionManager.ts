@@ -59,7 +59,7 @@ class CompanionManagerClass {
     message: string,
     options: SendMessageOptions = {},
   ): Promise<CompanionResponse> {
-    const { lengthPreference = 'long', conversationId } = options;
+    const { lengthPreference = 'normal', conversationId } = options;
 
     // Get or create active session
     let session = await this.getOrCreateSession(mentorId, conversationId);

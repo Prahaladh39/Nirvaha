@@ -14,8 +14,9 @@ import {
   SkipForward,
   X,
 } from "lucide-react-native";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   GestureResponderEvent,
   Image,
@@ -501,6 +502,8 @@ export default function SoundPlayer({
   const status = useAudioPlayerStatus(player);
   const [progressWidth, setProgressWidth] = useState(0);
   const [isPlayState, setIsPlayState] = useState(false);
+  const loadedTrackIdRef = useRef<string | null>(null);
+  const [isAutoPlayPending, setIsAutoPlayPending] = useState(false);
 
   useEffect(() => {
     setAudioModeAsync({
@@ -516,21 +519,30 @@ export default function SoundPlayer({
 
   useEffect(() => {
     if (track) {
-      const source = track.source || require("../../assets/audio/desert-glass-loop.mp3");
-      try {
-        player.replace(source);
-      } catch (error) {
-        console.warn("Unable to replace audio source", error);
+      const isSameTrack = loadedTrackIdRef.current === track.id;
+      if (!isSameTrack) {
+        const source = track.source || require("../../assets/audio/desert-glass-loop.mp3");
+        try {
+          player.replace(source);
+        } catch (error) {
+          console.warn("Unable to replace audio source", error);
+        }
+        player.loop = true; // Enable native loop
+        player.seekTo(0).catch(() => undefined);
+
+        setIsAutoPlayPending(true);
+        loadedTrackIdRef.current = track.id;
       }
-      player.loop = true; // Enable native loop
-      player.pause();
-      player.seekTo(0).catch(() => undefined);
-      setIsPlayState(false);
-    } else {
-      player.pause();
-      setIsPlayState(false);
     }
   }, [player, track]);
+
+  useEffect(() => {
+    if (track && status.isLoaded && isAutoPlayPending) {
+      player.play();
+      setIsAutoPlayPending(false);
+      setIsPlayState(true);
+    }
+  }, [status.isLoaded, track, isAutoPlayPending, player]);
 
   useEffect(() => {
     player.loop = true; // Enable native loop
@@ -655,8 +667,6 @@ export default function SoundPlayer({
   };
 
   const handleClose = () => {
-    player.pause();
-    player.seekTo(0).catch(() => undefined);
     onClose();
   };
 
@@ -900,7 +910,9 @@ export default function SoundPlayer({
                       end={{ x: 1, y: 1 }}
                       style={styles.playButtonGradient}
                     >
-                      {isPlaying ? (
+                      {!status.isLoaded ? (
+                        <ActivityIndicator size="small" color="#0A0B0D" />
+                      ) : isPlaying ? (
                         <Pause size={24} color="#0A0B0D" fill="#0A0B0D" />
                       ) : (
                         <Play
