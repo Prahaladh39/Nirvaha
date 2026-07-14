@@ -7,18 +7,37 @@ import { ChevronRight, ArrowLeft } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
 import { collectionCategories } from '../../constants/collectionData';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function CollectionOverview() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <ScreenContainer statusBarStyle="light" style={styles.container}>
+    <ScreenContainer statusBarStyle="light" style={styles.container} edges={['bottom', 'left', 'right']}>
       <Stack.Screen options={{ headerShown: false }} />
       
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={20} color="#FFFFFF" />
-        </Pressable>
-        <Text style={styles.title}>The Collection</Text>
-        <Text style={styles.subtitle}>Timeless wisdom for the modern mind</Text>
+      <View style={styles.hero}>
+        <Image 
+          source={require('../../assets/images/collection-bg.png')} 
+          style={styles.heroImage} 
+          contentFit="cover"
+          transition={500}
+        />
+        <LinearGradient 
+          colors={['rgba(10,10,10,0.1)', 'rgba(10,10,10,0.85)']} 
+          style={styles.heroOverlay} 
+        />
+        <View style={[styles.heroContent, { paddingTop: insets.top > 0 ? insets.top + 12 : 20 }]}>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <ArrowLeft size={20} color="#FFFFFF" />
+          </Pressable>
+          
+          <View style={styles.heroText}>
+            <Text style={styles.title}>The Collection</Text>
+            <Text style={styles.subtitle}>Timeless wisdom for the modern mind</Text>
+          </View>
+        </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
@@ -70,10 +89,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0A0A0A',
   },
-  header: {
+  hero: {
+    height: 220,
+    position: 'relative',
+  },
+  heroImage: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  heroContent: {
+    flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 20,
     paddingBottom: 20,
+    justifyContent: 'space-between',
+  },
+  heroText: {
+    paddingBottom: 10,
   },
   backButton: {
     width: 40,

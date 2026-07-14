@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
 import { Home, Sparkles, Play, User } from 'lucide-react-native';
 import { usePathname, router } from 'expo-router';
@@ -11,7 +11,7 @@ const { width } = Dimensions.get('window');
 
 const navItems = [
   { label: 'Home', icon: Home, route: '/(tabs)' },
-  { label: 'Inner Guide', icon: Sparkles, route: '/chat' },
+  { label: 'Chat', icon: Sparkles, route: '/chat' },
   { label: 'Collection', icon: Play, route: '/collection' },
   { label: 'Profile', icon: User, route: '/profile' },
 ];
@@ -34,6 +34,14 @@ export default function BottomNav() {
   // The shared value for the position of the active pill
   const pillOffset = useSharedValue(0);
   const pillWidth = useSharedValue(0);
+
+  useEffect(() => {
+    if (containerWidth > 0) {
+      const itemWidth = (containerWidth - 8) / navItems.length;
+      pillWidth.value = itemWidth;
+      pillOffset.value = itemWidth * activeIndex;
+    }
+  }, [activeIndex, containerWidth]);
 
   const animatedPillStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: withSpring(pillOffset.value, { damping: 20, stiffness: 300 }) }],
@@ -61,13 +69,6 @@ export default function BottomNav() {
             <Pressable
               key={item.label}
               style={styles.navItem}
-              onLayout={(e) => {
-                if (isActive && containerWidth > 0) {
-                  const itemWidth = containerWidth / navItems.length;
-                  pillWidth.value = itemWidth;
-                  pillOffset.value = itemWidth * index;
-                }
-              }}
               onPress={() => {
                 if (item.route === '/(tabs)') {
                   router.replace('/(tabs)');
@@ -77,15 +78,13 @@ export default function BottomNav() {
               }}
             >
               <Icon 
-                size={22} 
-                color={isActive ? theme.colors.background : 'rgba(255,255,255,0.7)'} 
+                size={18} 
+                color={isActive ? theme.colors.background : 'rgba(255,255,255,0.6)'} 
                 strokeWidth={isActive ? 2.5 : 2}
               />
-              {isActive && (
-                <Text style={styles.activeText} numberOfLines={1}>
-                  {item.label}
-                </Text>
-              )}
+              <Text style={[styles.navText, isActive && styles.activeText]} numberOfLines={1}>
+                {item.label}
+              </Text>
             </Pressable>
           );
         })}
@@ -106,7 +105,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     height: 60,
-    backgroundColor: 'rgba(30, 40, 35, 0.85)',
+    backgroundColor: 'rgba(30, 40, 35, 0.92)',
     borderRadius: 30,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -131,15 +130,19 @@ const styles = StyleSheet.create({
   navItem: {
     flex: 1,
     height: '100%',
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1,
-    gap: 6,
+    gap: 3,
+  },
+  navText: {
+    fontFamily: theme.typography.body,
+    fontSize: 9,
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.6)',
   },
   activeText: {
-    fontFamily: theme.typography.body,
-    fontSize: 11,
     fontWeight: '700',
     color: theme.colors.background,
   }

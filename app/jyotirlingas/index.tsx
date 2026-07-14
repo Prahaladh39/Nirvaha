@@ -26,7 +26,7 @@ const getCoords = (x: number, y: number) => {
 
 const labelLayouts: Record<string, { xOffset: number; yOffset: number; anchor: 'start' | 'end' | 'middle' }> = {
   somnath: { xOffset: 12, yOffset: 4, anchor: 'start' },
-  nageshwar: { xOffset: -12, yOffset: -5, anchor: 'end' },
+  nageshwar: { xOffset: 12, yOffset: -5, anchor: 'start' },
   trimbakeshwar: { xOffset: -12, yOffset: 4, anchor: 'end' },
   bhimashankar: { xOffset: -12, yOffset: 12, anchor: 'end' },
   grishneshwar: { xOffset: 14, yOffset: 2, anchor: 'start' },

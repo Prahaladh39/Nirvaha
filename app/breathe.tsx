@@ -8,8 +8,7 @@ import Animated, {
   withTiming, 
   Easing,
   FadeIn,
-  FadeOut,
-  LinearGradient as ReanimatedLinearGradient
+  FadeOut
 } from 'react-native-reanimated';
 import { ArrowLeft, Pause, Play, RotateCcw } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -34,7 +33,7 @@ export default function BreatheScreen() {
   const [elapsed, setElapsed] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [phaseTime, setPhaseTime] = useState(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const scale = useSharedValue(1);
 
