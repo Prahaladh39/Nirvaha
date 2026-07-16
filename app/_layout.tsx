@@ -9,6 +9,7 @@ import { SplashScreen } from 'expo-router';
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import ConsentGate from '../components/auth/ConsentGate';
+import { initializePushNotifications } from '../services/pushNotifications';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -22,6 +23,15 @@ function RootLayoutNav() {
   const { user, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = initializePushNotifications(router);
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [router]);
 
   useEffect(() => {
     if (isLoading) return;

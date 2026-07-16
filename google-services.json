@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "883506827772",
+    "project_id": "nirvaha-8a8e4",
+    "storage_bucket": "nirvaha-8a8e4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:883506827772:android:55e34be0188ea6896279f0",
+        "android_client_info": {
+          "package_name": "com.nirvaha.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrhis9EBbYDRncJXPThQStBaxJy-sTK3o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
