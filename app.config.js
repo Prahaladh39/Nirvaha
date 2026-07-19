@@ -1,3 +1,5 @@
+const withNotificationColorFix = require('./plugins/withNotificationColorFix');
+
 module.exports = {
   expo: {
     name: "NirVaha",
@@ -46,6 +48,7 @@ module.exports = {
     favicon: "./assets/images/favicon.png"
   },
   plugins: [
+    withNotificationColorFix,
     "expo-router",
     [
       "expo-splash-screen",
