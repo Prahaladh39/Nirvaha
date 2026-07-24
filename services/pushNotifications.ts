@@ -6,26 +6,72 @@ import * as Notifications from 'expo-notifications';
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
   }),
 });
 
 export function initializePushNotifications(router: any) {
-  const requestUserPermission = async () => {
+  /**
+   * Check the OS notification permission state and request only when appropriate.
+   *
+   * Uses expo-notifications for permission management as recommended by
+   * @react-native-firebase/messaging v25 (messaging().requestPermission() is
+   * deprecated and is a no-op on Android).
+   *
+   * Flow:
+   *  - GRANTED → skip prompt, proceed to configureFcm()
+   *  - UNDETERMINED → request permission once
+   *  - DENIED → do not request again, continue normally
+   *
+   * For Android < 13 (API < 33), notifications are enabled by default so
+   * we skip the runtime permission prompt entirely.
+   */
+  const checkAndRequestNotificationPermission = async () => {
     try {
-      const authStatus = await messaging().requestPermission();
-      const enabled =
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-      if (enabled) {
-        console.log('Push notification permission granted.');
+      // Android < 13 (API 33): notifications are enabled by default,
+      // no runtime permission exists. Proceed directly.
+      if (Platform.OS === 'android' && (Platform.Version as number) < 33) {
         await configureFcm();
-      } else {
-        console.log('Push notification permission denied.');
+        return;
       }
+
+      // Check the current OS permission state (source of truth).
+      const { status, canAskAgain } = await Notifications.getPermissionsAsync();
+
+      if (status === 'granted') {
+        // Already granted — never show a prompt again.
+        await configureFcm();
+        return;
+      }
+
+      if (status === 'undetermined' || (status === 'denied' && canAskAgain)) {
+        // Permission has not been determined yet, or was soft-denied but
+        // the OS still allows us to ask. Request once.
+        const { status: newStatus } = await Notifications.requestPermissionsAsync({
+          ios: {
+            allowAlert: true,
+            allowBadge: true,
+            allowSound: true,
+          },
+        });
+
+        if (newStatus === 'granted') {
+          await configureFcm();
+        }
+        // If denied, continue normally — no retry.
+        return;
+      }
+
+      // status === 'denied' && !canAskAgain
+      // The user has permanently denied notifications.
+      // Do not attempt to show any permission dialog.
+      // The app continues normally without notifications.
     } catch (error) {
-      console.error('Error requesting push permission:', error);
+      // Permission or token failures must never block app startup.
+      console.warn('Notification permission check failed:', error);
     }
   };
 
@@ -53,7 +99,7 @@ export function initializePushNotifications(router: any) {
     }
   };
 
-  requestUserPermission();
+  checkAndRequestNotificationPermission();
 
   const handleDeepLink = (remoteMessage: any) => {
     const deepLink = remoteMessage?.data?.deepLink;
