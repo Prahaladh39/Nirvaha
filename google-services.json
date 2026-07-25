@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:883506827772:android:55e34be0188ea6896279f0",
         "android_client_info": {
-          "package_name": "com.nirvaha.app"
+          "package_name": "org.nirvaha.app"
         }
       },
       "oauth_client": [],
