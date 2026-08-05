@@ -498,7 +498,7 @@ export default function SoundPlayer({
   playlist = [],
   onTrackChange,
 }: SoundPlayerProps) {
-  const player = useAudioPlayer(track?.source ?? require("../../assets/audio/desert-glass-loop.mp3"), { updateInterval: 200 });
+  const player = useAudioPlayer(track?.source ?? require("../../assets/audio/natureseye-blue-sky-binaural-meditation-191542.mp3"), { updateInterval: 200 });
   const status = useAudioPlayerStatus(player);
   const [progressWidth, setProgressWidth] = useState(0);
   const [isPlayState, setIsPlayState] = useState(false);
@@ -521,7 +521,7 @@ export default function SoundPlayer({
     if (track) {
       const isSameTrack = loadedTrackIdRef.current === track.id;
       if (!isSameTrack) {
-        const source = track.source || require("../../assets/audio/desert-glass-loop.mp3");
+        const source = track.source || require("../../assets/audio/natureseye-blue-sky-binaural-meditation-191542.mp3");
         try {
           player.replace(source);
         } catch (error) {
@@ -689,11 +689,14 @@ export default function SoundPlayer({
 
   const themeColors = useMemo(() => getTrackTheme(track), [track]);
 
-  const coverImageUri = useMemo(() => {
-    return (
-      track?.coverImage ||
-      "https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=600&auto=format&fit=crop"
-    );
+  const coverImageSource = useMemo(() => {
+    if (typeof track?.coverImage === 'number') {
+      return track.coverImage;
+    }
+    if (typeof track?.coverImage === 'string' && track.coverImage) {
+      return { uri: track.coverImage };
+    }
+    return { uri: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=600&auto=format&fit=crop" };
   }, [track]);
 
   return (
@@ -766,7 +769,7 @@ export default function SoundPlayer({
                   ]}
                 >
                   <Image
-                    source={{ uri: coverImageUri }}
+                    source={coverImageSource}
                     style={styles.artworkImage}
                     resizeMode="cover"
                   />

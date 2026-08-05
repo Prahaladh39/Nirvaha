@@ -50,7 +50,7 @@ export default function SoundCategoryScreen() {
           <View style={styles.heroCard}>
             {category.coverImage ? (
               <Image 
-                source={{ uri: category.coverImage }} 
+                source={typeof category.coverImage === 'number' ? category.coverImage : { uri: category.coverImage }} 
                 style={styles.heroImage} 
                 contentFit="cover"
                 transition={500}

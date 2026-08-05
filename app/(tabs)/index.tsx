@@ -7,7 +7,7 @@ import CollectionRail from '../../components/home/CollectionRail';
 import CompanionRail from '../../components/home/CompanionRail';
 import SoundRail from '../../components/home/SoundRail';
 import CompactTilesGrid from '../../components/home/CompactTile';
-import JyotirlingaCard from '../../components/home/JyotirlingaCard';
+import AncientPlacesCard from '../../components/home/AncientPlacesCard';
 import AncientCharacterCard from '../../components/home/AncientCharacterCard';
 import TempleOfBalanceCard from '../../components/home/TempleOfBalanceCard';
 import SmartActions from '../../components/home/SmartActions';
@@ -28,7 +28,7 @@ export default function Home() {
       <CollectionRail />
       <SoundRail />
       <CompactTilesGrid />
-      <JyotirlingaCard />
+      <AncientPlacesCard />
       <AncientCharacterCard />
       <TempleOfBalanceCard />
       <SmartActions />

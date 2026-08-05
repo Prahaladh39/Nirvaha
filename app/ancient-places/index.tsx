@@ -4,12 +4,13 @@ import Svg, { Path, Circle, G, Text as SvgText, Defs, LinearGradient, RadialGrad
 import { router, Stack } from 'expo-router';
 import { ArrowLeft, Compass } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
-import { jyotirlingas } from '../../constants/jyotirlingaData';
+import { ancientPlaces } from '../../constants/ancientPlacesData';
 import { indiaMapPaths } from '../../constants/indiaMapPaths';
 import { LinearGradient as ExpoLinearGradient } from 'expo-linear-gradient';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Rect } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
 
@@ -25,29 +26,28 @@ const getCoords = (x: number, y: number) => {
 };
 
 const labelLayouts: Record<string, { xOffset: number; yOffset: number; anchor: 'start' | 'end' | 'middle' }> = {
-  somnath: { xOffset: 12, yOffset: 4, anchor: 'start' },
-  nageshwar: { xOffset: 12, yOffset: -5, anchor: 'start' },
-  trimbakeshwar: { xOffset: -12, yOffset: 4, anchor: 'end' },
-  bhimashankar: { xOffset: -12, yOffset: 12, anchor: 'end' },
-  grishneshwar: { xOffset: 14, yOffset: 2, anchor: 'start' },
-  mahakaleshwar: { xOffset: 0, yOffset: -22, anchor: 'middle' },
-  omkareshwar: { xOffset: 12, yOffset: 4, anchor: 'start' },
-  mallikarjuna: { xOffset: 12, yOffset: 0, anchor: 'start' },
-  ramanathaswamy: { xOffset: -12, yOffset: 0, anchor: 'end' },
-  kedarnath: { xOffset: 12, yOffset: 0, anchor: 'start' },
-  'kashi-vishwanath': { xOffset: -12, yOffset: -8, anchor: 'end' },
-  vaidyanath: { xOffset: -12, yOffset: 10, anchor: 'end' },
+  brihadishwara: { xOffset: 12, yOffset: 4, anchor: 'start' },
+  'sun-temple': { xOffset: 12, yOffset: 4, anchor: 'start' },
+  ajanta: { xOffset: 14, yOffset: -8, anchor: 'start' },
+  ellora: { xOffset: -12, yOffset: 12, anchor: 'end' },
+  hampi: { xOffset: 12, yOffset: 4, anchor: 'start' },
+  dholavira: { xOffset: 12, yOffset: -5, anchor: 'start' },
+  varanasi: { xOffset: -12, yOffset: -8, anchor: 'end' },
+  vrindavan: { xOffset: 12, yOffset: 0, anchor: 'start' },
+  dwarka: { xOffset: 12, yOffset: 4, anchor: 'start' },
+  nalanda: { xOffset: 12, yOffset: 8, anchor: 'start' },
 };
 
-const regions = ['North', 'Central', 'East', 'West', 'South'];
+// Derive unique regions from data
+const regions = [...new Set(ancientPlaces.map(p => p.region))].sort();
 
-export default function JyotirlingaMapScreen() {
+export default function AncientPlacesMapScreen() {
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
 
   const activeStates = useMemo(() => {
     return new Set(
-      jyotirlingas
+      ancientPlaces
         .filter(t => activeRegion === null || t.region === activeRegion)
         .map(t => t.state)
     );
@@ -73,7 +73,6 @@ export default function JyotirlingaMapScreen() {
   const panGesture = Gesture.Pan()
     .minDistance(10)
     .onUpdate((e) => {
-      // Limit panning a bit based on scale if needed, or just let it free pan
       translateX.value = savedTranslateX.value + e.translationX;
       translateY.value = savedTranslateY.value + e.translationY;
     })
@@ -106,7 +105,7 @@ export default function JyotirlingaMapScreen() {
           <Text style={styles.headerSubtitle}>
             <Compass size={12} color={theme.colors.gold} style={{marginRight: 4}} /> SACRED GEOGRAPHY
           </Text>
-          <Text style={styles.headerTitle}>12 Jyotirlingas</Text>
+          <Text style={styles.headerTitle}>Ancient Places</Text>
         </View>
         <View style={{ width: 40 }} />
       </View>
@@ -118,7 +117,7 @@ export default function JyotirlingaMapScreen() {
             style={[styles.filterBtn, activeRegion === null && styles.filterBtnActive]}
           >
             <Text style={[styles.filterText, activeRegion === null && styles.filterTextActive]}>
-              All India ({jyotirlingas.length})
+              All India ({ancientPlaces.length})
             </Text>
           </Pressable>
           {regions.map(r => (
@@ -128,7 +127,7 @@ export default function JyotirlingaMapScreen() {
               style={[styles.filterBtn, activeRegion === r && styles.filterBtnActive]}
             >
               <Text style={[styles.filterText, activeRegion === r && styles.filterTextActive]}>
-                {r} ({jyotirlingas.filter(t => t.region === r).length})
+                {r} ({ancientPlaces.filter(t => t.region === r).length})
               </Text>
             </Pressable>
           ))}
@@ -192,15 +191,15 @@ export default function JyotirlingaMapScreen() {
           </SvgText>
 
           {/* Markers */}
-          {jyotirlingas.map((temple) => {
-            const { cx, cy } = getCoords(temple.x, temple.y);
-            const isDimmed = activeRegion !== null && temple.region !== activeRegion;
-            const layout = labelLayouts[temple.id] || { xOffset: 0, yOffset: -16, anchor: 'middle' };
-            const shortLocName = temple.location.split(',')[0];
+          {ancientPlaces.map((place) => {
+            const { cx, cy } = getCoords(place.x, place.y);
+            const isDimmed = activeRegion !== null && place.region !== activeRegion;
+            const layout = labelLayouts[place.id] || { xOffset: 0, yOffset: -16, anchor: 'middle' };
+            const shortLocName = place.location.split(',')[0];
 
             return (
               <G 
-                key={temple.id} 
+                key={place.id} 
                 opacity={isDimmed ? 0.2 : 1}
               >
                 {/* Hit area */}
@@ -228,7 +227,7 @@ export default function JyotirlingaMapScreen() {
                     fontWeight="bold"
                     fontFamily={theme.typography.display}
                   >
-                    {temple.name}
+                    {place.name}
                   </SvgText>
                   <SvgText
                     x="0"
@@ -247,13 +246,13 @@ export default function JyotirlingaMapScreen() {
           </Svg>
 
           {/* Invisible Native Overlays for Reliable Touches */}
-          {jyotirlingas.map((temple) => {
-            const { cx, cy } = getCoords(temple.x, temple.y);
-            const isDimmed = activeRegion !== null && temple.region !== activeRegion;
+          {ancientPlaces.map((place) => {
+            const { cx, cy } = getCoords(place.x, place.y);
+            const isDimmed = activeRegion !== null && place.region !== activeRegion;
 
             return (
               <Pressable
-                key={`touch-${temple.id}`}
+                key={`touch-${place.id}`}
                 style={{
                   position: 'absolute',
                   left: cx - 25,
@@ -264,7 +263,7 @@ export default function JyotirlingaMapScreen() {
                 }}
                 onPress={() => {
                   if (!isDimmed) {
-                    router.push(`/jyotirlingas/${temple.id}`);
+                    router.push(`/ancient-places/${place.id}` as any);
                   }
                 }}
               />
@@ -277,10 +276,6 @@ export default function JyotirlingaMapScreen() {
     </GestureHandlerRootView>
   );
 }
-
-// React Native SVG doesn't have <Rect> exported by default in some older versions but we can import it.
-// Let's import Rect just to be safe.
-import { Rect } from 'react-native-svg';
 
 const styles = StyleSheet.create({
   container: {

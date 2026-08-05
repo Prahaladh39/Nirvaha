@@ -9,6 +9,10 @@ node_modules/
 dist
 dist/
 web-build
+ios
+ios/
+android
+android/
 *.jks
 *.p8
 *.p12

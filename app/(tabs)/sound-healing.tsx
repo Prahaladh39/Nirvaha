@@ -65,7 +65,7 @@ export default function SoundHealingScreen() {
             <View style={styles.libraryHeader}>
               <View>
                 <Text style={styles.sectionTitle}>Available sounds</Text>
-                <Text style={styles.sectionSubtitle}>8 local tracks for this build</Text>
+                <Text style={styles.sectionSubtitle}>{localSoundTracks.length} curated tracks</Text>
               </View>
               <View style={styles.countBadge}>
                 <Headphones size={13} color={theme.colors.gold} />

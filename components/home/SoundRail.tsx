@@ -1,15 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, ImageSourcePropType } from 'react-native';
 import { Image } from 'expo-image';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ChevronRight, Play } from 'lucide-react-native';
-import { localSoundTracks, soundHealingCategories } from '../../constants/soundHealingData';
+import { soundHealingCategories } from '../../constants/soundHealingData';
 import { theme } from '../../constants/theme';
 import { router } from 'expo-router';
 
 export default function SoundRail() {
-  const visible = soundHealingCategories.slice(0, 6);
-
   return (
     <Animated.View entering={FadeInDown.duration(500).delay(500)} style={styles.container}>
       {/* Section Header */}
@@ -29,18 +27,18 @@ export default function SoundRail() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {visible.map((cat, i) => {
+        {soundHealingCategories.map((cat, i) => {
           const isRecommended = i === 0;
           return (
             <Pressable
               key={cat.id}
               style={styles.card}
-              onPress={() => router.push('/(tabs)/sound-healing' as any)}
+              onPress={() => router.push(`/sound-healing/category/${cat.id}` as any)}
             >
               <View style={[styles.cardContainer, isRecommended && styles.recommendedBorder]}>
                 {cat.coverImage ? (
                   <Image 
-                    source={{ uri: cat.coverImage }} 
+                    source={cat.coverImage as ImageSourcePropType} 
                     style={styles.coverImage} 
                     contentFit="cover"
                     transition={500}

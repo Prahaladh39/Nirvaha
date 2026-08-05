@@ -7,25 +7,25 @@ import {
   MapPin, Sparkles, Milestone, History, Award, Compass, Activity, CheckCircle2 
 } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
-import { jyotirlingas } from '../../constants/jyotirlingaData';
+import { ancientPlaces } from '../../constants/ancientPlacesData';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 
-export default function JyotirlingaDetailScreen() {
+export default function AncientPlaceDetailScreen() {
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   
-  const currentIndex = jyotirlingas.findIndex(t => t.id === id);
-  const currentTemple = jyotirlingas[currentIndex] || jyotirlingas[0];
+  const currentIndex = ancientPlaces.findIndex(t => t.id === id);
+  const currentPlace = ancientPlaces[currentIndex] || ancientPlaces[0];
   
   const handlePrev = () => {
-    const prevIndex = (currentIndex - 1 + jyotirlingas.length) % jyotirlingas.length;
-    router.replace(`/jyotirlingas/${jyotirlingas[prevIndex].id}`);
+    const prevIndex = (currentIndex - 1 + ancientPlaces.length) % ancientPlaces.length;
+    router.replace(`/ancient-places/${ancientPlaces[prevIndex].id}` as any);
   };
 
   const handleNext = () => {
-    const nextIndex = (currentIndex + 1) % jyotirlingas.length;
-    router.replace(`/jyotirlingas/${jyotirlingas[nextIndex].id}`);
+    const nextIndex = (currentIndex + 1) % ancientPlaces.length;
+    router.replace(`/ancient-places/${ancientPlaces[nextIndex].id}` as any);
   };
 
   return (
@@ -40,14 +40,14 @@ export default function JyotirlingaDetailScreen() {
             <ArrowLeft size={20} color="#FFF" />
           </Pressable>
           <BookOpen size={16} color={theme.colors.gold} style={{ marginLeft: 12, marginRight: 6 }} />
-          <Text style={styles.headerTitle}>SACRED CHRONICLES</Text>
+          <Text style={styles.headerTitle}>ANCIENT CHRONICLES</Text>
         </View>
 
         <View style={styles.headerRight}>
           <Pressable onPress={handlePrev} style={styles.iconBtnSmall}>
             <ChevronLeft size={16} color="#FFF" />
           </Pressable>
-          <Text style={styles.counter}>{currentIndex + 1} / 12</Text>
+          <Text style={styles.counter}>{currentIndex + 1} / {ancientPlaces.length}</Text>
           <Pressable onPress={handleNext} style={styles.iconBtnSmall}>
             <ChevronRight size={16} color="#FFF" />
           </Pressable>
@@ -59,34 +59,34 @@ export default function JyotirlingaDetailScreen() {
         <Animated.View entering={FadeInDown.duration(600)} style={styles.titleBlock}>
           <View style={styles.badgeRow}>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{currentTemple.region} Region • {currentTemple.state}</Text>
+              <Text style={styles.badgeText}>{currentPlace.region} Region • {currentPlace.state}</Text>
             </View>
           </View>
           
-          <Text style={styles.name}>{currentTemple.name}</Text>
-          <Text style={styles.sanskritName}>{currentTemple.sanskritName} • ज्योतिर्लिङ्ग</Text>
+          <Text style={styles.name}>{currentPlace.name}</Text>
+          <Text style={styles.sanskritName}>{currentPlace.sanskritName}</Text>
           
           <View style={styles.locationRow}>
             <MapPin size={14} color="#c84b1e" />
-            <Text style={styles.locationText}>{currentTemple.location}, {currentTemple.state}</Text>
+            <Text style={styles.locationText}>{currentPlace.location}, {currentPlace.state}</Text>
           </View>
         </Animated.View>
 
         {/* Quick Facts Grid */}
         <Animated.View entering={FadeInDown.duration(600).delay(100)} style={styles.factsGrid}>
           <View style={styles.factCard}>
-            <Text style={styles.factLabel}>RIVER / BASIN</Text>
+            <Text style={styles.factLabel}>RIVER / GEOGRAPHY</Text>
             <View style={styles.factValueRow}>
               <View style={[styles.dot, { backgroundColor: '#3b82f6' }]} />
-              <Text style={styles.factValue}>{currentTemple.river}</Text>
+              <Text style={styles.factValue}>{currentPlace.river}</Text>
             </View>
           </View>
           
           <View style={styles.factCard}>
-            <Text style={styles.factLabel}>SPIRITUAL THEME</Text>
+            <Text style={styles.factLabel}>HERITAGE THEME</Text>
             <View style={styles.factValueRow}>
               <Sparkles size={12} color={theme.colors.gold} />
-              <Text style={[styles.factValue, { color: theme.colors.gold }]}>{currentTemple.primaryTheme}</Text>
+              <Text style={[styles.factValue, { color: theme.colors.gold }]}>{currentPlace.primaryTheme}</Text>
             </View>
           </View>
           
@@ -94,7 +94,7 @@ export default function JyotirlingaDetailScreen() {
             <Text style={styles.factLabel}>ARCHITECTURAL IDENTITY</Text>
             <View style={styles.factValueRow}>
               <Milestone size={12} color="#c84b1e" />
-              <Text style={styles.factValue}>{currentTemple.architecturalStyle}</Text>
+              <Text style={styles.factValue}>{currentPlace.architecturalStyle}</Text>
             </View>
           </View>
         </Animated.View>
@@ -105,15 +105,15 @@ export default function JyotirlingaDetailScreen() {
             <History size={16} color="#c84b1e" />
             <Text style={styles.sectionTitle}>Historical Legacy</Text>
           </View>
-          <Text style={styles.sectionText}>{currentTemple.history}</Text>
+          <Text style={styles.sectionText}>{currentPlace.history}</Text>
         </Animated.View>
 
         <Animated.View entering={FadeInUp.duration(600).delay(300)} style={styles.section}>
           <View style={styles.sectionHeader}>
             <Award size={16} color={theme.colors.gold} />
-            <Text style={[styles.sectionTitle, { color: theme.colors.gold }]}>Spiritual Symbolism</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.gold }]}>Cultural Significance</Text>
           </View>
-          <Text style={styles.sectionText}>{currentTemple.significance}</Text>
+          <Text style={styles.sectionText}>{currentPlace.significance}</Text>
         </Animated.View>
 
         <Animated.View entering={FadeInUp.duration(600).delay(400)} style={styles.section}>
@@ -121,7 +121,7 @@ export default function JyotirlingaDetailScreen() {
             <Compass size={16} color="#38bdf8" />
             <Text style={[styles.sectionTitle, { color: '#38bdf8' }]}>Contemporary Lens</Text>
           </View>
-          <Text style={styles.sectionText}>{currentTemple.contemporary}</Text>
+          <Text style={styles.sectionText}>{currentPlace.contemporary}</Text>
         </Animated.View>
 
         <Animated.View entering={FadeInUp.duration(600).delay(500)} style={styles.section}>
@@ -129,7 +129,7 @@ export default function JyotirlingaDetailScreen() {
             <Activity size={16} color="#c84b1e" />
             <Text style={[styles.sectionTitle, { color: '#c84b1e' }]}>Living Heritage</Text>
           </View>
-          <Text style={styles.sectionText}>{currentTemple.relevance}</Text>
+          <Text style={styles.sectionText}>{currentPlace.relevance}</Text>
         </Animated.View>
         
       </ScrollView>

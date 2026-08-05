@@ -6,7 +6,7 @@ import { theme } from '../../constants/theme';
 import { Map, Sparkles, ChevronRight } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export default function JyotirlingaCard() {
+export default function AncientPlacesCard() {
   return (
     <Animated.View entering={FadeInDown.duration(500).delay(800)} style={styles.container}>
       <Pressable 
@@ -14,13 +14,12 @@ export default function JyotirlingaCard() {
           styles.card,
           pressed && { transform: [{ scale: 0.98 }] }
         ]}
-        onPress={() => router.push('/jyotirlingas')}
+        onPress={() => router.push('/ancient-places' as any)}
       >
         <LinearGradient 
           colors={['rgba(212, 175, 55, 0.15)', 'rgba(0,0,0,0.4)']} 
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFill} 
           style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: 24 }}
         />
         
@@ -32,8 +31,8 @@ export default function JyotirlingaCard() {
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.title}>The 12 Jyotirlingas</Text>
-          <Text style={styles.subtitle}>Explore the sacred geography of India</Text>
+          <Text style={styles.title}>Ancient Places</Text>
+          <Text style={styles.subtitle}>Explore the ancient heritage of India</Text>
         </View>
 
         <View style={styles.arrowContainer}>

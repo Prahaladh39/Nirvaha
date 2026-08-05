@@ -23,8 +23,7 @@ export const contentRows = [
 ];
 
 export const soundCategories = [
-  { id: "binaural", title: "Binaural Tones", trackCount: 12, moodTag: "Focus & Clarity" },
-  { id: "mantras", title: "Mantras", trackCount: 18, moodTag: "Spiritual Balance" },
-  { id: "nature", title: "Nature Sounds", trackCount: 24, moodTag: "Deep Relaxation" },
-  { id: "frequency", title: "Healing Frequencies", trackCount: 9, moodTag: "Cellular Healing" },
+  { id: "healing-vibes", title: "Healing Vibes", trackCount: 3, moodTag: "Meditation & Focus" },
+  { id: "ancient-music", title: "Ancient Music", trackCount: 3, moodTag: "Spiritual Heritage" },
+  { id: "nature-therapy", title: "Nature Therapy", trackCount: 3, moodTag: "Deep Relaxation" },
 ];
