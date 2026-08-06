@@ -18,7 +18,7 @@ module.exports = {
     android: {
       package: "org.nirvaha.app",
       googleServicesFile: "./google-services.json",
-      versionCode: 3,
+      versionCode: 4,
 
       permissions: [
         "INTERNET"

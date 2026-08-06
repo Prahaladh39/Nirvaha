@@ -1,18 +1,21 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Headphones, Play } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomNav from '../../../components/navigation/BottomNav';
 import SoundPlayer from '../../../components/sound-healing/SoundPlayer';
+import { LAYOUT_TOKENS } from '../../../components/ui/ScreenContainer';
 import { categoryTracks, SoundTrack, soundHealingCategories } from '../../../constants/soundHealingData';
 import { theme } from '../../../constants/theme';
 
 export default function SoundCategoryScreen() {
   const { categoryId } = useLocalSearchParams<{ categoryId?: string }>();
   const [activeTrack, setActiveTrack] = useState<SoundTrack | null>(null);
+  const insets = useSafeAreaInsets();
 
   const category = useMemo(
     () => soundHealingCategories.find((item) => item.id === categoryId),
@@ -20,25 +23,33 @@ export default function SoundCategoryScreen() {
   );
   const tracks = categoryTracks[categoryId || ''] || [];
 
+  const navBottomOffset = Math.max(LAYOUT_TOKENS.BOTTOM_NAV_MARGIN, insets.bottom + 4);
+  const bottomPadding = navBottomOffset + LAYOUT_TOKENS.BOTTOM_NAV_HEIGHT + LAYOUT_TOKENS.GAP_PADDING + 40;
+
   if (!category) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.missingState}>
           <Text style={styles.missingTitle}>Sound category unavailable</Text>
           <Pressable style={styles.primaryButton} onPress={() => router.replace('/(tabs)/sound-healing' as any)}>
             <Text style={styles.primaryButtonText}>Back to sound healing</Text>
           </Pressable>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <Stack.Screen options={{ headerShown: false }} />
       <View style={[styles.ambientOrb, styles.ambientOne]} />
       <View style={[styles.ambientOrb, styles.ambientTwo]} />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPadding }]}
+      >
         <Animated.View entering={FadeInDown.duration(450)} style={styles.header}>
           <View style={styles.headerRow}>
             <Pressable style={styles.backButton} onPress={() => router.replace('/(tabs)/sound-healing' as any)}>
@@ -119,7 +130,7 @@ export default function SoundCategoryScreen() {
         onTrackChange={setActiveTrack}
         onClose={() => setActiveTrack(null)}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -149,7 +160,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 44,
+    paddingTop: 16,
     paddingBottom: 130,
   },
   header: {
