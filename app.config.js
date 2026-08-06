@@ -26,7 +26,9 @@ module.exports = {
 
       blockedPermissions: [
         "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO"
       ],
 
       adaptiveIcon: {
@@ -71,6 +73,12 @@ module.exports = {
         {
           "icon": "./assets/notification-icon.png",
           "color": "#2d5a4c"
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "granularPermissions": ["audio"]
         }
       ]
     ],
