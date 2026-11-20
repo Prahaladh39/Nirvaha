@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { User } from 'lucide-react-native';
+import { User, TicketCheck } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
 import { router } from 'expo-router';
 
@@ -23,18 +23,34 @@ export default function GreetingHeader() {
         <Text style={styles.subtitleText}>How are you feeling today?</Text>
       </View>
 
-      <Pressable 
-        onPress={() => router.push('/profile')}
-        style={({ pressed }) => [
-          styles.profileButton,
-          pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] }
-        ]}
-      >
-        <User size={20} color="rgba(255,255,255,0.7)" />
-        {unreadCount > 0 && (
-          <View style={styles.notificationBadge} />
-        )}
-      </Pressable>
+      <View style={styles.rightButtonsRow}>
+        {/* Direct Bookings Quick Link */}
+        <Pressable 
+          onPress={() => router.push('/(tabs)/bookings' as any)}
+          style={({ pressed }) => [
+            styles.bookingsButton,
+            pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] }
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="My Bookings"
+        >
+          <TicketCheck size={18} color={theme.colors.gold} />
+          <Text style={styles.bookingsButtonText}>Bookings</Text>
+        </Pressable>
+
+        <Pressable 
+          onPress={() => router.push('/profile')}
+          style={({ pressed }) => [
+            styles.profileButton,
+            pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] }
+          ]}
+        >
+          <User size={20} color="rgba(255,255,255,0.7)" />
+          {unreadCount > 0 && (
+            <View style={styles.notificationBadge} />
+          )}
+        </Pressable>
+      </View>
     </Animated.View>
   );
 }
@@ -62,6 +78,28 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.body,
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.7)',
+  },
+  rightButtonsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  bookingsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.35)',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  bookingsButtonText: {
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 12,
+    color: theme.colors.gold,
+    fontWeight: '600',
   },
   profileButton: {
     width: 44,
