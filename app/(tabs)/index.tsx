@@ -3,6 +3,7 @@ import ScreenContainer from '../../components/ui/ScreenContainer';
 import GreetingHeader from '../../components/home/GreetingHeader';
 import EmotionChips from '../../components/home/EmotionChips';
 import HeroCarousel from '../../components/home/HeroCarousel';
+import EventsRail from '../../components/home/EventsRail';
 import CollectionRail from '../../components/home/CollectionRail';
 import CompanionRail from '../../components/home/CompanionRail';
 import SoundRail from '../../components/home/SoundRail';
@@ -24,6 +25,7 @@ export default function Home() {
       <GreetingHeader />
       <EmotionChips />
       <HeroCarousel />
+      <EventsRail />
       <CompanionRail />
       <CollectionRail />
       <SoundRail />
