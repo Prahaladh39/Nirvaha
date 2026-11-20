@@ -7,11 +7,25 @@ import {
   BookOpen,
   Camera,
   TrendingUp,
+  TicketCheck,
 } from "lucide-react-native";
 import { theme } from "../../constants/theme";
 import { router } from "expo-router";
 
 const tiles = [
+  {
+    id: "bookings",
+    title: "Bookings",
+    subtitle: "Sacred experiences",
+    icon: TicketCheck,
+    label: "RESERVE",
+    route: "/(tabs)/bookings",
+    colors: {
+      bg: "#16281E",
+      iconBg: "rgba(212, 175, 55, 0.25)",
+      accent: theme.colors.gold,
+    },
+  },
   {
     id: "community",
     title: "Nirvaha Space",

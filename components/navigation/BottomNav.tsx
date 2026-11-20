@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
-import { Home, Sparkles, Play, User } from 'lucide-react-native';
+import { Home, Sparkles, Play, User, TicketCheck } from 'lucide-react-native';
 import { usePathname, router } from 'expo-router';
 import Animated, { useAnimatedStyle, withSpring, useSharedValue } from 'react-native-reanimated';
 import { theme } from '../../constants/theme';
@@ -11,8 +11,9 @@ const { width } = Dimensions.get('window');
 
 const navItems = [
   { label: 'Home', icon: Home, route: '/(tabs)' },
-  { label: 'Chat', icon: Sparkles, route: '/chat' },
+  { label: 'Bookings', icon: TicketCheck, route: '/(tabs)/bookings' },
   { label: 'Collection', icon: Play, route: '/collection' },
+  { label: 'Chat', icon: Sparkles, route: '/chat' },
   { label: 'Profile', icon: User, route: '/profile' },
 ];
 
@@ -23,9 +24,10 @@ export default function BottomNav() {
 
   // We determine the active index based on route
   const getActiveIndex = () => {
-    if (pathname.includes('chat')) return 1;
+    if (pathname === '/(tabs)/bookings' || pathname.startsWith('/(tabs)/bookings') || pathname.startsWith('/events')) return 1;
     if (pathname.includes('collection')) return 2;
-    if (pathname.includes('profile')) return 3;
+    if (pathname.includes('chat')) return 3;
+    if (pathname.includes('profile')) return 4;
     return 0; // default to Home
   };
 
@@ -72,6 +74,8 @@ export default function BottomNav() {
               onPress={() => {
                 if (item.route === '/(tabs)') {
                   router.replace('/(tabs)');
+                } else if (item.route === '/(tabs)/bookings') {
+                  router.replace('/(tabs)/bookings' as any);
                 } else {
                   router.push(item.route as any);
                 }

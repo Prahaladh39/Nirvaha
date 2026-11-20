@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ChevronRight, Sparkles } from 'lucide-react-native';
+import { ChevronRight, Sparkles, TicketCheck } from 'lucide-react-native';
 import { EventDocument } from '../../types/events';
 import { fetchEvents } from '../../services/eventsService';
 import { EventCard } from '../events/EventCard';
@@ -37,7 +37,7 @@ export default function EventsRail() {
   }, [loadEvents]);
 
   const handleSeeAll = () => {
-    router.push('/events' as any);
+    router.push('/(tabs)/bookings' as any);
   };
 
   if (isLoading) {
@@ -48,9 +48,46 @@ export default function EventsRail() {
     );
   }
 
-  // Gracefully hide rail if no published events exist yet
+  // If no events found or offline, show an invitation card with direct link to the Bookings platform
   if (!events || events.length === 0) {
-    return null;
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.titleRow}>
+            <Sparkles size={16} color={theme.colors.gold} style={styles.sparkleIcon} />
+            <Text style={styles.title}>Experiences & Gatherings</Text>
+          </View>
+
+          <Pressable
+            onPress={handleSeeAll}
+            style={({ pressed }) => [styles.seeAllButton, pressed && styles.buttonPressed]}
+            hitSlop={8}
+          >
+            <Text style={styles.seeAllText}>Bookings Platform</Text>
+            <ChevronRight size={14} color={theme.colors.gold} />
+          </Pressable>
+        </View>
+
+        <Pressable
+          style={({ pressed }) => [styles.emptyCard, pressed && styles.buttonPressed]}
+          onPress={handleSeeAll}
+        >
+          <View style={styles.emptyIconCircle}>
+            <TicketCheck size={22} color={theme.colors.gold} />
+          </View>
+          <View style={styles.emptyTextContainer}>
+            <Text style={styles.emptyRailTitle}>Sacred Gatherings & Bookings</Text>
+            <Text style={styles.emptyRailSubtitle}>
+              Explore sound healing sessions, mindful retreats & community circles.
+            </Text>
+          </View>
+          <View style={styles.emptyActionPill}>
+            <Text style={styles.emptyActionText}>View</Text>
+            <ChevronRight size={12} color="#FFFFFF" />
+          </View>
+        </Pressable>
+      </View>
+    );
   }
 
   return (
@@ -67,7 +104,7 @@ export default function EventsRail() {
           style={({ pressed }) => [styles.seeAllButton, pressed && styles.buttonPressed]}
           hitSlop={8}
         >
-          <Text style={styles.seeAllText}>See All</Text>
+          <Text style={styles.seeAllText}>Bookings Hub</Text>
           <ChevronRight size={14} color={theme.colors.gold} />
         </Pressable>
       </View>
@@ -149,6 +186,58 @@ const styles = StyleSheet.create({
   },
   cardWrapper: {
     width: 290,
+  },
+  emptyCard: {
+    marginHorizontal: 20,
+    marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#121C16',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.35)',
+    gap: 12,
+  },
+  emptyIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.25)',
+  },
+  emptyTextContainer: {
+    flex: 1,
+  },
+  emptyRailTitle: {
+    fontFamily: theme.typography.display,
+    fontSize: 15,
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  emptyRailSubtitle: {
+    fontFamily: theme.typography.body,
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.6)',
+    lineHeight: 15,
+  },
+  emptyActionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: theme.colors.healingGreen,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  emptyActionText: {
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 11,
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
 });
 
