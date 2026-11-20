@@ -103,32 +103,42 @@ export function initializePushNotifications(router: any) {
 
   const handleDeepLink = (remoteMessage: any) => {
     const deepLink = remoteMessage?.data?.deepLink;
+    const eventId = remoteMessage?.data?.eventId;
+    const bookingId = remoteMessage?.data?.bookingId;
+
+    let targetRoute = '';
+
     if (deepLink) {
       console.log('Handling deep link from notification:', deepLink);
-      let targetRoute = '';
-      if (deepLink.startsWith('nirvaha://')) {
-        const routeName = deepLink.replace('nirvaha://', '');
+      if (deepLink.startsWith('nirvaha://') || deepLink.startsWith('nirvahaapp://')) {
+        const routeName = deepLink.replace(/^(nirvaha|nirvahaapp):\/\//, '');
         if (routeName === 'music') {
           targetRoute = '/collection';
         } else if (routeName === 'sleep') {
           targetRoute = '/(tabs)/wellness';
-        } else if (routeName === 'ai') {
+        } else if (routeName === 'ai' || routeName === 'companions') {
           targetRoute = '/chat';
-        } else if (routeName === 'companions') {
-          targetRoute = '/chat';
+        } else if (routeName === 'events' || routeName === 'events/') {
+          targetRoute = '/events';
+        } else if (routeName.startsWith('events/')) {
+          targetRoute = `/${routeName}`;
         } else {
           targetRoute = `/${routeName}`;
         }
       } else {
-        targetRoute = deepLink;
+        targetRoute = deepLink.startsWith('/') ? deepLink : `/${deepLink}`;
       }
-      
-      if (targetRoute) {
-        try {
-          router.push(targetRoute as any);
-        } catch (e) {
-          console.error('Failed to route deep link:', targetRoute, e);
-        }
+    } else if (eventId) {
+      targetRoute = `/events/${eventId}`;
+    } else if (bookingId) {
+      targetRoute = '/events/my-bookings';
+    }
+    
+    if (targetRoute) {
+      try {
+        router.push(targetRoute as any);
+      } catch (e) {
+        console.error('Failed to route deep link:', targetRoute, e);
       }
     }
   };

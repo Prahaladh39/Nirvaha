@@ -55,6 +55,7 @@ function RootLayoutNav() {
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="pages" options={{ headerShown: false }} />
+          <Stack.Screen name="events" options={{ headerShown: false }} />
           <Stack.Screen name="sound-healing" options={{ headerShown: false }} />
           <Stack.Screen name="space" options={{ headerShown: false }} />
           <Stack.Screen name="wisdom-selfie" options={{ headerShown: false }} />
