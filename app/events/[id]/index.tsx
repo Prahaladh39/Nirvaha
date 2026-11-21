@@ -10,7 +10,7 @@ import {
   Dimensions,
   Platform,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,6 +30,7 @@ import {
   AlertCircle,
   Sparkles,
   Info,
+  RotateCcw,
 } from 'lucide-react-native';
 import { EventDocument, getComputedEventStatus } from '../../../types/events';
 import { fetchEventById } from '../../../services/eventsService';
@@ -55,20 +56,39 @@ export default function EventDetailScreen() {
   const [event, setEvent] = useState<EventDocument | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isNetworkFailure, setIsNetworkFailure] = useState(false);
 
   const loadEvent = useCallback(async () => {
-    if (!id) return;
+    if (!id) {
+      setErrorMessage('Event identifier is missing.');
+      setIsLoading(false);
+      return;
+    }
     try {
       setIsLoading(true);
       setErrorMessage(null);
+      setIsNetworkFailure(false);
+
       const data = await fetchEventById(id);
       if (!data) {
-        setErrorMessage('This event could not be found or has been retired.');
+        setErrorMessage('This experience could not be found or has been retired.');
       } else {
         setEvent(data);
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to load event details. Please try again.');
+      const isNet =
+        err?.name === 'NetworkError' ||
+        err?.name === 'TimeoutError' ||
+        err?.message?.toLowerCase().includes('network') ||
+        err?.message?.toLowerCase().includes('connection') ||
+        err?.message?.toLowerCase().includes('offline');
+
+      setIsNetworkFailure(Boolean(isNet));
+      setErrorMessage(
+        isNet
+          ? 'Network connection issue. Please check your connection and tap retry.'
+          : err?.message || 'Failed to load experience details. Please try again.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -131,24 +151,71 @@ export default function EventDetailScreen() {
     } as any);
   };
 
+  // 1. Loading State
   if (isLoading) {
     return (
-      <View style={[styles.centeredContainer, { paddingTop: insets.top }]}>
-        <ActivityIndicator size="large" color={theme.colors.gold} />
-        <Text style={styles.loadingText}>Loading sacred experience...</Text>
+      <View style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={[styles.centeredContainer, { paddingTop: insets.top }]}>
+          <ActivityIndicator size="large" color={theme.colors.gold} />
+          <Text style={styles.loadingText}>Loading sacred experience...</Text>
+        </View>
       </View>
     );
   }
 
+  // 2. Error / Unavailable State
   if (errorMessage || !event) {
     return (
-      <View style={[styles.centeredContainer, { paddingTop: insets.top, paddingHorizontal: 30 }]}>
-        <AlertCircle size={48} color="#EF4444" style={{ marginBottom: 16 }} />
-        <Text style={styles.errorTitle}>Experience Unavailable</Text>
-        <Text style={styles.errorDescription}>{errorMessage || 'Event not found.'}</Text>
-        <Pressable style={styles.backHomeButton} onPress={handleBack}>
-          <Text style={styles.backHomeButtonText}>Back to Experiences</Text>
-        </Pressable>
+      <View style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
+
+        {/* Custom Dark Header for error screen */}
+        <View style={[styles.darkHeader, { paddingTop: Math.max(insets.top, 12) }]}>
+          <Pressable
+            style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
+            onPress={handleBack}
+            accessibilityRole="button"
+            accessibilityLabel="Back to experiences"
+          >
+            <ChevronLeft size={22} color="#FFFFFF" />
+          </Pressable>
+          <Text style={styles.darkHeaderTitle}>Experience Details</Text>
+          <View style={{ width: 38 }} />
+        </View>
+
+        <View style={styles.centeredContainer}>
+          <AlertCircle
+            size={52}
+            color={isNetworkFailure ? '#EAB308' : '#EF4444'}
+            style={{ marginBottom: 16 }}
+          />
+          <Text style={styles.errorTitle}>
+            {isNetworkFailure ? 'Connection Issue' : 'Experience Unavailable'}
+          </Text>
+          <Text style={styles.errorDescription}>
+            {errorMessage || 'This experience could not be found or has been retired.'}
+          </Text>
+
+          <View style={styles.errorActionRow}>
+            {isNetworkFailure ? (
+              <Pressable
+                style={({ pressed }) => [styles.retryBtn, pressed && styles.btnPressed]}
+                onPress={loadEvent}
+              >
+                <RotateCcw size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                <Text style={styles.retryBtnText}>Retry</Text>
+              </Pressable>
+            ) : null}
+
+            <Pressable
+              style={({ pressed }) => [styles.backHomeButton, pressed && styles.btnPressed]}
+              onPress={handleBack}
+            >
+              <Text style={styles.backHomeButtonText}>Back to Experiences</Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
     );
   }
@@ -193,7 +260,7 @@ export default function EventDetailScreen() {
   const isHybrid = event.location?.type === 'hybrid';
   const locationLabel = isOnline ? 'Online Gathering' : isHybrid ? 'Hybrid Experience' : 'In-Person Sanctuary';
 
-  // Render the Dynamic Action Button
+  // Render Dynamic Action Button
   const renderActionButton = () => {
     if (isCancelled) {
       return (
@@ -284,20 +351,36 @@ export default function EventDetailScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Top Floating Navigation */}
-      <View style={[styles.navHeader, { top: insets.top + 6 }]}>
+      {/* Explicitly suppress Expo Router default white header */}
+      <Stack.Screen options={{ headerShown: false }} />
+
+      {/* Custom Nirvaha Dark-Mode Navigation Header */}
+      <View style={[styles.darkHeader, { paddingTop: Math.max(insets.top, 12) }]}>
         <Pressable
-          style={({ pressed }) => [styles.iconCircle, pressed && styles.btnPressed]}
+          style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
           onPress={handleBack}
           hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
         >
           <ChevronLeft size={22} color="#FFFFFF" />
         </Pressable>
 
+        <View style={styles.headerTitleCenter}>
+          <Text style={styles.darkHeaderTitle} numberOfLines={1}>
+            {event.title}
+          </Text>
+          <Text style={styles.darkHeaderSubtitle}>
+            {CATEGORY_LABELS[event.category] || event.category}
+          </Text>
+        </View>
+
         <Pressable
-          style={({ pressed }) => [styles.iconCircle, pressed && styles.btnPressed]}
+          style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
           onPress={handleShare}
           hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Share Experience"
         >
           <Share2 size={18} color="#FFFFFF" />
         </Pressable>
@@ -310,13 +393,17 @@ export default function EventDetailScreen() {
         {/* Hero Cover Image */}
         <View style={styles.coverWrapper}>
           <Image
-            source={{ uri: event.media?.coverImageUrl || 'https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1200&q=80' }}
+            source={{
+              uri:
+                event.media?.coverImageUrl ||
+                'https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1200&q=80',
+            }}
             style={styles.coverImage}
             contentFit="cover"
             transition={300}
           />
           <LinearGradient
-            colors={['rgba(10,10,10,0.2)', 'rgba(10,10,10,0.5)', '#0A0A0A']}
+            colors={['rgba(10,10,10,0.1)', 'rgba(10,10,10,0.5)', '#0A0A0A']}
             style={styles.coverGradient}
           />
 
@@ -330,7 +417,7 @@ export default function EventDetailScreen() {
           </View>
         </View>
 
-        {/* Header & Title Section */}
+        {/* Content Section */}
         <View style={styles.contentSection}>
           <Text style={styles.eventTitle}>{event.title}</Text>
 
@@ -338,7 +425,7 @@ export default function EventDetailScreen() {
             <Text style={styles.eventShortDesc}>{event.shortDescription}</Text>
           ) : null}
 
-          {/* Quick Schedule Summary Card */}
+          {/* Schedule Summary Card */}
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
               <Calendar size={18} color={theme.colors.gold} style={styles.infoIcon} />
@@ -358,13 +445,15 @@ export default function EventDetailScreen() {
                   {timeRange} {event.schedule?.timezone ? `(${event.schedule.timezone})` : ''}
                 </Text>
                 {event.schedule?.durationMinutes ? (
-                  <Text style={styles.infoSubtext}>{event.schedule.durationMinutes} Minutes Session</Text>
+                  <Text style={styles.infoSubtext}>
+                    {event.schedule.durationMinutes} Minutes Session
+                  </Text>
                 ) : null}
               </View>
             </View>
           </View>
 
-          {/* Location Details Card */}
+          {/* Location Card */}
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
               {isOnline ? (
@@ -394,7 +483,7 @@ export default function EventDetailScreen() {
             </View>
           </View>
 
-          {/* Capacity / Availability Card */}
+          {/* Capacity Card */}
           {hasLimitedCapacity && (
             <View style={styles.capacityCard}>
               <View style={styles.capacityHeader}>
@@ -418,7 +507,7 @@ export default function EventDetailScreen() {
             </View>
           )}
 
-          {/* About the Experience */}
+          {/* About Section */}
           <View style={styles.textSection}>
             <Text style={styles.sectionHeading}>About This Experience</Text>
             <Text style={styles.bodyText}>
@@ -426,13 +515,17 @@ export default function EventDetailScreen() {
             </Text>
           </View>
 
-          {/* Organizer / Guide Information */}
+          {/* Guide / Organizer */}
           {event.organizer?.name ? (
             <View style={styles.organizerSection}>
               <Text style={styles.sectionHeading}>Your Guide</Text>
               <View style={styles.organizerCard}>
                 <Image
-                  source={{ uri: event.organizer.avatarUrl || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80' }}
+                  source={{
+                    uri:
+                      event.organizer.avatarUrl ||
+                      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+                  }}
                   style={styles.organizerAvatar}
                 />
                 <View style={styles.organizerInfo}>
@@ -445,7 +538,7 @@ export default function EventDetailScreen() {
             </View>
           ) : null}
 
-          {/* Cancellation Policy */}
+          {/* Policy Section */}
           {event.bookingConfig?.cancellationPolicy ? (
             <View style={styles.policySection}>
               <View style={styles.policyRow}>
@@ -471,14 +564,55 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0A0A0A',
   },
+  darkHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: '#0A0A0A',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    zIndex: 10,
+  },
+  headerIconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.07)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitleCenter: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  darkHeaderTitle: {
+    fontFamily: theme.typography.display,
+    fontSize: 16,
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
+  },
+  darkHeaderSubtitle: {
+    fontFamily: theme.typography.body,
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.5)',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: 1,
+  },
   centeredContainer: {
     flex: 1,
     backgroundColor: '#0A0A0A',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 30,
   },
   loadingText: {
-    marginTop: 12,
+    marginTop: 14,
     color: 'rgba(255,255,255,0.7)',
     fontFamily: theme.typography.body,
     fontSize: 14,
@@ -495,45 +629,54 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgba(255,255,255,0.6)',
     textAlign: 'center',
-    marginBottom: 20,
-    lineHeight: 20,
+    marginBottom: 24,
+    lineHeight: 21,
   },
-  backHomeButton: {
+  errorActionRow: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 12,
+    width: '100%',
+  },
+  retryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: theme.colors.healingGreen,
-    paddingHorizontal: 20,
+    paddingHorizontal: 28,
     paddingVertical: 12,
     borderRadius: 24,
+    width: '100%',
+    maxWidth: 240,
   },
-  backHomeButtonText: {
+  retryBtnText: {
     fontFamily: theme.typography.bodyMedium,
     color: '#FFFFFF',
     fontSize: 14,
+    fontWeight: '600',
   },
-  navHeader: {
-    position: 'absolute',
-    left: 20,
-    right: 20,
-    zIndex: 50,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(10, 10, 10, 0.65)',
+  backHomeButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.15)',
-    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+    width: '100%',
+    maxWidth: 240,
     alignItems: 'center',
+  },
+  backHomeButtonText: {
+    fontFamily: theme.typography.bodyMedium,
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 14,
   },
   scrollContent: {
     paddingBottom: 40,
   },
   coverWrapper: {
     width: width,
-    height: width * 0.85,
+    height: width * 0.75,
     position: 'relative',
   },
   coverImage: {
@@ -545,7 +688,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: '70%',
+    height: '80%',
   },
   badgeRow: {
     position: 'absolute',
@@ -752,7 +895,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(10, 10, 10, 0.94)',
+    backgroundColor: 'rgba(10, 10, 10, 0.95)',
     borderTopWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     paddingHorizontal: 20,
@@ -802,4 +945,3 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.98 }],
   },
 });
-

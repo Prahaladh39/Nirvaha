@@ -1,7 +1,7 @@
 /**
  * Nirvaha Events Query & Discovery Service
  * Primary source: Team 1 Backend API (GET /api/events, GET /api/events/[id])
- * Fallback: Cloud Firestore client query (where publicationStatus in ['published', 'featured'])
+ * Fallback / Source of truth: Cloud Firestore client query (where publicationStatus in ['published', 'featured'])
  */
 
 import { db } from '../config/firebase';
@@ -19,7 +19,7 @@ import {
   EventsApiResponse,
   EventDetailApiResponse,
 } from '../types/events';
-import { BookingApiError } from '../types/api';
+import { BookingApiError, NetworkError } from '../types/api';
 import { publicRequest } from './apiClient';
 
 /**
@@ -35,8 +35,10 @@ export function normalizeEventDocument(id: string, raw: any): EventDocument {
     return new Date(val).toISOString();
   };
 
+  const canonicalId = String(id || raw?.id || '').trim();
+
   return {
-    id: id || raw?.id || '',
+    id: canonicalId,
     title: raw?.title || '',
     shortDescription: raw?.shortDescription || '',
     fullDescription: raw?.fullDescription || '',
@@ -78,7 +80,7 @@ export function normalizeEventDocument(id: string, raw: any): EventDocument {
         ? raw.bookingConfig.requiredAttendeeFields
         : ['fullName', 'email'],
       cancellationPolicy: raw?.bookingConfig?.cancellationPolicy || '',
-      externalUrl: raw?.bookingConfig?.externalUrl || '',
+      externalUrl: raw?.bookingConfig?.externalUrl || raw?.externalUrl || '',
     },
     paymentConfig: {
       enabled: Boolean(raw?.paymentConfig?.enabled),
@@ -88,7 +90,7 @@ export function normalizeEventDocument(id: string, raw: any): EventDocument {
       providerName: raw?.paymentConfig?.providerName || '',
     },
     publicationStatus: raw?.publicationStatus || 'published',
-    isFeatured: Boolean(raw?.isFeatured),
+    isFeatured: Boolean(raw?.isFeatured || raw?.publicationStatus === 'featured'),
     displayOrder: Number(raw?.displayOrder || 0),
     notifyOnPublish: Boolean(raw?.notifyOnPublish),
     notificationSent: Boolean(raw?.notificationSent),
@@ -173,22 +175,21 @@ export async function fetchEvents(filters?: EventFilterParams): Promise<EventDoc
 
   // 1. Primary Attempt: Team 1 Backend API
   try {
-    const response = await publicRequest<EventsApiResponse>(`/api/events${queryString}`);
-    if (response?.success && Array.isArray(response.events)) {
-      return response.events.map((evt) => normalizeEventDocument(evt.id, evt));
+    const response = await publicRequest<any>(`/api/events${queryString}`);
+    const list = response?.data || response?.events;
+    if (Array.isArray(list)) {
+      return list.map((evt: any) => normalizeEventDocument(evt.id, evt));
     }
-    if (Array.isArray(response?.events)) {
-      return response.events.map((evt) => normalizeEventDocument(evt.id, evt));
-    }
-    return [];
   } catch (apiError: any) {
-    // 2. Fallback Attempt: Direct Firestore Read for published events
-    try {
-      const fallbackEvents = await fetchEventsFromFirestore(filters);
-      return fallbackEvents;
-    } catch {
-      throw apiError;
-    }
+    // Fall through to Firestore fallback if backend is unreachable or returns non-200
+  }
+
+  // 2. Fallback Attempt: Direct Firestore Read for published events
+  try {
+    const fallbackEvents = await fetchEventsFromFirestore(filters);
+    return fallbackEvents;
+  } catch (firestoreErr) {
+    throw firestoreErr;
   }
 }
 
@@ -210,36 +211,50 @@ export async function fetchEventById(eventId: string): Promise<EventDocument | n
     return null;
   }
 
+  const cleanId = eventId.trim();
+
   // 1. Primary Attempt: Team 1 Backend API
   try {
-    const response = await publicRequest<EventDetailApiResponse>(
-      `/api/events/${encodeURIComponent(eventId.trim())}`
+    const response = await publicRequest<any>(
+      `/api/events/${encodeURIComponent(cleanId)}`
     );
-    if (response?.event) {
-      return normalizeEventDocument(response.event.id, response.event);
+    const eventData = response?.data || response?.event;
+    if (eventData) {
+      return normalizeEventDocument(eventData.id || cleanId, eventData);
     }
-    return null;
-  } catch (err: any) {
-    if (err instanceof BookingApiError && err.status === 404) {
-      return null;
-    }
-    if (err?.status === 404) {
-      return null;
-    }
-
-    // 2. Fallback Attempt: Direct Firestore Read
-    try {
-      if (db) {
-        const docRef = doc(db, 'events', eventId.trim());
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          return normalizeEventDocument(docSnap.id, docSnap.data());
-        }
-        return null;
-      }
-    } catch {
-      // Fallback failed, throw original error
-    }
-    throw err;
+  } catch (apiErr: any) {
+    // If backend API is down, returns 404/500, or endpoint route is missing,
+    // do not short-circuit with null. Continue to authoritative Firestore read.
   }
+
+  // 2. Authoritative Fallback: Direct Firestore Read
+  try {
+    if (db) {
+      const docRef = doc(db, 'events', cleanId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const docData = docSnap.data();
+        return normalizeEventDocument(docSnap.id, docData);
+      }
+      // If docSnap does not exist in Firestore, event is genuinely not found.
+      return null;
+    }
+  } catch (firestoreErr: any) {
+    // If Firestore fails due to network/offline conditions, rethrow as NetworkError
+    // so the caller can present a retryable network error state.
+    const isNetworkError =
+      firestoreErr?.message?.toLowerCase().includes('network') ||
+      firestoreErr?.message?.toLowerCase().includes('offline') ||
+      firestoreErr?.code === 'unavailable';
+
+    if (isNetworkError) {
+      throw new NetworkError(
+        'Unable to connect to the network. Please check your internet connection.',
+        firestoreErr
+      );
+    }
+    throw firestoreErr;
+  }
+
+  return null;
 }

@@ -32,7 +32,7 @@ export default function BottomNav() {
   };
 
   const activeIndex = getActiveIndex();
-  
+
   // The shared value for the position of the active pill
   const pillOffset = useSharedValue(0);
   const pillWidth = useSharedValue(0);
@@ -57,7 +57,7 @@ export default function BottomNav() {
   */
   return (
     <View style={[styles.wrapper, { bottom: Math.max(LAYOUT_TOKENS.BOTTOM_NAV_MARGIN, insets.bottom + 4) }]}>
-      <View 
+      <View
         style={styles.container}
         onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
       >
@@ -66,7 +66,7 @@ export default function BottomNav() {
         {navItems.map((item, index) => {
           const isActive = index === activeIndex;
           const Icon = item.icon;
-          
+
           return (
             <Pressable
               key={item.label}
@@ -81,9 +81,10 @@ export default function BottomNav() {
                 }
               }}
             >
-              <Icon 
-                size={18} 
-                color={isActive ? theme.colors.background : 'rgba(255,255,255,0.6)'} 
+              <Icon
+                size={18}
+                color={isActive ? theme.colors.background : 'rgba(255,255,255,0.6)'}
+
                 strokeWidth={isActive ? 2.5 : 2}
               />
               <Text style={[styles.navText, isActive && styles.activeText]} numberOfLines={1}>
