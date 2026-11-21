@@ -39,7 +39,7 @@ export class BookingApiError extends Error {
   constructor(
     arg1: number | string,
     arg2?: ApiErrorCode | string | number,
-    arg3?: string,
+    arg3?: any,
     arg4?: Record<string, any>
   ) {
     let status: number;
@@ -47,13 +47,26 @@ export class BookingApiError extends Error {
     let message: string;
     let details: Record<string, any> | undefined;
 
+    const sanitizeString = (val: any, fallback: string): string => {
+      if (typeof val === 'string' && val.trim().length > 0 && val !== '[object Object]') {
+        return val.trim();
+      }
+      if (val && typeof val.message === 'string' && val.message !== '[object Object]') {
+        return val.message.trim();
+      }
+      if (val && typeof val.error === 'string' && val.error !== '[object Object]') {
+        return val.error.trim();
+      }
+      return fallback;
+    };
+
     if (typeof arg1 === 'number') {
       status = arg1;
       code = (arg2 as ApiErrorCode | string) || 'UNKNOWN_ERROR';
-      message = arg3 || `API Error with status ${status}`;
+      message = sanitizeString(arg3, `API Error with status ${status}`);
       details = arg4;
     } else {
-      message = arg1;
+      message = sanitizeString(arg1, 'API Error');
       status = typeof arg2 === 'number' ? arg2 : 500;
       code = typeof arg3 === 'string' ? (arg3 as ApiErrorCode | string) : 'UNKNOWN_ERROR';
       details = arg4;

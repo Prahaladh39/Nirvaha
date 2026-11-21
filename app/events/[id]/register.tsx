@@ -153,6 +153,9 @@ export default function EventRegisterScreen() {
         eventId: event.id,
         participantCount,
         attendeeDetails,
+        userName: fullName.trim(),
+        userEmail: email.trim().toLowerCase(),
+        userPhone: phone.trim() || undefined,
       });
 
       Toast.show({
@@ -178,7 +181,17 @@ export default function EventRegisterScreen() {
         },
       } as any);
     } catch (err: any) {
-      const msg = err?.message || 'Failed to complete booking. Please try again.';
+      let msg = 'Failed to complete booking. Please try again.';
+      if (typeof err === 'string' && err.trim().length > 0 && err !== '[object Object]') {
+        msg = err.trim();
+      } else if (typeof err?.message === 'string' && err.message.trim().length > 0 && err.message !== '[object Object]') {
+        msg = err.message.trim();
+      } else if (typeof err?.error === 'string' && err.error.trim().length > 0 && err.error !== '[object Object]') {
+        msg = err.error.trim();
+      } else if (err?.details && typeof err.details.message === 'string' && err.details.message.trim().length > 0) {
+        msg = err.details.message.trim();
+      }
+
       Toast.show({
         type: 'error',
         text1: 'Booking Unsuccessful',

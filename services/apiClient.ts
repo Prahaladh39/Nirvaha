@@ -8,14 +8,14 @@ import {
   ApiErrorCode,
 } from '../types/api';
 
-const DEFAULT_BACKEND_URL = 'https://backend-six-lac-91.vercel.app';
+const DEFAULT_BACKEND_URL = 'https://admin-nirvaha.vercel.app';
 const DEFAULT_TIMEOUT_MS = 15000;
 
 /**
  * Resolves API Base URL with prioritized fallback:
  * 1. process.env.EXPO_PUBLIC_API_BASE_URL (Metro inlined)
  * 2. Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL (Expo config)
- * 3. Default production URL (https://backend-six-lac-91.vercel.app)
+ * 3. Default production URL (https://admin-nirvaha.vercel.app)
  */
 export function getApiBaseUrl(): string {
   const envUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
@@ -62,6 +62,55 @@ function mapStatusToCode(status: number): ApiErrorCode {
 }
 
 /**
+ * Extracts a sanitized, human-readable error string from various body formats.
+ * Guarantees that neither an object nor '[object Object]' is returned.
+ */
+function extractErrorMessage(body: any, status: number, statusText?: string): string {
+  if (body) {
+    if (typeof body.error === 'string' && body.error.trim().length > 0 && body.error !== '[object Object]') {
+      return body.error.trim();
+    }
+    if (body.error && typeof body.error.message === 'string' && body.error.message.trim().length > 0) {
+      return body.error.message.trim();
+    }
+    if (typeof body.message === 'string' && body.message.trim().length > 0 && body.message !== '[object Object]') {
+      const trimmed = body.message.trim();
+      if (trimmed.includes('NOT_FOUND') || trimmed.includes('<!DOCTYPE') || trimmed.includes('<html')) {
+        return status === 404
+          ? 'The requested booking service endpoint could not be found.'
+          : `Server responded with status ${status}. Please try again later.`;
+      }
+      return trimmed;
+    }
+    if (body.message && typeof body.message.message === 'string' && body.message.message.trim().length > 0) {
+      return body.message.message.trim();
+    }
+  }
+
+  if (statusText && statusText.trim().length > 0) {
+    return statusText.trim();
+  }
+
+  switch (status) {
+    case 400:
+      return 'Invalid booking request. Please check attendee details.';
+    case 401:
+      return 'Your session has expired. Please sign in again to book.';
+    case 403:
+      return 'You do not have permission to perform this booking action.';
+    case 404:
+      return 'The requested event or booking could not be found.';
+    case 409:
+      return 'Requested seats are no longer available. Please select fewer seats.';
+    default:
+      if (status >= 500) {
+        return 'The booking service is temporarily unavailable. Please try again shortly.';
+      }
+      return `Request failed with status ${status}`;
+  }
+}
+
+/**
  * Safely parse HTTP response (JSON or plain text) and extract error or payload.
  */
 async function parseResponse<T>(response: Response): Promise<T> {
@@ -86,18 +135,14 @@ async function parseResponse<T>(response: Response): Promise<T> {
 
   if (!response.ok) {
     const status = response.status;
-    const message =
-      body?.error ||
-      body?.message ||
-      response.statusText ||
-      `Request failed with status ${status}`;
-    const code = body?.code || mapStatusToCode(status);
+    const message = extractErrorMessage(body, status, response.statusText);
+    const code = (typeof body?.code === 'string' ? body.code : null) || mapStatusToCode(status);
     throw new BookingApiError(status, code, message, body?.details);
   }
 
   if (body && typeof body === 'object' && body.success === false) {
-    const message = body.error || body.message || 'Operation failed';
-    const code = body.code || mapStatusToCode(response.status);
+    const message = extractErrorMessage(body, response.status, response.statusText);
+    const code = (typeof body.code === 'string' ? body.code : null) || mapStatusToCode(response.status);
     throw new BookingApiError(response.status, code, message, body.details);
   }
 

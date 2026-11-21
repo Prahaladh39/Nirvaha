@@ -47,7 +47,12 @@ export async function createBooking(payload: CreateBookingPayload): Promise<Book
     body: JSON.stringify(payload),
   });
 
-  return response.booking;
+  const booking = response?.booking || response?.data;
+  if (!booking) {
+    throw new BookingApiError(500, 'SERVER_ERROR', 'Booking confirmation was not returned by server.');
+  }
+
+  return booking;
 }
 
 /**
@@ -63,7 +68,7 @@ export async function fetchMyBookings(): Promise<BookingDocument[]> {
     `/api/bookings?userId=${encodeURIComponent(user.uid)}`
   );
 
-  return response.bookings || [];
+  return response?.bookings || response?.data || [];
 }
 
 /**
@@ -83,7 +88,12 @@ export async function fetchBookingById(bookingId: string): Promise<BookingDocume
     `/api/bookings/${encodeURIComponent(bookingId.trim())}`
   );
 
-  return response.booking;
+  const booking = response?.booking || response?.data;
+  if (!booking) {
+    throw new BookingApiError(404, 'NOT_FOUND', 'Booking details could not be found.');
+  }
+
+  return booking;
 }
 
 /**
@@ -107,5 +117,10 @@ export async function cancelBooking(bookingId: string, reason?: string): Promise
     }
   );
 
-  return response.booking;
+  const booking = response?.booking || response?.data;
+  if (!booking) {
+    throw new BookingApiError(500, 'SERVER_ERROR', 'Cancellation confirmation was not returned by server.');
+  }
+
+  return booking;
 }

@@ -48,18 +48,23 @@ export interface CreateBookingPayload {
   eventId: string;
   participantCount: number;
   attendeeDetails: AttendeeDetail[];
+  userName?: string;
+  userEmail?: string;
+  userPhone?: string;
 }
 
 export interface BookingApiResponse {
   success: boolean;
-  booking: BookingDocument;
+  booking?: BookingDocument;
+  data?: BookingDocument;
   message?: string;
 }
 
 export interface BookingsListApiResponse {
   success: boolean;
-  bookings: BookingDocument[];
-  total: number;
+  bookings?: BookingDocument[];
+  data?: BookingDocument[];
+  total?: number;
   message?: string;
 }
 
