@@ -63,7 +63,7 @@ function RootLayoutNav() {
           <Stack.Screen name="temple-of-balance" options={{ headerShown: false }} />
         </Stack>
       </ConsentGate>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
       <Toast />
     </>
   );

@@ -6,7 +6,6 @@ import HeroCarousel from '../../components/home/HeroCarousel';
 import BookingsBanner from '../../components/home/BookingsBanner';
 import EventsRail from '../../components/home/EventsRail';
 import CollectionRail from '../../components/home/CollectionRail';
-import CompanionRail from '../../components/home/CompanionRail';
 import SoundRail from '../../components/home/SoundRail';
 import CompactTilesGrid from '../../components/home/CompactTile';
 import AncientPlacesCard from '../../components/home/AncientPlacesCard';
@@ -28,7 +27,6 @@ export default function Home() {
       <HeroCarousel />
       <BookingsBanner />
       <EventsRail />
-      <CompanionRail />
       <CollectionRail />
       <SoundRail />
       <CompactTilesGrid />

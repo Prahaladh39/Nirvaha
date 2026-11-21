@@ -134,7 +134,7 @@ export default function EventsDiscoveryScreen() {
   }, [filteredEvents]);
 
   return (
-    <View style={[styles.container, { paddingTop: Math.max(insets.top, 16) }]}>
+    <View style={[styles.container, { paddingTop: Math.max(insets.top + 8, 44) }]}>
       {/* Top Header */}
       <View style={styles.header}>
         <Pressable

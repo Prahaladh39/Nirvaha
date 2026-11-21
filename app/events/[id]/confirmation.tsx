@@ -96,7 +96,7 @@ export default function BookingConfirmationScreen() {
         contentContainerStyle={[
           styles.scrollContent,
           {
-            paddingTop: insets.top + 24,
+            paddingTop: Math.max(insets.top + 24, 52),
             paddingBottom: insets.bottom + 40,
           },
         ]}

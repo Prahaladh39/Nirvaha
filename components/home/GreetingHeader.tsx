@@ -19,8 +19,12 @@ export default function GreetingHeader() {
   return (
     <Animated.View entering={FadeInUp.duration(500)} style={styles.container}>
       <View style={styles.textContainer}>
-        <Text style={styles.greetingText}>{getGreeting()}</Text>
-        <Text style={styles.subtitleText}>How are you feeling today?</Text>
+        <Text style={styles.greetingText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
+          {getGreeting()}
+        </Text>
+        <Text style={styles.subtitleText} numberOfLines={1}>
+          How are you feeling today?
+        </Text>
       </View>
 
       <View style={styles.rightButtonsRow}>
@@ -60,12 +64,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    marginBottom: 20,
     paddingHorizontal: 20,
-    marginTop: 60, // Top margin for safe area
+    marginTop: 10,
+    gap: 10,
   },
   textContainer: {
     flex: 1,
+    minWidth: 0,
+    marginRight: 6,
   },
   greetingText: {
     fontFamily: theme.typography.display,
@@ -76,10 +83,11 @@ const styles = StyleSheet.create({
   },
   subtitleText: {
     fontFamily: theme.typography.body,
-    fontSize: 14,
+    fontSize: 13,
     color: 'rgba(255, 255, 255, 0.7)',
   },
   rightButtonsRow: {
+    flexShrink: 0,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,

@@ -38,18 +38,26 @@ export default function BookingsBanner() {
           <Pressable
             style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]}
             onPress={() => router.push('/events' as any)}
+            accessibilityRole="button"
+            accessibilityLabel="Explore Gatherings"
           >
             <Calendar size={14} color="#FFFFFF" />
-            <Text style={styles.primaryBtnText}>Explore Gatherings</Text>
+            <Text style={styles.primaryBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
+              Explore Gatherings
+            </Text>
             <ChevronRight size={14} color="#FFFFFF" />
           </Pressable>
 
           <Pressable
             style={({ pressed }) => [styles.secondaryBtn, pressed && styles.pressed]}
             onPress={() => router.push('/(tabs)/bookings' as any)}
+            accessibilityRole="button"
+            accessibilityLabel="My Passbook"
           >
             <TicketCheck size={14} color={theme.colors.gold} />
-            <Text style={styles.secondaryBtnText}>My Passbook</Text>
+            <Text style={styles.secondaryBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
+              My Passbook
+            </Text>
           </Pressable>
         </View>
       </LinearGradient>

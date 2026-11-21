@@ -355,7 +355,7 @@ export default function EventDetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* Custom Nirvaha Dark-Mode Navigation Header */}
-      <View style={[styles.darkHeader, { paddingTop: Math.max(insets.top, 12) }]}>
+      <View style={[styles.darkHeader, { paddingTop: Math.max(insets.top + 8, 44) }]}>
         <Pressable
           style={({ pressed }) => [styles.headerIconBtn, pressed && styles.btnPressed]}
           onPress={handleBack}

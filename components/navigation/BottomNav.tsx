@@ -50,13 +50,24 @@ export default function BottomNav() {
     width: withSpring(pillWidth.value, { damping: 20, stiffness: 300 }),
   }));
 
+  const horizontalInset = width <= 360 ? 10 : 18;
+
   /* 
     Position the nav bar so it floats just above the system navigation area.
     - On gesture-nav / iOS (insets.bottom ≈ 0–24): keeps the original 20px design spacing.
     - On 3-button nav (insets.bottom ≈ 48): sits just above the system bar, not 20+48=68px up.
   */
   return (
-    <View style={[styles.wrapper, { bottom: Math.max(LAYOUT_TOKENS.BOTTOM_NAV_MARGIN, insets.bottom + 4) }]}>
+    <View
+      style={[
+        styles.wrapper,
+        {
+          left: horizontalInset,
+          right: horizontalInset,
+          bottom: Math.max(LAYOUT_TOKENS.BOTTOM_NAV_MARGIN, insets.bottom + 6),
+        },
+      ]}
+    >
       <View
         style={styles.container}
         onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}

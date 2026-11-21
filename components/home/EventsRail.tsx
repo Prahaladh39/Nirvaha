@@ -55,16 +55,20 @@ export default function EventsRail() {
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <Sparkles size={16} color={theme.colors.gold} style={styles.sparkleIcon} />
-            <Text style={styles.title}>Experiences & Gatherings</Text>
+            <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
+              Experiences & Gatherings
+            </Text>
           </View>
 
           <Pressable
             onPress={handleSeeAll}
             style={({ pressed }) => [styles.seeAllButton, pressed && styles.buttonPressed]}
             hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Go to Bookings Hub"
           >
-            <Text style={styles.seeAllText}>Bookings Platform</Text>
-            <ChevronRight size={14} color={theme.colors.gold} />
+            <Text style={styles.seeAllText}>Bookings Hub</Text>
+            <ChevronRight size={13} color={theme.colors.gold} />
           </Pressable>
         </View>
 
@@ -96,20 +100,24 @@ export default function EventsRail() {
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <Sparkles size={16} color={theme.colors.gold} style={styles.sparkleIcon} />
-          <Text style={styles.title}>Experiences & Gatherings</Text>
+          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
+            Experiences & Gatherings
+          </Text>
         </View>
 
         <Pressable
           onPress={handleSeeAll}
           style={({ pressed }) => [styles.seeAllButton, pressed && styles.buttonPressed]}
           hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Go to Bookings Hub"
         >
           <Text style={styles.seeAllText}>Bookings Hub</Text>
-          <ChevronRight size={14} color={theme.colors.gold} />
+          <ChevronRight size={13} color={theme.colors.gold} />
         </Pressable>
       </View>
 
-      <Text style={styles.subtitle}>
+      <Text style={styles.subtitle} numberOfLines={1}>
         Sacred retreats, sound immersions & community circles
       </Text>
 
@@ -145,35 +153,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     marginBottom: 4,
+    gap: 8,
   },
   titleRow: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    minWidth: 0,
+    marginRight: 6,
   },
   sparkleIcon: {
     marginRight: 6,
+    flexShrink: 0,
   },
   title: {
+    flex: 1,
     fontFamily: theme.typography.display,
-    fontSize: 20,
+    fontSize: 18,
     color: '#FFFFFF',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
   subtitle: {
     fontFamily: theme.typography.body,
-    fontSize: 12,
+    fontSize: 11,
     color: 'rgba(255, 255, 255, 0.6)',
     paddingHorizontal: 20,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   seeAllButton: {
+    flexShrink: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
+    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.25)',
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 12,
   },
   seeAllText: {
     fontFamily: theme.typography.bodyMedium,
-    fontSize: 12,
+    fontSize: 11,
     color: theme.colors.gold,
     fontWeight: '600',
   },

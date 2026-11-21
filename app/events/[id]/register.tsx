@@ -247,7 +247,7 @@ export default function EventRegisterScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/* Top Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top + 8, 44) }]}>
         <Pressable
           style={({ pressed }) => [styles.backIconBtn, pressed && styles.btnPressed]}
           onPress={() => router.back()}

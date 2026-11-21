@@ -226,25 +226,32 @@ export default function BookingsTabScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: Math.max(insets.top + 8, 48) }]}>
-        <View style={styles.headerTitleBox}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top + 10, 44) }]}>
+        <View style={styles.headerTopRow}>
           <View style={styles.titleWithIcon}>
-            <TicketCheck size={22} color={theme.colors.gold} />
-            <Text style={styles.headerTitle}>Experiences & Bookings</Text>
+            <View style={styles.ticketIconContainer}>
+              <TicketCheck size={18} color={theme.colors.gold} />
+            </View>
+            <Text style={styles.headerTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.82}>
+              Experiences & Bookings
+            </Text>
           </View>
-          <Text style={styles.headerSubtitle}>
-            Sacred gatherings, reservations & event passbook
-          </Text>
+
+          <Pressable
+            style={({ pressed }) => [styles.catalogLinkBtn, pressed && styles.pressed]}
+            onPress={() => router.push('/events' as any)}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Explore full catalog"
+          >
+            <Compass size={13} color={theme.colors.gold} />
+            <Text style={styles.catalogLinkText} numberOfLines={1}>Full Catalog</Text>
+          </Pressable>
         </View>
 
-        <Pressable
-          style={({ pressed }) => [styles.catalogLinkBtn, pressed && styles.pressed]}
-          onPress={() => router.push('/events' as any)}
-          hitSlop={8}
-        >
-          <Compass size={14} color={theme.colors.gold} />
-          <Text style={styles.catalogLinkText}>Full Catalog</Text>
-        </Pressable>
+        <Text style={styles.headerSubtitle} numberOfLines={1}>
+          Sacred gatherings, reservations & event passbook
+        </Text>
       </View>
 
       {/* Main Switcher: My Bookings vs Explore Gatherings */}
@@ -682,44 +689,60 @@ const styles = StyleSheet.create({
     backgroundColor: '#0A0A0A',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingBottom: 14,
     borderBottomWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.06)',
+    backgroundColor: '#0A0A0A',
   },
-  headerTitleBox: {
-    flex: 1,
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
   },
   titleWithIcon: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    minWidth: 0,
+  },
+  ticketIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
   },
   headerTitle: {
+    flex: 1,
     fontFamily: theme.typography.display,
-    fontSize: 20,
+    fontSize: 19,
     color: '#FFFFFF',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
   headerSubtitle: {
     fontFamily: theme.typography.body,
     fontSize: 11,
     color: 'rgba(255, 255, 255, 0.55)',
-    marginTop: 2,
+    marginTop: 6,
   },
   catalogLinkBtn: {
+    flexShrink: 0,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: 'rgba(212, 175, 55, 0.12)',
     borderWidth: 1,
     borderColor: 'rgba(212, 175, 55, 0.3)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 14,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 12,
   },
   catalogLinkText: {
     fontFamily: theme.typography.bodyMedium,
