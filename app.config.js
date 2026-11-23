@@ -8,7 +8,7 @@ module.exports = {
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
-    scheme: "nirvahaapp",
+    scheme: ["nirvahaapp", "nirvaha"],
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {

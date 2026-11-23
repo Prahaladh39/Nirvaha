@@ -102,13 +102,16 @@ export function initializePushNotifications(router: any) {
   checkAndRequestNotificationPermission();
 
   const handleDeepLink = (remoteMessage: any) => {
-    const deepLink = remoteMessage?.data?.deepLink;
-    const eventId = remoteMessage?.data?.eventId;
-    const bookingId = remoteMessage?.data?.bookingId;
+    const data = remoteMessage?.data || remoteMessage;
+    const deepLink = data?.deepLink || data?.url;
+    const eventId = data?.eventId;
+    const bookingId = data?.bookingId;
 
     let targetRoute = '';
 
-    if (deepLink) {
+    if (eventId) {
+      targetRoute = `/events/${eventId}`;
+    } else if (deepLink) {
       console.log('Handling deep link from notification:', deepLink);
       if (deepLink.startsWith('nirvaha://') || deepLink.startsWith('nirvahaapp://')) {
         const routeName = deepLink.replace(/^(nirvaha|nirvahaapp):\/\//, '');
@@ -128,18 +131,20 @@ export function initializePushNotifications(router: any) {
       } else {
         targetRoute = deepLink.startsWith('/') ? deepLink : `/${deepLink}`;
       }
-    } else if (eventId) {
-      targetRoute = `/events/${eventId}`;
     } else if (bookingId) {
       targetRoute = '/events/my-bookings';
     }
     
     if (targetRoute) {
-      try {
-        router.push(targetRoute as any);
-      } catch (e) {
-        console.error('Failed to route deep link:', targetRoute, e);
-      }
+      console.log('[PushNotifications] Navigating to target route:', targetRoute);
+      // Small timeout ensures Expo Router navigation container has mounted
+      setTimeout(() => {
+        try {
+          router.push(targetRoute as any);
+        } catch (e) {
+          console.error('Failed to route deep link:', targetRoute, e);
+        }
+      }, 300);
     }
   };
 
@@ -164,7 +169,7 @@ export function initializePushNotifications(router: any) {
     handleDeepLink(remoteMessage);
   });
 
-  // 6. Handle Click event when app is fully closed
+  // 6. Handle Click event when app is fully closed (FCM native)
   messaging()
     .getInitialNotification()
     .then(remoteMessage => {
@@ -174,8 +179,29 @@ export function initializePushNotifications(router: any) {
       }
     });
 
+  // 7. Handle click on Expo foreground notification banner
+  const notificationResponseSubscription = Notifications.addNotificationResponseReceivedListener(response => {
+    console.log('[PushNotifications] User tapped notification response:', response);
+    const data = response?.notification?.request?.content?.data;
+    if (data) {
+      handleDeepLink({ data });
+    }
+  });
+
+  // 8. Handle cold-start from Expo notification response
+  Notifications.getLastNotificationResponseAsync().then(response => {
+    if (response) {
+      console.log('[PushNotifications] Opened by Expo Notification cold-start:', response);
+      const data = response?.notification?.request?.content?.data;
+      if (data) {
+        handleDeepLink({ data });
+      }
+    }
+  });
+
   return () => {
     unsubscribeForeground();
     unsubscribeNotificationOpened();
+    notificationResponseSubscription.remove();
   };
 }
