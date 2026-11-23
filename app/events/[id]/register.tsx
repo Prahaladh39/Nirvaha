@@ -29,9 +29,9 @@ import {
   Sparkles,
 } from 'lucide-react-native';
 import { EventDocument } from '../../../types/events';
-import { AttendeeDetail } from '../../../types/bookings';
+import { AttendeeDetail, BookingDocument } from '../../../types/bookings';
 import { fetchEventById } from '../../../services/eventsService';
-import { createBooking } from '../../../services/bookingsService';
+import { createBooking, fetchMyBookings } from '../../../services/bookingsService';
 import { useAuth } from '../../../contexts/AuthContext';
 import { theme } from '../../../constants/theme';
 
@@ -42,6 +42,7 @@ export default function EventRegisterScreen() {
   const { user, profileName } = useAuth();
 
   const [event, setEvent] = useState<EventDocument | null>(null);
+  const [existingBooking, setExistingBooking] = useState<BookingDocument | null>(null);
   const [isLoadingEvent, setIsLoadingEvent] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -68,6 +69,21 @@ export default function EventRegisterScreen() {
       setIsLoadingEvent(true);
       const data = await fetchEventById(id);
       setEvent(data);
+
+      // Check if user already holds an active booking
+      if (user) {
+        try {
+          const myBookings = await fetchMyBookings();
+          const active = myBookings.find(
+            (b) => b.eventId === id && (b.status === 'confirmed' || b.status === 'waitlist' || b.status === 'attended')
+          );
+          if (active) {
+            setExistingBooking(active);
+          }
+        } catch {
+          // Non-blocking
+        }
+      }
     } catch (err: any) {
       Toast.show({
         type: 'error',
@@ -192,6 +208,19 @@ export default function EventRegisterScreen() {
         msg = err.details.message.trim();
       }
 
+      // Check for duplicate booking signal
+      if (err?.code === 'DUPLICATE_BOOKING' || msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('duplicate')) {
+        Toast.show({
+          type: 'info',
+          text1: 'Already Registered',
+          text2: 'You already hold an active reservation for this experience.',
+        });
+        setTimeout(() => {
+          router.replace('/events/my-bookings' as any);
+        }, 1200);
+        return;
+      }
+
       Toast.show({
         type: 'error',
         text1: 'Booking Unsuccessful',
@@ -218,6 +247,38 @@ export default function EventRegisterScreen() {
         <Text style={styles.errorTitle}>Event Not Available</Text>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
           <Text style={styles.backButtonText}>Return</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  // Prevent duplicate registration view
+  if (existingBooking) {
+    return (
+      <View style={[styles.centeredContainer, { paddingTop: insets.top, paddingHorizontal: 24 }]}>
+        <CheckCircle2 size={50} color={theme.colors.gold} style={{ marginBottom: 16 }} />
+        <Text style={styles.errorTitle}>Already Registered</Text>
+        <Text style={[styles.loadingText, { textAlign: 'center', marginBottom: 24 }]}>
+          You already hold a confirmed reservation for {event.title}. Reference: {existingBooking.bookingReference}
+        </Text>
+        <Pressable
+          style={[styles.backButton, { backgroundColor: theme.colors.healingGreen, borderColor: theme.colors.healingGreen }]}
+          onPress={() => {
+            router.replace({
+              pathname: '/events/[id]/confirmation',
+              params: {
+                id: event.id,
+                bookingId: existingBooking.id,
+                bookingReference: existingBooking.bookingReference,
+                participantCount: String(existingBooking.participantCount),
+                eventTitle: event.title,
+                eventDate: event.schedule?.startDate,
+                eventLocation: event.location?.venueName || event.location?.address || 'Sanctuary',
+              },
+            } as any);
+          }}
+        >
+          <Text style={[styles.backButtonText, { color: '#FFFFFF' }]}>View Experience Pass</Text>
         </Pressable>
       </View>
     );

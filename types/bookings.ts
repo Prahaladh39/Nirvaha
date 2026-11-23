@@ -40,6 +40,8 @@ export interface BookingDocument {
   bookedAt: string;
   cancelledAt?: string;
   cancellationReason?: string;
+  checkedInAt?: string;
+  checkedInBy?: string;
   createdAt: string;
   updatedAt: string;
 }

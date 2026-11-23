@@ -27,10 +27,15 @@ import {
   Sparkles,
   BookmarkCheck,
   RotateCcw,
+  QrCode,
+  X,
+  CheckCircle2,
 } from 'lucide-react-native';
 import { BookingDocument, BookingStatus } from '../../types/bookings';
 import { fetchMyBookings, cancelBooking } from '../../services/bookingsService';
 import { theme } from '../../constants/theme';
+import TicketPassQR from '../../components/events/TicketPassQR';
+import { addEventToCalendar } from '../../components/events/CalendarService';
 
 type FilterTab = 'all' | 'confirmed' | 'past' | 'cancelled';
 
@@ -47,6 +52,43 @@ export default function MyBookingsScreen() {
   // Cancellation Modal State
   const [cancellingBooking, setCancellingBooking] = useState<BookingDocument | null>(null);
   const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
+
+  // Selected Pass Modal State
+  const [selectedPass, setSelectedPass] = useState<BookingDocument | null>(null);
+  const [isAddingCalendar, setIsAddingCalendar] = useState(false);
+
+  const handleAddToCalendar = async (pass: BookingDocument) => {
+    setIsAddingCalendar(true);
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const res = await addEventToCalendar({
+        title: pass.eventTitle,
+        description: `Nirvaha Gathering: ${pass.eventTitle}`,
+        startDate: pass.eventStartDate || new Date().toISOString(),
+        location:
+          pass.eventLocation?.type === 'online'
+            ? pass.eventLocation?.meetingUrl || 'Online'
+            : pass.eventLocation?.venueName || 'Nirvaha Sanctuary',
+        bookingReference: pass.bookingReference,
+      });
+
+      if (res.success) {
+        Toast.show({
+          type: 'success',
+          text1: 'Added to Calendar',
+          text2: 'Experience scheduled in your calendar',
+        });
+      }
+    } catch {
+      Toast.show({
+        type: 'error',
+        text1: 'Calendar Sync Notice',
+        text2: 'Could not export gathering to calendar',
+      });
+    } finally {
+      setIsAddingCalendar(false);
+    }
+  };
 
   const loadBookings = useCallback(async (showIndicator = true) => {
     try {
@@ -397,12 +439,22 @@ export default function MyBookingsScreen() {
 
                 {/* Card Actions Footer */}
                 <View style={styles.cardActions}>
+                  {(booking.status === 'confirmed' || booking.status === 'attended') && (
+                    <Pressable
+                      style={({ pressed }) => [styles.viewPassBtn, pressed && styles.pressed]}
+                      onPress={() => setSelectedPass(booking)}
+                    >
+                      <QrCode size={13} color={theme.colors.gold} />
+                      <Text style={styles.viewPassText}>View QR Pass</Text>
+                    </Pressable>
+                  )}
+
                   <Pressable
                     style={({ pressed }) => [styles.viewDetailsBtn, pressed && styles.pressed]}
                     onPress={() => handleOpenEvent(booking.eventId)}
                   >
-                    <Text style={styles.viewDetailsText}>View Experience</Text>
-                    <ExternalLink size={13} color="#FFFFFF" />
+                    <Text style={styles.viewDetailsText}>Details</Text>
+                    <ExternalLink size={12} color="#FFFFFF" />
                   </Pressable>
 
                   {canCancel && (
@@ -419,6 +471,107 @@ export default function MyBookingsScreen() {
             );
           })}
       </ScrollView>
+
+      {/* Passbook QR & Admission Modal */}
+      <Modal
+        visible={selectedPass !== null}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setSelectedPass(null)}
+      >
+        <View style={styles.passModalOverlay}>
+          <View style={styles.passModalContainer}>
+            {/* Modal Header */}
+            <View style={styles.passModalHeader}>
+              <View style={{ flex: 1, marginRight: 10 }}>
+                <Text style={styles.passCategoryText}>NIRVAHA SACRED PASS</Text>
+                <Text style={styles.passTitleText} numberOfLines={1}>
+                  {selectedPass?.eventTitle}
+                </Text>
+              </View>
+              <Pressable
+                style={({ pressed }) => [styles.passCloseBtn, pressed && styles.pressed]}
+                onPress={() => setSelectedPass(null)}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="Close Pass"
+              >
+                <X size={20} color="#FFFFFF" />
+              </Pressable>
+            </View>
+
+            {/* QR Code Component */}
+            {selectedPass && (
+              <TicketPassQR
+                bookingReference={selectedPass.bookingReference}
+                eventId={selectedPass.eventId}
+                bookingId={selectedPass.id}
+                status={selectedPass.status}
+                size={160}
+                showCode={true}
+              />
+            )}
+
+            {/* Quick Details */}
+            <View style={styles.passDetailsBox}>
+              <View style={styles.passDetailRow}>
+                <Calendar size={13} color={theme.colors.gold} />
+                <Text style={styles.passDetailText}>
+                  {selectedPass?.eventStartDate
+                    ? new Date(selectedPass.eventStartDate).toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })
+                    : 'Date Confirmed'}
+                </Text>
+              </View>
+              <View style={styles.passDetailRow}>
+                <MapPin size={13} color="rgba(255,255,255,0.6)" />
+                <Text style={styles.passDetailText} numberOfLines={1}>
+                  {selectedPass?.eventLocation?.type === 'online'
+                    ? 'Online Sanctuary'
+                    : selectedPass?.eventLocation?.venueName || 'Nirvaha Sanctuary'}
+                </Text>
+              </View>
+              <View style={styles.passDetailRow}>
+                <Users size={13} color="rgba(255,255,255,0.6)" />
+                <Text style={styles.passDetailText}>
+                  {selectedPass?.participantCount} {Number(selectedPass?.participantCount) === 1 ? 'Guest' : 'Guests'} Reserved
+                </Text>
+              </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={styles.passModalActions}>
+              <Pressable
+                style={({ pressed }) => [styles.passCalendarBtn, pressed && styles.pressed]}
+                onPress={() => selectedPass && handleAddToCalendar(selectedPass)}
+                disabled={isAddingCalendar}
+                accessibilityRole="button"
+                accessibilityLabel="Add to Calendar"
+              >
+                <Calendar size={15} color={theme.colors.gold} />
+                <Text style={styles.passCalendarText}>
+                  {isAddingCalendar ? 'Syncing...' : 'Add to Calendar'}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [styles.passCopyBtn, pressed && styles.pressed]}
+                onPress={() => selectedPass && handleCopyCode(selectedPass.bookingReference)}
+                accessibilityRole="button"
+                accessibilityLabel="Copy Pass Code"
+              >
+                <Copy size={15} color="#FFFFFF" />
+                <Text style={styles.passCopyText}>Copy Code</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Cancellation Confirmation Modal */}
       <Modal
@@ -718,6 +871,23 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.06)',
   },
+  viewPassBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.35)',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 16,
+  },
+  viewPassText: {
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 12,
+    color: theme.colors.gold,
+    fontWeight: '600',
+  },
   viewDetailsBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -822,6 +992,117 @@ const styles = StyleSheet.create({
   },
   disabledBtn: {
     opacity: 0.5,
+  },
+  passModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.82)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  passModalContainer: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: '#121A15',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.3)',
+    alignItems: 'center',
+  },
+  passModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  passCategoryText: {
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 10,
+    color: theme.colors.gold,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  passTitleText: {
+    fontFamily: theme.typography.display,
+    fontSize: 17,
+    color: '#FFFFFF',
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  passCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  passDetailsBox: {
+    width: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 14,
+    padding: 12,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
+    marginTop: 10,
+    marginBottom: 16,
+  },
+  passDetailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  passDetailText: {
+    flex: 1,
+    fontFamily: theme.typography.body,
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.75)',
+  },
+  passModalActions: {
+    flexDirection: 'row',
+    gap: 10,
+    width: '100%',
+  },
+  passCalendarBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.35)',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+  },
+  passCalendarText: {
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 13,
+    color: theme.colors.gold,
+    fontWeight: '600',
+  },
+  passCopyBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+  },
+  passCopyText: {
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 13,
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
   pressed: {
     opacity: 0.8,

@@ -31,9 +31,13 @@ import {
   Sparkles,
   Info,
   RotateCcw,
+  BookmarkCheck,
 } from 'lucide-react-native';
 import { EventDocument, getComputedEventStatus } from '../../../types/events';
 import { fetchEventById } from '../../../services/eventsService';
+import { fetchMyBookings } from '../../../services/bookingsService';
+import { BookingDocument } from '../../../types/bookings';
+import { auth } from '../../../config/firebase';
 import { StatusBadge } from '../../../components/events/StatusBadge';
 import { theme } from '../../../constants/theme';
 
@@ -54,6 +58,7 @@ export default function EventDetailScreen() {
   const insets = useSafeAreaInsets();
 
   const [event, setEvent] = useState<EventDocument | null>(null);
+  const [existingBooking, setExistingBooking] = useState<BookingDocument | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isNetworkFailure, setIsNetworkFailure] = useState(false);
@@ -74,6 +79,19 @@ export default function EventDetailScreen() {
         setErrorMessage('This experience could not be found or has been retired.');
       } else {
         setEvent(data);
+      }
+
+      // Check for active user booking to prevent duplicate registrations
+      if (auth.currentUser) {
+        try {
+          const myBookings = await fetchMyBookings();
+          const active = myBookings.find(
+            (b) => b.eventId === id && (b.status === 'confirmed' || b.status === 'waitlist' || b.status === 'attended')
+          );
+          setExistingBooking(active || null);
+        } catch {
+          // Non-blocking
+        }
       }
     } catch (err: any) {
       const isNet =
@@ -283,6 +301,32 @@ export default function EventDetailScreen() {
         <View style={[styles.actionBtn, styles.actionBtnDisabled]}>
           <Text style={styles.actionBtnTextDisabled}>Fully Booked</Text>
         </View>
+      );
+    }
+
+    // ANTI-DUPLICATION: If user already has an active reservation
+    if (existingBooking) {
+      return (
+        <Pressable
+          style={({ pressed }) => [styles.actionBtn, styles.actionBtnAlreadyRegistered, pressed && styles.btnPressed]}
+          onPress={() => {
+            router.push({
+              pathname: '/events/[id]/confirmation',
+              params: {
+                id: event.id,
+                bookingId: existingBooking.id,
+                bookingReference: existingBooking.bookingReference,
+                participantCount: String(existingBooking.participantCount),
+                eventTitle: event.title,
+                eventDate: event.schedule?.startDate,
+                eventLocation: event.location?.venueName || event.location?.address || 'Nirvaha Sanctuary',
+              },
+            } as any);
+          }}
+        >
+          <BookmarkCheck size={18} color="#FFFFFF" />
+          <Text style={styles.actionBtnTextPrimary}>Already Registered • View Pass</Text>
+        </Pressable>
       );
     }
 
@@ -916,6 +960,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 10,
     elevation: 6,
+  },
+  actionBtnAlreadyRegistered: {
+    backgroundColor: '#059669',
+    shadowColor: '#059669',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#34D399',
   },
   actionBtnText: {
     fontFamily: theme.typography.bodyMedium,

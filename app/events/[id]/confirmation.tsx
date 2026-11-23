@@ -25,6 +25,8 @@ import {
   Sparkles,
 } from 'lucide-react-native';
 import { theme } from '../../../constants/theme';
+import TicketPassQR from '../../../components/events/TicketPassQR';
+import { addEventToCalendar } from '../../../components/events/CalendarService';
 
 const { width } = Dimensions.get('window');
 
@@ -62,6 +64,38 @@ export default function BookingConfirmationScreen() {
     rawDate && !isNaN(rawDate.getTime())
       ? rawDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
       : '';
+
+  const [isAddingCalendar, setIsAddingCalendar] = React.useState(false);
+
+  const handleAddCalendar = async () => {
+    setIsAddingCalendar(true);
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const res = await addEventToCalendar({
+        title: eventTitle,
+        description: `Nirvaha Experience: ${eventTitle}`,
+        startDate: params.eventDate || new Date().toISOString(),
+        location: eventLocation,
+        bookingReference: bookingRef,
+      });
+
+      if (res.success) {
+        Toast.show({
+          type: 'success',
+          text1: 'Added to Calendar',
+          text2: 'Experience scheduled in your calendar',
+        });
+      }
+    } catch {
+      Toast.show({
+        type: 'error',
+        text1: 'Calendar Sync Notice',
+        text2: 'Could not export to calendar',
+      });
+    } finally {
+      setIsAddingCalendar(false);
+    }
+  };
 
   const handleCopyReference = async () => {
     try {
@@ -185,7 +219,7 @@ export default function BookingConfirmationScreen() {
               </View>
             </View>
 
-            {/* Guests */}
+            {/* Registered Guests */}
             <View style={styles.detailRow}>
               <View style={styles.iconCircle}>
                 <Users size={16} color={theme.colors.gold} />
@@ -197,6 +231,15 @@ export default function BookingConfirmationScreen() {
                 </Text>
               </View>
             </View>
+
+            {/* Scannable Passbook QR Code */}
+            <TicketPassQR
+              bookingReference={bookingRef}
+              eventId={params.id}
+              bookingId={params.bookingId}
+              size={170}
+              showCode={false}
+            />
           </View>
 
           {/* Ticket Footer Note */}
@@ -209,6 +252,19 @@ export default function BookingConfirmationScreen() {
 
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
+          <Pressable
+            style={({ pressed }) => [styles.calendarActionBtn, pressed && styles.pressed]}
+            onPress={handleAddCalendar}
+            disabled={isAddingCalendar}
+            accessibilityRole="button"
+            accessibilityLabel="Add to Calendar"
+          >
+            <Calendar size={18} color={theme.colors.gold} />
+            <Text style={styles.calendarActionText}>
+              {isAddingCalendar ? 'Syncing Calendar...' : 'Add to Calendar'}
+            </Text>
+          </Pressable>
+
           <Pressable
             style={({ pressed }) => [styles.primaryActionBtn, pressed && styles.pressed]}
             onPress={handleGoToMyBookings}
@@ -472,6 +528,24 @@ const styles = StyleSheet.create({
   actionsContainer: {
     width: '100%',
     gap: 12,
+  },
+  calendarActionBtn: {
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.35)',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  calendarActionText: {
+    fontFamily: theme.typography.bodyMedium,
+    fontSize: 14,
+    color: theme.colors.gold,
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
   primaryActionBtn: {
     height: 52,
